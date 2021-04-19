@@ -1,0 +1,606 @@
+<div class="page page-user-detail col-sm-12">
+
+	<div class="page-breadcrumb">
+		<cmi-viaduc-breadcrumb [items]="crumbs"></cmi-viaduc-breadcrumb>
+	</div>
+
+	<cmi-viaduc-layout-left-content>
+		<div left>
+			<cmi-viaduc-left-navigation></cmi-viaduc-left-navigation>
+		</div>
+
+		<div content>
+			<div class="page-header">
+				<h2 class="page-content-title">
+					<span>{{'Benutzer' | translate:'user.user'}}</span>
+					<span *ngIf="detail">:&nbsp;{{ detail.item.firstName }} {{ detail.item.familyName }}</span>
+				</h2>
+			</div>
+			<div class="action-container" *ngIf="detailPagingEnabled()">
+				<div class="row action-buttons">
+					<div class="col-md-4 col-xs-12 pull-right">
+						<cmi-viaduc-detail-paging [detailUrl]="getDetailBaseUrl()" [idProperty]="'id'"></cmi-viaduc-detail-paging>
+					</div>
+				</div>
+			</div>
+			<div *ngIf="detail" class="user-roles-detail">
+					<div class="col-md-12 col-xs-12 tablecontainer with-border">
+					<form #formUserDetail="ngForm" >
+						<h3 class="title">
+							<span>{{'Benutzerdaten' | translate:'user.userdata'}}</span>
+						</h3>
+						<div class="col-md-6 col-xs-12">
+							<div class="form-group">
+								<div [ngClass]="{'has-warning': familyName.errors && familyName.errors.required}" class="row">
+									<label tooltip="{{'Name' | translate:'user.familyName'}}*" class="col-md-3 col-xs-3 control-label">{{'Name' | translate:'user.familyName'}}*</label>
+									<div class="col-md-9 col-xs-9">
+										<input class="form-control"
+											   [(ngModel)]="detail.item.familyName"
+											   placeholder="{{'name' | translate: 'user.placeholder.familyName'}}"
+											   [disabled]="!allowBereichBenutzerdatenBearbeiten || !editUserHasOe3Role || detail.item.isInternalUser" required
+											   name="familyName"
+											   #familyName="ngModel">
+										<span *ngIf="familyName.errors && familyName.errors.required"
+											  class="help-block" role="alert">
+											{{'Dieses Feld muss ausgefüllt werden' | translate:'main.errorMandatoryField'}}
+										</span>
+									</div>
+								</div>
+								<div [ngClass]="{'has-warning': firstName.errors && firstName.errors.required}" class="row">
+									<label tooltip="{{'Vorname(n)' | translate:'user.firstName'}}*" class="col-md-3 col-xs-3 control-label">{{'Vorname(n)' | translate:'user.firstName'}}*</label>
+									<div class="col-md-9 col-xs-9">
+										<input class="form-control"
+											   [(ngModel)]="detail.item.firstName"
+											   placeholder="{{'Vorname(n)' | translate: 'user.placeholder.firstName'}}"
+											   [disabled]="!allowBereichBenutzerdatenBearbeiten || !editUserHasOe3Role || detail.item.isInternalUser" required
+											   name="firstName"
+											   #firstName="ngModel">
+										<span *ngIf="firstName.errors && firstName.errors.required" class="help-block" role="alert">
+											{{'Dieses Feld muss ausgefüllt werden' | translate:'main.errorMandatoryField'}}
+										</span>
+									</div>
+								</div>
+								<div [ngClass]="{'has-warning': organization.errors && organization.errors.required && detail.item.isInternalUser}" class="row">
+									<label *ngIf="!detail.item.isInternalUser" tooltip="{{'Organisation' | translate:'user.organization'}}" class="col-md-3 col-xs-3 control-label">{{'Organisation' | translate:'user.organization'}}</label>
+									<label  *ngIf="detail.item.isInternalUser" tooltip="{{'Organisation' | translate:'user.organization'}}*" class="col-md-3 col-xs-3 control-label">{{'Organisation' | translate:'user.organization'}}*</label>
+									<div class="col-md-9 col-xs-9">
+										<input class="form-control"
+											   [(ngModel)]="detail.item.organization"
+											   placeholder="{{'Organisation' | translate: 'user.placeholder.organization'}}"
+											   [disabled]="!allowBereichBenutzerdatenBearbeiten"
+											   [required]="detail.item.isInternalUser"
+											   name="organization" #organization="ngModel">
+										<span *ngIf="organization.errors && organization.errors.required" class="help-block" role="alert">
+											{{'Dieses Feld muss ausgefüllt werden' | translate:'main.errorMandatoryField'}}
+										</span>
+									</div>
+								</div>
+								<div [ngClass]="{'has-warning': street.errors && street.errors.required}" class="row">
+									<label tooltip="{{'Strasse / Nr.' | translate:'user.street'}}*" class="col-md-3 col-xs-3 control-label">{{'Strasse / Nr.' | translate:'user.street'}}*</label>
+									<div class="col-md-9 col-xs-9">
+										<input class="form-control"
+											   [(ngModel)]="detail.item.street"
+											   placeholder="{{'Strasse / Nr.' | translate: 'user.placeholder.street'}}"
+											   [disabled]="!allowBereichBenutzerdatenBearbeiten" required
+											   name="street" #street="ngModel">
+										<span *ngIf="street.errors && street.errors.required" class="help-block" role="alert">
+											{{'Dieses Feld muss ausgefüllt werden' | translate:'main.errorMandatoryField'}}
+										</span>
+									</div>
+								</div>
+								<div class="row">
+									<label tooltip="{{'Zusatz' | translate:'user.streetAttachment'}}" class="col-md-3 col-xs-3 control-label">{{'Zusatz' | translate:'user.streetAttachment'}}</label>
+									<div class="col-md-9 col-xs-9">
+										<input class="form-control"
+											   [(ngModel)]="detail.item.streetAttachment"
+											   placeholder="{{'Zusatz' | translate: 'user.placeholder.streetAttachment'}}"
+											   [disabled]="!allowBereichBenutzerdatenBearbeiten"
+											   name="streetAttachment">
+									</div>
+								</div>
+								<div [ngClass]="{'has-warning': zipCode.errors && zipCode.errors.required}" class="row">
+									<label tooltip="{{'PLZ' | translate:'user.zipCode'}}*" class="col-md-3 col-xs-3 control-label">{{'PLZ' | translate:'user.zipCode'}}*</label>
+									<div class="col-md-9 col-xs-9">
+										<input class="form-control" type="text"
+											   [(ngModel)]="detail.item.zipCode"
+											   placeholder="{{'PLZ' | translate: 'user.placeholder.zipCode'}}"
+											   [disabled]="!allowBereichBenutzerdatenBearbeiten" required
+											   name="zipCode" #zipCode="ngModel">
+										<span *ngIf="zipCode.errors && zipCode.errors.required" class="help-block" role="alert">
+											{{'Dieses Feld muss ausgefüllt werden' | translate:'main.errorMandatoryField'}}
+										</span>
+									</div>
+								</div>
+								<div [ngClass]="{'has-warning': town.errors && town.errors.required}" class="row">
+									<label tooltip="{{'Ort' | translate:'user.town'}}*" class="col-md-3 col-xs-3 control-label">{{'Ort' | translate:'user.town'}}*</label>
+									<div class="col-md-9 col-xs-9">
+										<input class="form-control"
+											   [(ngModel)]="detail.item.town"
+											   placeholder="{{'Ort' | translate: 'user.placeholder.town'}}"
+											   [disabled]="!allowBereichBenutzerdatenBearbeiten" required
+											   name="town" #town="ngModel">
+										<span *ngIf="town.errors && town.errors.required" class="help-block" role="alert">
+											{{'Dieses Feld muss ausgefüllt werden' | translate:'main.errorMandatoryField'}}
+										</span>
+									</div>
+								</div>
+								<div [ngClass]="{'has-warning': countryCode.errors && countryCode.errors.required}" class="row">
+									<label tooltip="{{'Land' | translate:'user.countryCode'}}*" class="col-md-3 col-xs-3 control-label">{{'Land' | translate:'user.countryCode'}}*</label>
+									<div class="col-md-9 col-xs-9">
+										<select class="form-control" [(ngModel)]="detail.item.countryCode"
+												[disabled]="!allowBereichBenutzerdatenBearbeiten" required
+												name="countryCode" #countryCode="ngModel">
+											<option *ngFor="let c of languageDependantCountries" value="{{c.code}}"
+													title="{{c.name}}">{{c.name}}
+											</option>
+										</select>
+										<span *ngIf="countryCode.errors && countryCode.errors.required" class="help-block" role="alert">
+											{{'Dieses Feld muss ausgefüllt werden' | translate:'main.errorMandatoryField'}}
+										</span>
+									</div>
+								</div>
+								<div [ngClass]="{'has-warning': phoneNumber.errors}" class="row">
+									<label tooltip="{{'Telefon (Festnetz)' | translate:'user.phoneNumber'}}" class="col-md-3 col-xs-3 control-label">{{'Telefon (Festnetz)' | translate:'user.phoneNumber'}}</label>
+									<div class="col-md-9 col-xs-9">
+										<input class="form-control" type="text"
+											   [(ngModel)]="detail.item.phoneNumber"
+											   placeholder="{{'Telefon (Festnetz)' | translate: 'user.placeholder.phoneNumber'}}"
+											   [disabled]="!allowBereichBenutzerdatenBearbeiten"
+											   [pattern]="phonenumberRegexPattern"
+											   name="phoneNumber" #phoneNumber="ngModel">
+									</div>
+									<span *ngIf="phoneNumber.errors" class="help-block" role="alert">
+											{{'Telefonnummern können mit einem "+" beginnen sowie Zahlen, Leerzeichen und "-" enthalten und müssen zwischen 6 und 20 Zeichen lang sein'
+										| translate:'main.errorPhone'}}
+									</span>
+								</div>
+								<div [ngClass]="{'has-warning': mobileNumber.errors}" class="row">
+									<label tooltip="{{'Mobiltelefon' | translate:'user.mobileNumber'}}" class="col-md-3 col-xs-3 control-label">{{'Mobiltelefon' | translate:'user.mobileNumber'}}</label>
+									<div class="col-md-9 col-xs-9">
+										<input class="form-control" type="text"
+											   [(ngModel)]="detail.item.mobileNumber"
+											   placeholder="{{'Mobiltelefon' | translate: 'user.placeholder.mobileNumber'}}"
+											   [disabled]="!allowBereichBenutzerdatenBearbeiten"
+											   [pattern]="phonenumberRegexPattern"
+											   name="mobileNumber" #mobileNumber="ngModel">
+									</div>
+									<span *ngIf="mobileNumber.errors" class="help-block" role="alert">
+											{{'Mobilnummern können mit einem "+" beginnen sowie Zahlen, Leerzeichen und "-" enthalten und müssen zwischen 6 und 20 Zeichen lang sein'
+										| translate:'main.errorMobil'}}
+									</span>
+								</div>
+								<div class="row" [ngClass]="{'has-warning': !isValidDate(detail.item.birthday)}">
+									<label tooltip="{{'Geburtsdatum' | translate:'user.birthday'}}" class="col-md-3 col-xs-3 control-label">{{'Geburtsdatum' | translate:'user.birthday'}}</label>
+									<div class="col-md-9 col-xs-9">
+										<input class="form-control"
+											   type="text"
+											   [(ngModel)]="detail.item.birthday"
+											   datePicker
+											   [minDateToday]="false"
+											   aria-labelledby="Date DD.MM.YYYY"
+											   placeholder="{{'Geburtsdatum (dd.mm.jjjj)' | translate: 'user.placeholder.birthday'}}"
+											   [disabled]="!allowBereichBenutzerdatenBearbeiten || !editUserHasOe3Role"
+											   name="birthday" #birthday="ngModel">
+										 <span *ngIf="!isValidDate(detail.item.birthday)" class="help-block" role="alert">
+											{{'Das Datum liegt nicht im Format dd.mm.jjjj vor.' | translate: 'main.errorDateFormat'}}
+										</span>
+									</div>
+								</div>
+								<div [ngClass]="{'has-warning': emailAddress.errors}" class="row">
+									<label tooltip="{{'E-Mail' | translate:'user.emailAddress'}}*" class="col-md-3 col-xs-3 control-label ">{{'E-Mail' | translate:'user.emailAddress'}}*</label>
+									<div class="col-md-9 col-xs-9">
+										<input class="form-control" type="email"
+											   [(ngModel)]="detail.item.emailAddress"
+											   placeholder="{{'E-Mail' | translate: 'user.placeholder.emailAddress'}}"
+											   [disabled]="!allowBereichBenutzerdatenBearbeiten || detail.item.isInternalUser" required
+											   [pattern]="emailRegexPattern"
+											   name="emailAddress" #emailAddress="ngModel">
+										<span *ngIf="emailAddress.errors" class="help-block" role="alert">
+											{{'Dieses Feld muss ausgefüllt werden und muss eine gültige E-Mail sein' | translate:'main.errorMandatoryField'}}
+										</span>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="col-md-6 col-xs-12">
+							<div class="form-group">
+								<div class="row">
+									<label tooltip="{{'Fabasoft-Dossier 622' | translate:'user.fabasoftDossier'}}" class="col-md-3 col-xs-3 control-label">{{'Fabasoft-Dossier 622' | translate:'user.fabasoftDossier'}}</label>
+									<div class="col-md-9 col-xs-9">
+										<input class="form-control"
+											   [(ngModel)]="detail.item.fabasoftDossier"
+											   placeholder="{{'Fabasoft-Dossier 622' | translate: 'user.placeholder.fabasoftDossier'}}"
+											   [disabled]="!allowBereichBenutzerdatenBearbeiten"
+											   name="fabasoftDossier">
+									</div>
+								</div>
+								<div class="row">
+									<label tooltip="{{'Bevorzugte Sprache' | translate:'user.language'}}" class="col-md-3 col-xs-3 control-label">{{'Bevorzugte Sprache' | translate:'user.language'}}</label>
+									<div class="col-md-9 col-xs-9">
+										<select class="form-control" [(ngModel)]="detail.item.language"
+												[disabled]="!allowBereichBenutzerdatenBearbeiten"
+												name="language">
+											<option *ngFor="let c of language" [ngValue]="c.code"
+													title="{{c.name}}">{{c.name}}
+											</option>
+										</select>
+									</div>
+								</div>
+								<div class="row">
+									<label tooltip="{{'Benutzer-ID' | translate:'user.id'}}" class="col-md-3 col-xs-3 control-label">{{'Benutzer-ID' | translate:'user.id'}}</label>
+									<div class="col-md-9 col-xs-9">
+										<input class="form-control"
+											   [value]="detail.item.id"
+											   disabled
+											   name="id">
+									</div>
+								</div>
+								<div class="row">
+									<label tooltip="{{'UserExt-ID' | translate:'user.extid'}}" class="col-md-3 col-xs-3 control-label">{{'UserExt-ID' | translate:'user.extid'}}</label>
+									<div class="col-md-9 col-xs-9">
+										<input class="form-control"
+											   [value]="detail.item.userExtId"
+											   disabled
+											   name="userExtId">
+									</div>
+								</div>
+								<div class="row">
+									<label tooltip="{{'Datensatz-Log' | translate:'user.createModifiyData'}}" class="col-md-3 col-xs-3 control-label">{{'Datensatz-Log' | translate:'user.createModifiyData'}}</label>
+									<div class="col-md-9 col-xs-9">
+										 <textarea class="form-control"
+												   [rows]="5"
+												   [value]="detail.item.createModifiyData"
+												   disabled
+												   name="createModifiyData"> </textarea>
+									</div>
+								</div>
+							</div>
+						</div>
+						<h3 class="col-md-12 col-xs-12 title">
+							<span>{{'Rollenverwaltung Public-Client' | translate:'usersAndRoles.roleadmin'}}</span>
+						</h3>
+						<div class="col-md-12 col-xs-12">
+							<div class="col-md-6 col-xs-12">
+								<div class="form-group">
+									<div class="row">
+										<label tooltip="{{'Benutzerrolle Public-Client' | translate:'user.rolepublicclient'}}" class="col-md-3 col-xs-3 control-label">{{'Benutzerrolle Public-Client' | translate:'user.rolepublicclient'}}</label>
+										<div class="col-md-9 col-xs-9">
+											<div *ngIf="!detail.item.isInternalUser" class="radio radio--left">
+												<a href="javascript:void(0)" role="menuitem" (click)="onOpenModalClick($event, _authorization.roles.Oe2, allowBenutzerrollePublicClientBearbeiten)">
+													<label for="chkRolePublicOe2Radio">
+														<input type="radio" id="chkRolePublicOe2Radio"
+															   [checked]="getCheckedStatusForRolePublic(_authorization.roles.Oe2)"
+															   value="Ö2"
+															   [disabled]="!allowBenutzerrollePublicClientBearbeiten">
+														<span>{{'Ö2' |translate:'user.userrolepublic.oe2'}}</span>
+													</label>
+												</a>
+											</div>
+											<div *ngIf="!detail.item.isInternalUser" class="radio radio--left">
+												<a href="javascript:void(0)" role="menuitem" (click)="onOpenModalClick($event, _authorization.roles.Oe3, !oeDreiDisabled())">
+													<label for="chkRolePublicOe3Radio">
+														<input type="radio" id="chkRolePublicOe3Radio"
+															   [checked]="getCheckedStatusForRolePublic(_authorization.roles.Oe3)"
+															   value="Ö3"
+															   [disabled]="oeDreiDisabled()">
+														<span>{{'Ö3' |translate:'user.userrolepublic.oe3'}}</span>
+													</label>
+												</a>
+											</div>
+											<div *ngIf="detail.item.isInternalUser" class="radio radio--left">
+												<a href="javascript:void(0)" role="menuitem" (click)="onOpenModalClick($event, _authorization.roles.BVW, allowBenutzerrollePublicClientBearbeiten)">
+													<label for="chkRolePublicBvwRadio">
+														<input type="radio" id="chkRolePublicBvwRadio"
+															   [checked]="getCheckedStatusForRolePublic(_authorization.roles.BVW)"
+															   value="BVW"
+															   [disabled]="!allowBenutzerrollePublicClientBearbeiten">
+														<span>{{'BVW' |translate:'user.userrolepublic.bvw'}}</span>
+													</label>
+												</a>
+											</div>
+											<div *ngIf="detail.item.isInternalUser" class="radio radio--left">
+												<a href="javascript:void(0)" role="menuitem" (click)="onOpenModalClick($event, _authorization.roles.AS, allowBenutzerrollePublicClientBearbeiten)">
+													<label for="chkRolePublicAsRadio">
+														<input type="radio" id="chkRolePublicAsRadio"
+															   [checked]="getCheckedStatusForRolePublic(_authorization.roles.AS)"
+															   value="AS"
+															   [disabled]="!allowBenutzerrollePublicClientBearbeiten">
+														<span>{{'AS' |translate:'user.userrolepublic.as'}}</span>
+													</label>
+												</a>
+											</div>
+											<div *ngIf="detail.item.isInternalUser" class="radio radio--left">
+												<a href="javascript:void(0)" role="menuitem" (click)="onOpenModalClick($event, _authorization.roles.BAR, allowBenutzerrollePublicClientBearbeiten)">
+													<label for="chkRolePublicBarRadio">
+														<input type="radio" id="chkRolePublicBarRadio"
+															   [checked]="getCheckedStatusForRolePublic(_authorization.roles.BAR)"
+															   value="BAR"
+															   [disabled]="!allowBenutzerrollePublicClientBearbeiten">
+														<span>{{'BAR' |translate:'user.userrolepublic.bar'}}</span>
+													</label>
+												</a>
+											</div>
+										</div>
+									</div>
+									<div [ngClass]="{'has-warning': !isValidDate(detail.item.downloadLimitDisabledUntil) || !isInValidRange(detail.item.downloadLimitDisabledUntil)}" class="row">
+										<label tooltip="{{'Downloadbeschränkung aufheben bis' | translate:'user.downloadLimit'}}" class="col-md-3 col-xs-3 control-label">{{'Downloadbeschränkung aufheben bis' | translate:'user.downloadLimit'}}</label>
+										<div class="col-md-9 col-xs-9">
+											<input class="form-control"
+												   type="text"
+												   datePicker
+												   name="downloadLimitDisabledUntil"
+												   [minDateToday]="true"
+												   [openingDays]="getNextThirtyDays()"
+												   [(ngModel)]="detail.item.downloadLimitDisabledUntil"
+												   aria-labelledby="Date DD.MM.YYYY"
+												   placeholder="{{'Downloadbeschränkung aufheben bis (dd.mm.jjjj)' | translate: 'user.placeholder.downloadLimitDisabledUntil'}}"
+												   [disabled]="!allowDownloadbeschraenkungBearbeiten"
+												   #downloadLimitDisabledUntil="ngModel">
+											<span *ngIf="!isValidDate(detail.item.downloadLimitDisabledUntil)" class="help-block" role="alert">
+											{{'Das Datum liegt nicht im Format dd.mm.jjjj vor.' | translate: 'main.errorDateFormat'}}
+											</span>
+												<span *ngIf="!isInValidRange(detail.item.downloadLimitDisabledUntil)" class="help-block" role="alert">
+												{{'Das Datum muss innerhalb der nächsten 30 Tage liegen.' | translate: 'user.notInValidRangeDownloadLimit'}}
+											</span>
+										</div>
+									</div>
+									<div [ngClass]="{'has-warning': !isValidDate(detail.item.digitalisierungsbeschraenkungAufgehobenBis) || !isInValidRange(detail.item.digitalisierungsbeschraenkungAufgehobenBis)}" class="row">
+										<label tooltip="{{'Digitalisierungsbeschränkung aufheben bis' | translate:'user.digitalisierungsbeschraenkungAufgehobenBis'}}" class="col-md-3 col-xs-3 control-label">{{'Digitalisierungsbeschränkung aufheben bis' | translate:'user.digitalisierungsLimit'}}</label>
+										<div class="col-md-9 col-xs-9">
+											<input class="form-control"
+												   type="text"
+												   datePicker
+												   name="digitalisierungLimitDisabledUntil"
+												   [minDateToday]="true"
+												   [openingDays]="getNextThirtyDays()"
+												   [(ngModel)]="detail.item.digitalisierungsbeschraenkungAufgehobenBis"
+												   aria-labelledby="Date DD.MM.YYYY"
+												   placeholder="{{'Digitalisierungsbeschränkung aufheben bis (dd.mm.jjjj)' | translate: 'user.placeholder.digitalisierungsbeschraenkungAufgehobenBis'}}"
+												   [disabled]="!allowDigitalisierungsbeschraenkungBearbeiten"
+												   #downloadLimitDisabledUntil="ngModel">
+											<span *ngIf="!isValidDate(detail.item.digitalisierungsbeschraenkungAufgehobenBis)" class="help-block" role="alert">
+											{{'Das Datum liegt nicht im Format dd.mm.jjjj vor.' | translate: 'main.errorDateFormat'}}
+											</span>
+											<span *ngIf="!isInValidRange(detail.item.digitalisierungsbeschraenkungAufgehobenBis)" class="help-block" role="alert">
+												{{'Das Datum muss innerhalb der nächsten 30 Tage liegen.' | translate: 'user.notInValidRangeDownloadLimit'}}
+											</span>
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="col-md-6 col-xs-12">
+								<div class="form-group">
+									<div class="row">
+										<label tooltip="{{'Ablehnungsgrund' | translate:'user.ablehnungsgrund'}}" class="col-md-3 col-xs-3 control-label">{{'Ablehnungsgrund' | translate:'user.ablehnungsgrund'}}</label>
+										<div class="col-md-9 col-xs-9">
+											<input class="form-control"
+												   [value]="detail.item.reasonForRejection"
+												   disabled
+												   name="reasonForRejection">
+										</div>
+									</div>
+									<div class="row" *ngIf="!detail.item.isInternalUser">
+										<label tooltip="{{'Forschungsgruppe DDS' | translate:'user.researcherGroup'}}" class="col-md-3 col-xs-3 control-label ">{{'Forschungsgruppe DDS' | translate:'user.researcherGroup'}}</label>
+										<div class="col-md-9 col-xs-9">
+											<input class="checkbox checkbox&#45;&#45;left" type="checkbox"
+												   (click)="toggelSelectedResearcherGroup()"
+												   [(ngModel)]="selectedResearcherGroup"
+												   [disabled]="researcherGroupDdsDisabled()"
+												   [ngModelOptions]="{standalone: true}">
+										</div>
+										<cmi-viaduc-verify-modal (onSubmitted)="researcherGroupDdsModalAnswer($event)" [(open)]="showVerifyModal"></cmi-viaduc-verify-modal>
+									</div>
+									<div class="row" *ngIf="detail.item.isInternalUser">
+										<label tooltip="{{'BAR-interne Konsultation' | translate:'user.isInternalUser'}}" class="col-md-3 col-xs-3 control-label">{{'BAR-interne Konsultation' | translate:'user.isInternalUser'}}</label>
+										<div class="col-md-9 col-xs-9">
+											<input class="checkbox checkbox&#45;&#45;left" type="checkbox"
+												   (click)="toggelSelectedBarInternalConsultation()"
+												   [(ngModel)]="selectedBarInternalConsultation"
+												   [disabled]="!allowBarInterneKonsultationBearbeiten"
+												   ng-Pattern="^(?:(?:31(\/|-|\.)(?:0?[13578]|1[02]))\1|(?:(?:29|30)(\/|-|\.)(?:0?[1,3-9]|1[0-2])\2))(?:(?:1[6-9]|[2-9]\d)?\d{2})$|^(?:29(\/|-|\.)0?2\3(?:(?:(?:1[6-9]|[2-9]\d)?(?:0[48]|[2468][048]|[13579][26])|(?:(?:16|[2468][048]|[3579][26])00))))$|^(?:0?[1-9]|1\d|2[0-8])(\/|-|\.)(?:(?:0?[1-9])|(?:1[0-2]))\4(?:(?:1[6-9]|[2-9]\d)?\d{2})$"
+												   [ngModelOptions]="{standalone: true}">
+										</div>
+									</div>
+									<div class="row" *ngIf="(allowUploadAusfuehren || allowHerunterladenAusfuehren) && !detail.item.isInternalUser">
+										<label tooltip="{{'Identifierungsmittel' | translate:'user.identifierungsmittel'}}" class="col-md-3 col-xs-3 control-label ">{{'Identifierungsmittel' | translate:'user.identifierungsmittel'}}</label>
+										<div class="col-md-9 col-xs-9" *ngIf="allowHerunterladenAusfuehren">
+											<button id="buttonDownloadIdentifierungsmittel" type="button" class="btn btn-link" (click)="downloadIdentifierungsmittel()"
+													[disabled]="!detail.item.hasIdentifizierungsmittel">
+												<span *ngIf="detail.item.hasIdentifizierungsmittel"><span class="icon icon&#45;&#45;pdf"></span>&nbsp;{{ 'Herunterladen' | translate:'user.download' }}</span>
+												<span *ngIf="!detail.item.hasIdentifizierungsmittel"><span class="glyphicon glyphicon-remove"></span>&nbsp;{{ 'Kein Dokument vorhanden' | translate:'user.datei' }}</span>
+											</button>
+										</div>
+										<div class="col-md-3 col-xs-3 "></div>
+										<div class="col-md-9 col-xs-9" *ngIf="allowUploadAusfuehren">
+											<div class="upload-btn-wrapper">
+												<button class="btn btn-default">
+													<span><span class="glyphicon glyphicon-open-file"></span>&nbsp;{{ 'Datei wählen' | translate:'user.datei' }}</span>
+												</button>
+												<input type="file" class="form-control" accept="application/pdf" (change)="onChangedentIfierungsmittel($event)">
+											</div>
+											<button *ngIf="getCheckedStatusForRolePublic(_authorization.roles.Oe2)" id="buttonUploadIdentifierungsmittel" type="button" class="button btn btn-primary"
+													(click)="onOpenModalClick($event, _authorization.roles.Oe3, true)"
+													[disabled]="!selectedIdentifizierungsmittel">
+												{{'Upload' |translate:'user.upload.identifierungsmittel' }}
+											</button>
+											<button *ngIf="getCheckedStatusForRolePublic(_authorization.roles.Oe3)" type="button" class="button btn btn-primary" (click)="uploadIdentifierungsmittel()"
+													[disabled]="!selectedIdentifizierungsmittel">
+												{{'Upload' |translate:'user.upload.identifierungsmittel' }}
+											</button>
+										</div>
+									</div>
+									<cmi-viaduc-modal [modalTitle]="GetModalTitel()" [(opened)]="showModal">
+										<cmi-viaduc-modal-body>
+												<span class="col-sm-12 col-md-12">{{GetModalMessage()}}</span>
+										</cmi-viaduc-modal-body>
+										<cmi-viaduc-modal-footer>
+											<div class="row">
+												<div class="col-xs-12">
+													<button type="button" class="btn btn-secondary" (click)="onCancelClick($event)">
+														{{'Nein' | translate:'user.no'}}
+													</button>
+													<button type="button" class="button btn btn-primary" (click)="onOkClick()">
+														{{'Ja' | translate:'user.yes'}}
+													</button>
+												</div>
+											</div>
+										</cmi-viaduc-modal-footer>
+									</cmi-viaduc-modal>
+								</div>
+							</div>
+						</div>
+						<div class="col-md-12 col-xs-12">
+							<button id="buttonSaveUser" *ngIf="allowBereichBenutzerdatenBearbeiten || allowDownloadbeschraenkungBearbeiten || allowBenutzerrollePublicClientBearbeiten ||
+							(detail.item.isInternalUser && allowBarInterneKonsultationBearbeiten) || (!detail.item.isInternalUser && allowForschungsgruppeDdsBearbeiten)" type="button" class="btn btn-primary"
+									(click)="saveUser()" name="buttonSaveUser"
+									[disabled]="allowBereichBenutzerdatenBearbeiten && (!formUserDetail.form.valid || !isValidDate(detail.item.birthday) ||
+											!isValidDate(detail.item.downloadLimitDisabledUntil))">
+									{{'Speichern' |translate:'save' }}
+							</button>
+							<button *ngIf="allowBereichBenutzerdatenBearbeiten || allowDownloadbeschraenkungBearbeiten || allowBenutzerrollePublicClientBearbeiten ||
+							(detail.item.isInternalUser && allowBarInterneKonsultationBearbeiten) || (!detail.item.isInternalUser && allowForschungsgruppeDdsBearbeiten)" type="reset" class="btn btn-default"
+									(click)="reset()" name="buttonReset">{{'Zurücksetzen' | translate:'reset'}}
+							</button>
+							<button class="btn btn-secondary" type="button" (click)="goToBenutzerList()"
+									name="buttonCancel">{{'Abbrechen' | translate:'cancel'}}
+							</button>
+						</div>
+					</form>
+				</div>
+
+				<div *ngIf="detail.item.eiamRoles" class="col-md-6 col-xs-12 tableandborder">
+					<h3 class="col-md-12 col-xs-12title">
+						<span>{{'Rollenverwaltung Management-Client' | translate:'usersAndRoles.roleadmin.management'}}</span>
+					</h3>
+					<div class="col-md-12 col-xs-12 tablecontainer">
+						<div class="row">
+							<label tooltip="{{'eIAM-Rolle Management-Client' | translate:'user.eiamRoles'}}" class="col-md-3 col-xs-3 control-label">{{'eIAM-Rolle Management-Client' | translate:'user.eiamRoles'}}</label>
+							<div class="col-md-9 col-xs-9">
+								<input class="form-control"
+									   [value]="detail.item.eiamRoles"
+									   disabled
+									   name="eiamRoles">
+							</div>
+						</div>
+						<div class="tablerowcontainer">
+							<div class="left">
+								<h4>{{ 'Zugewiesene Rollen' | translate:'user.assignedRoles' }}</h4>
+							</div>
+							<div *ngIf="canManageManagementClientRole(detail.item.eiamRoles)" class="middle">
+							</div>
+							<div *ngIf="canManageManagementClientRole(detail.item.eiamRoles)" class="right">
+								<h4>{{ 'Verfügbare Rollen' | translate:'user.availableRoles' }}</h4>
+							</div>
+						</div>
+						<div *ngIf="canManageManagementClientRole(detail.item.eiamRoles)" class="tablerowcontainer">
+							<div class="left with-border">
+								<wj-list-box #listIncluded [itemsSource]="detail.item.roles" displayMemberPath="name"
+											 [selectedItem]="null"></wj-list-box>
+							</div>
+							<div class="middle">
+								<button type="button" class="btn btn-default"
+										[disabled]="!listExcluded || !listExcluded.selectedItem"
+										(click)="include()">
+									<i class="glyphicon glyphicon-chevron-left"></i>
+								</button>
+								<br/>
+								<br/>
+								<button type="button" class="btn btn-default" [disabled]="!listIncluded.selectedItem"
+										(click)="exclude()">
+									<i class="glyphicon glyphicon-chevron-right"></i>
+								</button>
+							</div>
+							<div class="right with-border">
+								<wj-list-box #listExcluded [itemsSource]="detail.roles"
+											 displayMemberPath="name"></wj-list-box>
+							</div>
+						</div>
+
+						<div *ngIf="!canManageManagementClientRole(detail.item.eiamRoles)">
+							<div class="tablerowcontainer">
+								<div class="left with-border">
+									<wj-list-box #listIncluded [itemsSource]="detail.item.roles"
+												 displayMemberPath="name"
+												 [selectedItem]="null"></wj-list-box>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="col-md-12 col-xs-12">
+						<button id="buttonSaveRoles" *ngIf="canManageManagementClientRole(detail.item.eiamRoles)" type="button" class="btn btn-primary"
+								(click)="saveRoles()">{{
+							'Speichern' |
+							translate:'save' }}
+						</button>
+						<button *ngIf="canManageManagementClientRole(detail.item.eiamRoles)" type="button" class="btn btn-default"
+								(click)="reset()">{{
+							'Zurücksetzen' |
+							translate:'reset' }}
+						</button>
+						<button class="btn btn-secondary" (click)="goToBenutzerList()">{{'Abbrechen' |
+							translate:'cancel'}}
+						</button>
+					</div>
+				</div>
+				<div *ngIf="detail.item.isInternalUser"  class="col-md-6 col-xs-12 tableandborder">
+					<h3 class="col-md-12 col-xs-12 title">
+						{{'Access-Tokens für AS-Benutzer' | translate:'usersAndRoles.accesstokens.title'}}
+					</h3>
+					<div class="col-md-12 col-xs-12">
+						<div class="left">
+							<h4>
+								{{ 'Zugewiesene zuständige Stellen' | translate:'user.assignedAblieferndeStellen' }}
+							</h4>
+						</div>
+						<div class="left form-control">
+							<wj-multi-auto-complete *ngIf="allowZustaendigeStelleBearbeiten" #mac1
+													[itemsSource]="ablieferndeStelleAllList"
+													[displayMemberPath]="'bezeichnung'"
+													[selectedValuePath]="'bezeichnung'"
+													[(ngModel)]="detail.item.ablieferndeStelleList"
+													placeholder="{{'Zuständige Stellen' | translate: 'user.ablieferndeStelle'}}"
+													[isDisabled]="asTokenManageDisabled()"
+							>
+							</wj-multi-auto-complete>
+
+							<div *ngIf="!allowZustaendigeStelleBearbeiten" class="left">
+								<wj-list-box [itemsSource]="detail.item.ablieferndeStelleList"
+											 displayMemberPath="kuerzel"
+											 [selectedItem]="null"></wj-list-box>
+							</div>
+						</div>
+					</div>
+					<div class="col-md-12 col-xs-12">
+						<div class="left">
+							<h4>
+								{{ 'Zugewiesene Access-Tokens' | translate:'user.assignedAblieferndeStellenToken' }}
+							</h4>
+						</div>
+						<div class="left form-control">
+							<wj-list-box [itemsSource]="detail.item.tokens"
+										 [selectedItem]="null"></wj-list-box>
+						</div>
+					</div>
+					<div class="col-md-12 col-xs-12">
+						<button id="buttonSaveAblieferndeStellen" *ngIf="allowZustaendigeStelleBearbeiten" [disabled]="asTokenManageDisabled()" type="button" class="btn btn-primary"
+								(click)="saveAblieferndeStellen()">{{
+							'Speichern' |
+							translate:'save' }}
+						</button>
+						<button *ngIf="allowZustaendigeStelleBearbeiten" [disabled]="asTokenManageDisabled()" type="button" class="btn btn-default"
+								(click)="reset()">{{
+							'Zurücksetzen' |
+							translate:'reset' }}
+						</button>
+						<button class="btn btn-secondary" (click)="goToBenutzerList()">{{'Abbrechen' |
+							translate:'cancel'}}
+						</button>
+					</div>
+				</div>
+			</div>
+
+		</div>
+	</cmi-viaduc-layout-left-content>
+
+	<cmi-loader *ngIf="loading" class="cmi-visible"></cmi-loader>
+</div>

@@ -1,0 +1,61 @@
+<cmi-viaduc-modal [(opened)]="open" [modalTitle]="'Freigabeprüfung'">
+	<cmi-blocker *ngIf="isLoading" class="cmi-visible cmi-fixed cmi-center cmi-shadow modal-loading-blocker">
+		<cmi-spinner [hint]="'Statusänderung wird durchgeführt...'"></cmi-spinner>
+	</cmi-blocker>
+
+	<cmi-viaduc-modal-body>
+		<form class="form-horizontal" #form="ngForm">
+			<fieldset>
+				<div class="form-group">
+					<p>Anzahl ausgewählter Aufträge: {{ids?.length || 0}}</p>
+				</div>
+				<div class="form-group" [ngClass]="{'has-warning': entscheidFreigabe?.errors?.required}">
+					<label for="entscheidFreigabe" class="col-sm-4 control-label">Freigabestatus *
+					</label>
+					<div class="col-sm-8">
+						<select class="form-control" required id="entscheidFreigabe" name="entscheidFreigabe" [(ngModel)]="selectedEntscheid" #entscheidFreigabe="ngModel">
+							<option [ngValue]="null">Bitte wählen</option>
+							<option *ngFor="let x of entscheide" [ngValue]="x">{{translateStatus(x)}}</option>
+						</select>
+						<span *ngIf="entscheidFreigabe?.errors?.required" class="help-block" role="alert">
+							{{'Dieses Feld muss ausgefüllt werden' | translate:'main.errorMandatoryField'}}
+						</span>
+					</div>
+				</div>
+				<div class="form-group" *ngIf="haveToEnterBewilligungsDatum"  [ngClass]="{'has-warning': (datumBewilligungField?.errors?.required || !isValidDate)}">
+					<label for="datumBewilligung" class="col-sm-4 control-label">Datum der Bewilligung *
+					</label>
+					<div class="col-sm-8">
+						<input type="text"
+							   class="form-control"
+							   datePicker
+							   name="datumBewilligung"
+							   [(ngModel)]="datumBewilligung"
+							   [minDateToday]="false"
+							   (isValidChanged)="checkDate($event)"
+							   [required]="haveToEnterBewilligungsDatum"
+							   #datumBewilligungField="ngModel"
+							   [placeholder]="'Bewilligungsdatum (tt.mm.jjjj)' | translate: 'entscheidHinterlegenModal.datumPlaceholder'"
+							   id="datumBewilligung"/>
+						<span *ngIf="(datumBewilligungField?.errors?.required || !isValidDate)" class="help-block" role="alert">
+							<span *ngIf="datumBewilligungField?.errors?.required">{{'Dieses Feld muss ausgefüllt werden' | translate:'main.errorMandatoryField'}}</span>
+							<span *ngIf="!isValidDate">{{'Bitte wählen Sie ein gültiges Datum aus (im Format tt.mm.jjjj)' | translate:'main.errorWrongDate'}}</span>
+						</span>
+					</div>
+				</div>
+				<div class="form-group">
+					<label for="interneBemerkung" class="col-sm-4 control-label">Interne Bemerkung
+					</label>
+					<div class="col-sm-8">
+						<textarea rows="8" class="form-control" name="interneBemerkung" id="interneBemerkung" [(ngModel)]="interneBemerkung">
+						</textarea>
+					</div>
+				</div>
+			</fieldset>
+		</form>
+	</cmi-viaduc-modal-body>
+	<cmi-viaduc-modal-footer>
+		<button class="btn btn-default" (click)="cancel()">Abbrechen</button>
+		<button class="btn btn-primary" (click)="ok()" [disabled]="!form.valid || (haveToEnterBewilligungsDatum && !isValidDate)">Speichern</button>
+	</cmi-viaduc-modal-footer>
+</cmi-viaduc-modal>
