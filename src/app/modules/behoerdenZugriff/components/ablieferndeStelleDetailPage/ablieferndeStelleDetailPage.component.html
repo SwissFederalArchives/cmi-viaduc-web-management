@@ -9,12 +9,14 @@
 			<cmi-viaduc-left-navigation></cmi-viaduc-left-navigation>
 		</div>
 		<div *ngIf="ablieferndeStelle" content>
-			<div class="page-header">
-				<h2 class="page-content-title">
-					<span>{{'Zuständige Stelle' | translate:'behoerdenZugriff.detail.ablieferndestelleTitel'}}: {{ablieferndeStelleHeaderName}}</span>
-				</h2>
-			</div>
-				<fieldset>
+			<form #formStelleDetail="ngForm">
+				<div class="page-header">
+					<h2 class="page-content-title">
+						<span>{{'Zuständige Stelle' | translate:'behoerdenZugriff.detail.ablieferndestelleTitel'}}: {{ablieferndeStelleHeaderName}}</span>
+					</h2>
+				</div>
+
+				<div class="row">
 					<div class="form-group" [ngClass]="{'has-warning': (saveClicked && bezeichnung.errors && bezeichnung.errors.required)}">
 						<label class="col-sm-2 control-label">{{'Bezeichnung' | translate:
 							'behoerdenZugriff.detail.bezeichnung'}} *</label>
@@ -35,9 +37,9 @@
 							</div>
 						</div>
 					</div>
-				</fieldset>
+				</div>
 
-				<fieldset>
+				<div class="row">
 					<div class="form-group" [ngClass]="{'has-warning': (saveClicked && kuerzel.errors && kuerzel.errors.required)}">
 						<label class="col-sm-2 control-label">{{'Kürzel' | translate:
 							'behoerdenZugriff.detail.kuerzel'}} *</label>
@@ -56,9 +58,9 @@
 							</div>
 						</div>
 					</div>
-				</fieldset>
+				</div>
 
-				<fieldset>
+				<div class="row">
 					<div class="row">
 						<div class="col-sm-12 col-reduced-margin">
 							<div class="form-group" [ngClass]="{'has-warning': (!ablieferndeStelle.ablieferndeStelleTokenList || ablieferndeStelle.ablieferndeStelleTokenList.length === 0) && saveClicked}">
@@ -72,6 +74,7 @@
 															[selectedValuePath]="'token'"
 															[ngModelOptions]="{standalone: true}"
 															[(ngModel)]="ablieferndeStelle.ablieferndeStelleTokenList"
+															#tokens="ngModel"
 															placeholder="{{'Access Token' | translate: 'behoerdenZugriff.detail.accesstoken'}}"
 															[required]="true">
 									</wj-multi-auto-complete>
@@ -85,9 +88,9 @@
 							</div>
 						</div>
 					</div>
-				</fieldset>
+				</div>
 
-				<fieldset>
+				<div class="row">
 					<div class="form-group">
 						<label class="col-sm-2 control-label" id="ktrlstl-radio-group">Kontrollstelle</label>
 						<div class="col-sm-10">
@@ -162,9 +165,9 @@
 							</div>
 						</div>
 					</div>
-				</fieldset>
+				</div>
 
-				<fieldset>
+				<div class="row">
 					<div class="form-group">
 						<label class="col-sm-2 control-label" style="text-align: left">{{'Zugewiesene Benutzer' | translate: 'behoerdenZugriff.detail.zugewiesenebenutzer'}}</label>
 						<div class="col-sm-8">
@@ -173,9 +176,9 @@
 							</ul>
 						</div>
 					</div>
-				</fieldset>
+				</div>
 
-				<fieldset>
+				<div class="row">
 					<div class="form-group">
 						<label class="col-sm-2 control-label">
 							{{'Datensatz-Log' | translate:'user.createModifiyData'}}
@@ -188,30 +191,36 @@
 									   name="createModifiyData"> </textarea>
 						</div>
 					</div>
-				</fieldset>
+				</div>
 
-				<fieldset *ngIf="hasErrors">
-					<div class="form-group has-warning col-sm-10">
-						<span *ngFor="let e of errors" class="help-block col-sm-10" role="alert">
-							{{e}}
-						</span>
+				<div class="row" *ngIf="hasErrors">
+					<div class="col-sm-12">
+						<div class="alert alert-warning" role="alert">
+							<span class="sr-only">warning:</span>
+							<span *ngFor="let e of errors">
+								{{e}}
+							</span>
+						</div>
 					</div>
-				</fieldset>
+				</div>
 
-				<fieldset>
-					<button class="btn btn-primary" (click)="processChanges()">{{'Speichern' |
-						translate:'behoerdenZugriff.detail.save'}}
-					</button>
-					<button class="btn btn-secondary" (click)="goToAblieferndeStelleList()">{{'Abbrechen' |
-						translate:'behoerdenZugriff.detail.cancel'}}
-					</button>
-				</fieldset>
+				<div class="row">
+					<div class="col-sm-8">
+						<button class="btn btn-primary" (click)="processChanges()">{{'Speichern' |
+							translate:'behoerdenZugriff.detail.save'}}
+						</button>
+						<button class="btn btn-secondary" (click)="goToAblieferndeStelleList()">{{'Abbrechen' |
+							translate:'behoerdenZugriff.detail.cancel'}}
+						</button>
+					</div>
+				</div>
+			</form>
 		</div>
 	</cmi-viaduc-layout-left-content>
 
 	<cmi-viaduc-delete-confirm  *ngIf="showDeleteModal"
-								[countOfSelectedItem]="1"
-							   [nameOfSelectedItem]="emailToDelete"
+                                [countOfCheckedItem]="1"
+							   [nameOfCheckedItem]="emailToDelete"
 							   [(showDeleteModal)]="showDeleteModal"
 							   (deleteClicked)="removeKontrollstelle(emailToDelete)">
 	</cmi-viaduc-delete-confirm>
@@ -250,5 +259,7 @@
 	</cmi-viaduc-modal>
 
 </div>
+
+<cmi-viaduc-modal-service-container></cmi-viaduc-modal-service-container>
 
 

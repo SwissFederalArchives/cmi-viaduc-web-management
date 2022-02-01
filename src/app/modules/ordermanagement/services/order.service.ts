@@ -167,4 +167,11 @@ export class OrderService {
 		};
 		return this._http.post<void>(this._orderApiUrl + '/MahnungVersenden', postbody);
 	}
+
+	public auftraegeErinnerungVersenden(ids: number[]): Observable<any> {
+		const postbody = {
+			orderItemIds: ids
+		};
+		return this._http.post<void>(this._orderApiUrl + '/ErinnerungVersenden', postbody);
+	}
 }

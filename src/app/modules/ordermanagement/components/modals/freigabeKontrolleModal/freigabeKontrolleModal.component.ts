@@ -19,10 +19,13 @@ export class FreigabeKontrolleModalComponent implements OnInit {
 	@Input()
 	public interneBemerkung: string;
 	@Input()
+	public currentRolePublicClient: string;
+	@Input()
 	public set open(val: boolean) {
 		this._open = val;
 		this.openChange.emit(val);
 	}
+
 	public get open(): boolean {
 		return this._open;
 	}
@@ -44,6 +47,7 @@ export class FreigabeKontrolleModalComponent implements OnInit {
 	public isLoading = false;
 	public entscheide = [];
 	public haveToEnterBewilligungsDatum = false;
+	public isOe2UserConfirmed: boolean;
 
 	private _open = true;
 	private _selectedEntscheid: ApproveStatus = null;

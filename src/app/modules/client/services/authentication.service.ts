@@ -204,7 +204,7 @@ export class AuthenticationService {
 			return this._getIdentity().toPromise().then(response_claims => {
 				return this.handleIdentityResponse(response_claims, token);
 			}, err => {
-				console.log(err);
+				console.error(err);
 				this.clearCurrentSession();
 				throw err;
 			});
@@ -225,7 +225,7 @@ export class AuthenticationService {
 				router.navigate([this._urlService.getErrorNewUser()]);
 				return true;
 			default:
-				console.log('Keine definierter AuthStatus!');
+				console.error('Keine definierter AuthStatus!');
 				break;
 		}
 	}

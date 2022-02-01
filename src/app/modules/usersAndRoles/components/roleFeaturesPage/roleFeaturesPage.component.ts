@@ -1,6 +1,6 @@
 import {Component, OnInit, ViewChild} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
-import {CmiGridComponent, TranslationService, Utilities as _util} from '@cmi/viaduc-web-core';
+import {CmiGridComponent, ComponentCanDeactivate, TranslationService, Utilities as _util} from '@cmi/viaduc-web-core';
 import {UrlService, AuthorizationService, ErrorService, UiService} from '../../../shared/services';
 import {PagedResult} from '../../../shared/model/apiModels';
 import {RoleService} from '../../services/role.service';
@@ -11,23 +11,19 @@ import {FlexGridFilter} from '@grapecity//wijmo.grid.filter';
 	templateUrl: 'roleFeaturesPage.component.html',
 	styleUrls: ['./roleFeaturesPage.component.less']
 })
-export class RoleFeaturesPageComponent implements OnInit {
-
-	public loading: boolean;
-
-	public crumbs: any[] = [];
-	public list: PagedResult<any>;
-
-	public allowEdit: boolean;
-
-	public roleFeaturesList: Map<string, string[]> = new Map<string, string[]>();
-	public roleFeaturesForSaveList: Map<string, string[]> = new Map<string, string[]>();
-
+export class RoleFeaturesPageComponent extends ComponentCanDeactivate implements OnInit {
 	@ViewChild('flexGrid', { static: false })
 	public flexGrid: CmiGridComponent;
-
 	@ViewChild('filter', { static: false })
+
 	public filter: FlexGridFilter;
+	public loading: boolean;
+	public crumbs: any[] = [];
+	public list: PagedResult<any>;
+	public allowEdit: boolean;
+	public isDirty: boolean;
+	public roleFeaturesList: Map<string, string[]> = new Map<string, string[]>();
+	public roleFeaturesForSaveList: Map<string, string[]> = new Map<string, string[]>();
 
 	constructor(private _authorization: AuthorizationService,
 				private _roleService: RoleService,
@@ -37,6 +33,7 @@ export class RoleFeaturesPageComponent implements OnInit {
 				private _router: Router,
 				private _route: ActivatedRoute,
 				private _ui: UiService) {
+		super();
 	}
 
 	public get txt(): TranslationService {
@@ -114,9 +111,10 @@ export class RoleFeaturesPageComponent implements OnInit {
 			let index = a.indexOf(featureId);
 			if (index >= 0) {
 				a.splice(index, 1);
-			}else {
+			} else {
 				a.push(featureId);
 			}
+			this.isDirty = this.allowEdit;
 		}
 	}
 
@@ -127,6 +125,7 @@ export class RoleFeaturesPageComponent implements OnInit {
 	public saveGridChanges(): void {
 		this.loading = true;
 		this.allowEdit = false;
+		this.isDirty = false;
 		this.roleFeaturesForSaveList.forEach((value: string[], key: string) => {
 				this._roleService.setRoleFeatures(key, value).then(
 					res => {
@@ -158,12 +157,24 @@ export class RoleFeaturesPageComponent implements OnInit {
 	public ngOnInit(): void {
 		this._buildCrumbs();
 		this._route.params.subscribe(params => this._loadList());
-
 		this.allowEdit = false;
+		this.isDirty = false;
 	}
 
 	public show(item: any): void {
 		const id = item ? item.id : 'new';
 		this._router.navigate([this._url.getNormalizedUrl('/benutzerundrollen/rollen') + '/' + id]);
+	}
+
+	public canDeactivate(): boolean {
+		return !this.isDirty;
+	}
+
+	public promptForMessage(): false | 'question' | 'message' {
+		return  'question';
+	}
+
+	public message(): string {
+		return this._txt.get('hints.unsavedChanges', 'Sie haben ungespeicherte Änderungen. Wollen Sie die Seite tatsächlich verlassen?');
 	}
 }

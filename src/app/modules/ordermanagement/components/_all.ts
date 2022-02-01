@@ -15,6 +15,8 @@ import {InVorlageExportierenModalComponent} from './modals/inVorlageExportierenM
 import {DigitalisierungAusloesenModalComponent} from './modals/digitalisierungAusloesenModal/digitalisierungAusloesenModal.component';
 import {BestellHistorieComponent} from './bestellhistorie/bestellHistorie.component';
 import {AuftraegeReponierenModalComponent} from './modals/auftraegeReponierenModal/auftraege-reponieren-modal.component';
+import {AuftraegeMahnungSendenModalComponent} from './modals/auftraegeMahnungSendenModal/auftraege-mahnung-senden-modal.component';
+import {AuftraegeErinnerungSendenModalComponent} from './modals/auftraegeErinnerungSendenModal/auftraege-erinnerung-senden-modal.component';
 
 export const ALL_COMPONENTS = [
 	OrdersListPageComponent,
@@ -34,4 +36,6 @@ export const ALL_COMPONENTS = [
 	BarCodeModalComponent,
 	BestellHistorieComponent,
 	DigitalisierungAusloesenModalComponent,
+	AuftraegeMahnungSendenModalComponent,
+	AuftraegeErinnerungSendenModalComponent
 ];

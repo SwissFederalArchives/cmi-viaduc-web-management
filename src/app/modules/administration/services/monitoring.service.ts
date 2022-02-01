@@ -1,6 +1,6 @@
 import {Injectable} from '@angular/core';
 import {CoreOptions, HttpService} from '@cmi/viaduc-web-core';
-import {MonitoringResult} from '../model/MonitoringResult';
+import {MonitoringResult} from '../model/monitoringResult';
 
 @Injectable()
 export class MonitoringService {

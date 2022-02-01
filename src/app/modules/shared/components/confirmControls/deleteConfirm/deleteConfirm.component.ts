@@ -8,10 +8,10 @@ export class DeleteConfirmComponent {
 	public controlId: string;
 
 	@Input()
-	public nameOfSelectedItem: any;
+	public nameOfCheckedItem: any;
 
 	@Input()
-	public countOfSelectedItem: number;
+	public countOfCheckedItem: number;
 
 	@Output() // 2-Way-Binding {Variable + 'Change'}
 	public showDeleteModalChange: EventEmitter<boolean> = new EventEmitter<boolean>();

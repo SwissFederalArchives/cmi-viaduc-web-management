@@ -1,9 +1,9 @@
 import {Injectable} from '@angular/core';
-import {Utilities as _util, ClientContext, Routing} from '@cmi/viaduc-web-core';
+import {Utilities as _util, ClientContext, Routing, ConfigService} from '@cmi/viaduc-web-core';
 
 @Injectable()
 export class UrlService {
-	constructor(private _context: ClientContext) {
+	constructor(private _context: ClientContext, private _cfg: ConfigService) {
 	}
 
 	public localizeUrl(lang: string, url: string): string {
@@ -55,6 +55,18 @@ export class UrlService {
 			url = _util.addToString(url, ':', window.location.port);
 		}
 		return url;
+	}
+
+	public getPublicClientBaseURL(): string {
+		let baseUrl = this._cfg.getSetting('publicClientUrl') as string;
+
+		if (baseUrl.endsWith('/#')) {
+			return baseUrl;
+		} else if (baseUrl.endsWith('/')) {
+			return baseUrl + '#';
+		} else {
+			return baseUrl + '/#';
+		}
 	}
 
 	public getExternalBaseUrl(): string {

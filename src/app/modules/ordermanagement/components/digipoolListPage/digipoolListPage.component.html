@@ -69,6 +69,17 @@
 										<a [routerLink]="_url.getNormalizedUrl('/benutzerundrollen/benutzer') + '/' + item.userId">
 											{{item.user}}</a>
 									</ng-template>
+									<ng-template wjFlexGridCellTemplate [cellType]="'Cell'" let-item="item" *ngIf="col.key === 'orderItemId'">
+										<a [routerLink]="_url.getNormalizedUrl('/auftragsuebersicht/auftraege') + '/' + item.orderItemId">
+											{{item.orderItemId}}</a>
+									</ng-template>										
+									<ng-template wjFlexGridCellTemplate [cellType]="'Cell'" let-item="item" *ngIf="col.key === 'signatur'">
+												<a  href="{{_url.getPublicClientBaseURL() + _url.getNormalizedUrl('/archiv/einheit/') + item.veId}}" target="_blank" *ngIf="item.veId && item.veId !==0;else emptyVeId" >
+												{{item.signatur}}</a>
+											<ng-template #emptyVeId>
+												{{item.signatur}}
+											</ng-template>
+									</ng-template>
 								</wj-flex-grid-column>
 
 							</cmi-viaduc-grid>

@@ -1,18 +1,23 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, OnInit, ViewChild} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
-import {TranslationService, Utilities as _util} from '@cmi/viaduc-web-core';
+import {ComponentCanDeactivate, TranslationService, Utilities as _util} from '@cmi/viaduc-web-core';
 import {UrlService, UiService} from '../../../shared/services';
 import {TokenService} from '../../services';
 import {AblieferndeStelleToken} from '../../../shared/model/ablieferndeStelleToken';
 import {AsToken} from '../../model/asToken';
 import {HttpErrorResponse} from '@angular/common/http';
+import {NgForm} from '@angular/forms';
 
 @Component({
 	selector: 'cmi-viaduc-token-page-edit',
 	templateUrl: 'tokenDetailPage.component.html'
 })
 
-export class TokenDetailPageComponent implements OnInit {
+export class TokenDetailPageComponent extends ComponentCanDeactivate implements OnInit {
+
+	@ViewChild('formToken', {static: false})
+	public formToken: NgForm;
+
 	public crumbs: any[] = [];
 	public tokenHeaderName: string;
 	public id: any;
@@ -24,6 +29,7 @@ export class TokenDetailPageComponent implements OnInit {
 	private _mode: Mode;
 
 	constructor(private tokenService: TokenService, private _txt: TranslationService, private _url: UrlService, private _ui: UiService, private _route: ActivatedRoute, private _router: Router) {
+		super();
 	}
 
 	public ngOnInit(): void {
@@ -48,7 +54,6 @@ export class TokenDetailPageComponent implements OnInit {
 				this._allTokens.splice(index, 1);
 			}
 		}
-
 	}
 
 	public processChanges(): void {
@@ -94,7 +99,20 @@ export class TokenDetailPageComponent implements OnInit {
 	}
 
 	public goToTokenList(): void {
+		this.formToken.resetForm(); // damit das dirty flag nicht gesetzt ist und es eine Warnung gibt
 		this._router.navigate([this._url.getNormalizedUrl('/behoerdenzugriff/token')]);
+	}
+
+	public canDeactivate(): boolean {
+		return !this.formToken.dirty;
+	}
+
+	public promptForMessage(): false | 'question' | 'message' {
+		return  'question';
+	}
+
+	public message(): string {
+		return this._txt.get('hints.unsavedChanges', 'Sie haben ungespeicherte Änderungen. Wollen Sie die Seite tatsächlich verlassen?');
 	}
 
 	private _clearAndAddError(error: string): void {

@@ -59,6 +59,10 @@
 	-moz-osx-font-smoothing: grayscale
 }
 
+.alert.alert-info:before, .glyphicon-info-sign:before {
+	content: "\e196"
+}
+
 .glyphicon-asterisk:before {
 	content: "\002a"
 }
@@ -393,10 +397,6 @@
 
 .glyphicon-headset:before {
 	content: "\e078"
-}
-
-.glyphicon-warning-sign:before {
-	content: "\e079"
 }
 
 .glyphicon-signal:before {

@@ -18,23 +18,20 @@ import {DetailPagingService} from '../../../shared/services';
 })
 export class UserRolesPageComponent implements OnInit {
 
-	public loading: boolean;
-	public error: any;
-
-	public crumbs: any[] = [];
-
 	@ViewChild('flexGrid', { static: true })
 	public flexGrid: CmiGridComponent;
 
+	public loading: boolean;
+	public error: any;
+	public crumbs: any[] = [];
 	public columns: any[] = [];
 	public showColumnPicker = false;
 	public valueFilters: any;
-
 	public hiddenColumns: any[] = [];
 	public visibleColumns: any[] = [];
 	public visibleColumnsSelector: any[] = [];
-
 	public userList: ODataCollectionView;
+
 	private _language: any = [{name:'de', code:'de'}, {name:'fr', code:'fr'}, {name:'it', code:'it'}, {name:'en', code:'en'}];
 
 	constructor(private _context: ClientContext,

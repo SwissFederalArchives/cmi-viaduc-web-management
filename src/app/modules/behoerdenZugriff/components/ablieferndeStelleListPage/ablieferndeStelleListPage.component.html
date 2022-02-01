@@ -103,12 +103,12 @@
 	<cmi-viaduc-modal [(opened)]="showDeleteModal"
 					  [modalTitle]="'Löschen' | translate:'behoerdenZugriff.loeschentitle'">
 		<cmi-viaduc-modal-body>
-			<p *ngIf="getQuantityOfSelectetItmesToDelete() == 1">{{'Wollen Sie den gewählten Eintrag "{0}" definitiv
+			<p *ngIf="getQuantityOfCheckedItmesToDelete() == 1">{{'Wollen Sie den gewählten Eintrag "{0}" definitiv
 				löschen?' |
 				translate:'behoerdenZugriff.confirmDeleteOne': getElementToDelete()}}</p>
-			<p *ngIf="getQuantityOfSelectetItmesToDelete() > 1">{{'Wollen Sie die gewählten {0} Einträge definitiv
+			<p *ngIf="getQuantityOfCheckedItmesToDelete() > 1">{{'Wollen Sie die gewählten {0} Einträge definitiv
 				löschen?' |
-				translate:'behoerdenZugriff.confirmDelete': getQuantityOfSelectetItmesToDelete()}}</p>
+				translate:'behoerdenZugriff.confirmDelete': getQuantityOfCheckedItmesToDelete()}}</p>
 		</cmi-viaduc-modal-body>
 		<cmi-viaduc-modal-footer>
 			<div class="row">
@@ -116,7 +116,7 @@
 					<button type="button" class="btn btn-secondary" (click)="toggleDeleteModal()">
 						{{'Abbrechen' | translate:'behoerdenZugriff.cancel'}}
 					</button>
-					<button type="button" class="btn btn-primary" (click)="deleteSelectetAblieferndeStelle()">
+					<button type="button" class="btn btn-primary" (click)="deleteCheckedAblieferndeStelle()">
 						{{'Löschen' | translate:'behoerdenZugriff.loeschen'}}
 					</button>
 				</div>

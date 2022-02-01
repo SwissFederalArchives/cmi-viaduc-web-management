@@ -7,7 +7,8 @@
 			<cmi-viaduc-left-navigation></cmi-viaduc-left-navigation>
 		</div>
 		<div content>
-			<div class="page-content">
+			<form #formOrderDetail="ngForm">
+				<div class="page-content">
 				<div class="page-header">
 					<h2 class="page-content-title">
 						<span>{{'Auftragsdetail' | translate:'ordersDetailPage.title'}}</span>
@@ -57,14 +58,14 @@
 							</div>
 
 							<div class="col-lg-3 col-md-4 col-sm-5 col-xs-12 detail-paging" *ngIf="detailPagingEnabled">
-								<cmi-viaduc-detail-paging [detailUrl]="getDetailBaseUrl()" [idProperty]="'itemId'"></cmi-viaduc-detail-paging>
+								<cmi-viaduc-detail-paging [detailUrl]="getDetailBaseUrl()" [idProperty]="'itemId'" [disableNavigation]="getFormIsDirty()"></cmi-viaduc-detail-paging>
 							</div>
 
 							<div class="col-lg-9 col-md-8 col-sm-7">
 								<button (click)="reset()" class="btn btn-link">
 									<span><span class="glyphicon glyphicon-undo"></span>&nbsp;{{ 'Änderungen verwerfen' | translate:'role.cancel' }}</span>
 								</button>
-								<button (click)="updateOrderDetail()" class="btn btn-link">
+								<button (click)="updateOrderDetail()" [disabled]="!isValidRueckgabeDatum || !isValidRueckgabeNumber"  class="btn btn-link">
 									<span><span class="glyphicon glyphicon-floppy-save"></span>&nbsp;{{ 'Speichern' | translate:'role.save' }}</span>
 								</button>
 								<button (click)="downloadGebrauchskopie()" class="btn btn-link">
@@ -117,12 +118,28 @@
 												{{'Auftrags-ID' | translate:''}}
 											</label>
 											<div class="col-md-9 col-xs-9">
-												<input class="form-control"
-													   name="itemId"
-													   id="itemId"
-													   [disabled]="isFieldReadonly('itemId')"
-													   [(ngModel)]="detailRecord.itemId"
-													   required>
+												<div class="input-group"
+													 *ngIf="detailRecord.orderingType && detailRecord.status === 6 && detailRecord.orderingType === 2;else nonDigiOrder">
+													<a class="input-group-addon"
+													   [routerLink]="_url.getNormalizedUrl('/auftragsuebersicht/digitalisierungsauftraege')"
+													   [queryParams]="{ itemId: detailRecord.itemId}">
+														<i class="glyphicon glyphicon-new-window"></i>
+													</a>
+													<input class="form-control"
+														   name="itemId"
+														   id="itemId"
+														   [disabled]="isFieldReadonly('itemId')"
+														   [(ngModel)]="detailRecord.itemId"
+														   required>
+												</div>
+												<ng-template #nonDigiOrder>
+													<input class="form-control"
+														   name="itemId"
+														   id="itemIdNonDigiOrder"
+														   [disabled]="isFieldReadonly('itemId')"
+														   [(ngModel)]="detailRecord.itemId"
+														   required>
+												</ng-template>
 											</div>
 										</div>
 									</div>
@@ -234,12 +251,20 @@
 												{{'Signatur' | translate:''}}
 											</label>
 											<div class="col-md-9 col-xs-9" [tooltip]="detailRecord.signatur" [tooltipDisabled]="!detailRecord.signatur">
-												<input class="form-control"
-													   name="signatur"
-													   id="signatur"
-													   [disabled]="isFieldReadonly('signatur')"
-													   [(ngModel)]="detailRecord.signatur"
-													   required>
+												<div class="input-group">
+													<a class="input-group-addon" target="_blank"
+														*ngIf="detailRecord.signatur && detailRecord.veId && detailRecord.veId !==0"
+														href="{{_url.getPublicClientBaseURL() + _url.getNormalizedUrl('/archiv/einheit/') + detailRecord.veId}}"
+														title="Öffnet die Detailansicht der Signatur in einem neuen Register">
+														<i class="glyphicon glyphicon-new-window"></i>
+													</a>
+													<input class="form-control"
+														   name="signatur"
+														   id="signatur"
+														   [disabled]="isFieldReadonly('signatur')"
+														   [(ngModel)]="detailRecord.signatur"
+														   required>
+												</div>
 											</div>
 										</div>
 									</div>
@@ -600,7 +625,7 @@
 								</div>
 								<div class="row">
 									<div class="col-xs-12 col-md-4">
-										<div class="row">
+										<div class="row" [ngClass]="{'has-warning': !isValidOrderingLesesaalDatum}">
 											<label class="col-md-3 col-xs-3 control-label" tooltip="Geplante Ausgabe im Lesesaal" for="lesesaalDate">
 												{{'Geplante Ausgabe im Lesesaal' | translate:''}}
 											</label>
@@ -611,13 +636,17 @@
 													   [ngModel]="getDateAsString(detailRecord.orderingLesesaalDate)"
 													   (ngModelChange)="setStringAsDate($event, 'orderingLesesaalDate')"
 													   datePicker
+													   (isValidChanged)="orderingLesesaalDatumValidChanged($event)"
 													   [minDateToday]="false"
-													   [disabled]="isFieldReadonly('orderingLesesaalDate')">
+													   [disabled]="isFieldReadonly('orderingLesesaalDate')"/>
+												<span *ngIf="!isValidOrderingLesesaalDatum" class="help-block" role="alert">
+													<span *ngIf="!isValidOrderingLesesaalDatum">{{'Bitte wählen Sie ein gültiges Datum aus (im Format tt.mm.jjjj)' | translate:'main.errorWrongDate'}}</span>
+												</span>
 											</div>
 										</div>
 									</div>
 									<div class="col-xs-12 col-md-4">
-										<div class="row">
+										<div class="row" [ngClass]="{'has-warning': !isValidRueckgabeDatum}">
 											<label class="col-md-3 col-xs-3 control-label" tooltip="Erwartetes Rückgabedatum"
 												   for="erwartetesRueckgabeDatum">
 												{{'Erwartetes Rückgabedatum' | translate:''}}
@@ -629,24 +658,36 @@
 													   id="erwartetesRueckgabeDatum"
 													   [ngModel]="getDateAsString(detailRecord.erwartetesRueckgabeDatum)"
 													   (ngModelChange)="setStringAsDate($event, 'erwartetesRueckgabeDatum')"
+													   (change)="erwartetesRueckgabeDatumChange()"
+													   [disabled]="!canFieldAusleihdauerChange()"
 													   datePicker
+													   (isValidChanged)="rueckgabeDatumValidChanged($event)"
 													   [minDateToday]="false"
-													   [disabled]="true">
+													   [minDate]=detailRecord.ausgabedatum />
+												<span *ngIf="!isValidRueckgabeDatum" class="help-block" role="alert">
+													<span *ngIf="!isValidRueckgabeDatum">{{'Bitte wählen Sie ein gültiges Datum aus (im Format tt.mm.jjjj)' | translate:'main.errorWrongDate'}}</span>
+												</span>
 											</div>
 										</div>
 									</div>
 									<div class="col-xs-12 col-md-4">
-										<div class="row">
+										<div class="row"  [ngClass]="{'has-warning': !isValidRueckgabeNumber}">
 											<label class="col-md-3 col-xs-3 control-label" tooltip="Ausleihdauer" for="ausleihdauer">
 												{{'Ausleihdauer' | translate:''}}
 											</label>
 											<div class="col-md-9 col-xs-9">
 												<input class="form-control"
+													   type="number" min="1"
 													   name="ausleihdauer"
 													   id="ausleihdauer"
+													   (change)="ausleihdauerChange()"
 													   [(ngModel)]="detailRecord.ausleihdauer"
-													   [disabled]="isFieldReadonly('ausleihdauer')"
-													   required>
+													   [disabled]="!canFieldAusleihdauerChange()"
+													   required />
+
+												<span *ngIf="!isValidRueckgabeNumber" class="help-block" role="alert">
+													<span *ngIf="!isValidRueckgabeNumber">{{'Bitte wählen Sie einen Wert grösser 0' | translate:'main.errorGreater Than0'}}</span>
+												</span>
 											</div>
 										</div>
 									</div>
@@ -936,7 +977,8 @@
 																[(open)]="showEntscheidHinterlegen"
 																(onSubmitted)="reset()"
 																[datumBewilligung]="detailRecord.bewilligungsDatum"
-																[interneBemerkung]="detailRecord.internalComment">
+																[interneBemerkung]="detailRecord.internalComment"
+																[currentRolePublicClient]="currentUserRole">
 							</cmi-viaduc-freigabekontrolle-modal>
 
 							<cmi-viaduc-auftraege-abschliessen-modal *ngIf="showAuftraegeAbschliessen"
@@ -979,7 +1021,8 @@
 					</div>
 				</ng-template>
 
-			</div>
+				</div>
+			</form>
 		</div>
 	</cmi-viaduc-layout-left-content>
 </div>
@@ -993,3 +1036,5 @@
 		</div>
 	</cmi-viaduc-modal-body>
 </cmi-viaduc-modal>
+
+<cmi-viaduc-modal-service-container></cmi-viaduc-modal-service-container>

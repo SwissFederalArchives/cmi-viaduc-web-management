@@ -60,12 +60,12 @@ export class TokenListPageComponent implements OnInit {
 		return item.ablieferndeStelleList.map(a => a.kuerzel).join(', ');
 	}
 
-	public deleteSelectetToken(): void {
+	public deleteCheckedToken(): void {
 		if (!this.flexGrid) {
 			return;
 		}
 
-		let toDelete: number[] = this.flexGrid.selectedItems.map(t => t.tokenId);
+		let toDelete: number[] = this.flexGrid.checkedItems.map(t => t.tokenId);
 		if (toDelete.length === 0) {
 			return;
 		}
@@ -93,24 +93,24 @@ export class TokenListPageComponent implements OnInit {
 			return true;
 		}
 
-		return this.flexGrid.selectedItems.length > 0 ? false : true;
+		return this.flexGrid.checkedItems.length > 0 ? false : true;
 	}
 
 	public getElementToDelete(): string {
-		if (this.getQuantityOfSelectedItemsToDelete() !== 1) {
+		if (this.getQuantityOfCheckedItemsToDelete() !== 1) {
 			return '';
 		}
 
-		return this.flexGrid.selectedItems[0].token;
+		return this.flexGrid.checkedItems[0].token;
 	}
 
-	public getQuantityOfSelectedItemsToDelete(): number {
+	public getQuantityOfCheckedItemsToDelete(): number {
 		let counter: number = 0;
 		if (!this.flexGrid) {
 			return counter;
 		}
 
-		return this.flexGrid.selectedItems.length;
+		return this.flexGrid.checkedItems.length;
 	}
 
 	public toggleDeleteModal(): void {

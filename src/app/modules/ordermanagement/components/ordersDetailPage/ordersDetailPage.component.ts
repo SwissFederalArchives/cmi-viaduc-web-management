@@ -1,28 +1,26 @@
-import {Component, HostListener, ViewEncapsulation} from '@angular/core';
+import {Component, HostListener, ViewChild, ViewEncapsulation} from '@angular/core';
 import {
-	ApproveStatus,
-	EntityDecoratorService,
+	Abbruchgrund,
 	ApplicationFeatureEnum,
+	ApproveStatus,
+	ArtDerArbeit,
+	ComponentCanDeactivate,
+	EntityDecoratorService,
+	EntscheidGesuchStatus,
+	GebrauchskopieStatus,
+	InternalStatus,
+	Reason,
 	ShippingType,
-	TranslationService,
-	Abbruchgrund, StammdatenService, ArtDerArbeit, Reason, EntscheidGesuchStatus, GebrauchskopieStatus
+	StammdatenService,
+	TranslationService
 } from '@cmi/viaduc-web-core';
-import {
-	AuthorizationService,
-	DetailPagingService,
-	ErrorService,
-	FileDownloadService,
-	UiService,
-	UrlService
-} from '../../../shared/services';
-import {
-	Bestellhistorie, OrderingFlatDetailItem, OrderingFlatItem,
-	StatusHistory
-} from '../../model';
+import {AuthorizationService, DetailPagingService, ErrorService, FileDownloadService, UiService, UrlService, UserService} from '../../../shared/services';
+import {Bestellhistorie, OrderingFlatDetailItem, OrderingFlatItem, StatusHistory} from '../../model';
 import {OrderService} from '../../services';
 import {ActivatedRoute} from '@angular/router';
 import * as moment from 'moment';
 import {ToastrService} from 'ngx-toastr';
+import {NgForm} from '@angular/forms';
 
 @Component({
 	selector: 'cmi-viaduc-orders-list-page',
@@ -30,7 +28,7 @@ import {ToastrService} from 'ngx-toastr';
 	encapsulation: ViewEncapsulation.None,
 	styleUrls: ['./ordersDetailPage.component.less']
 })
-export class OrdersDetailPageComponent {
+export class OrdersDetailPageComponent extends ComponentCanDeactivate {
 
 	public loading: boolean;
 	public crumbs: any[] = [];
@@ -54,10 +52,18 @@ export class OrdersDetailPageComponent {
 
 	private _recordId: number;
 
+	@ViewChild('formOrderDetail', {static: false})
+	public formOrderDetail: NgForm;
+	public currentUserRole: string;
+	public isValidRueckgabeDatum: boolean;
+	public isValidRueckgabeNumber = true;
+	public isValidOrderingLesesaalDatum: boolean;
+
 	constructor(private _aut: AuthorizationService,
 				private _dec: EntityDecoratorService,
 				private _ord: OrderService,
 				private _url: UrlService,
+				private _userService: UserService,
 				private _file: FileDownloadService,
 				private _dps: DetailPagingService,
 				private _stm: StammdatenService,
@@ -67,6 +73,7 @@ export class OrdersDetailPageComponent {
 				private _txt: TranslationService,
 				private _route: ActivatedRoute) {
 
+		super();
 		this._route.params.subscribe(params => {
 			this._recordId = params['id'];
 			this._init();
@@ -91,11 +98,13 @@ export class OrdersDetailPageComponent {
 		this._ord.getOrderingDetail(this._recordId).subscribe(r => {
 			this.loading = false;
 			this.detailRecord = r;
+			this.formOrderDetail.resetForm();
 			this._buildCrumbs();
 			this._ord.getAuftragOrderingDetailFields().subscribe(fields => {
 				this.fieldInfos = fields;
 			});
 		});
+
 	}
 
 	private _buildCrumbs(): void {
@@ -188,8 +197,11 @@ export class OrdersDetailPageComponent {
 	}
 
 	public updateReason(val: number) {
-		this.detailRecord.reason = this.reasons.find(r => r.id === val).name;
-		this.detailRecord.reasonId = val;
+		// nach this.formOrderDetail.resetForm(); kommt ein nuller Wert
+		if (val !== null) {
+			this.detailRecord.reason = this.reasons.find(r => r.id === val).name;
+			this.detailRecord.reasonId = val;
+		}
 	}
 
 	public updatGebrauchskopieStatus(val: number) {
@@ -205,12 +217,31 @@ export class OrdersDetailPageComponent {
 	}
 
 	public setStringAsDate(str: string, key: string): void {
+		// Required for adding a date by hand
+		if (!moment(str, 'DD.MM.YYYY', true).isValid()) {
+			return;
+		}
+		const oldValue = moment(this.detailRecord[key]).format('DD.MM.YYYY');
 		this.detailRecord[key] = (str && str.length > 0) ? moment.utc(str, 'DD.MM.YYYY').toDate() : null;
+		// Required to check old/new values as loading the form also calls this method
+		if (str !== oldValue) {
+			this.formOrderDetail.form.markAsDirty();
+		}
 	}
 
 	public setStringAsDateTime(str: string, key: string): void {
+		// Required for adding a date by hand
+		if (!moment(str, 'DD.MM.YYYY', true).isValid()) {
+			return;
+		}
+		const oldValue = moment(this.detailRecord[key]).format('DD.MM.YYYY, HH:mm:ss');
 		this.detailRecord[key] = (str && str.length > 0) ? moment.utc(str, 'DD.MM.YYYY, HH:mm:ss').toDate() : null;
+		// Required to check old/new values as loading the form also calls this method
+		if (str !== oldValue) {
+			this.formOrderDetail.form.markAsDirty();
+		}
 	}
+
 	public getDateTimeAsString(field: any): string {
 		if (field) {
 			const val = moment.utc(field).format('DD.MM.YYYY, HH:mm:ss');
@@ -229,6 +260,10 @@ export class OrdersDetailPageComponent {
 			return info.isReadonly;
 		}
 		return true;
+	}
+
+	public canFieldAusleihdauerChange(): boolean	{
+		return this.detailRecord.status === InternalStatus.Ausgeliehen && !this.isFieldReadonly('ausleihdauer');
 	}
 
 	public showAushebungsAuftrag() {
@@ -270,7 +305,14 @@ export class OrdersDetailPageComponent {
 		if (!this._err.verifyApplicationFeatureOrShowError(ApplicationFeatureEnum.AuftragsuebersichtAuftraegeKannEntscheidFreigabeHinterlegen)) {
 			return;
 		}
-		this.showEntscheidHinterlegen = true;
+		let strings: string[] = [];
+		strings[0] = this.detailRecord.userId;
+		this._userService.getUsers(strings).then((users) => {
+			if (users) {
+				this.currentUserRole = users[0].rolePublicClient;
+				this.showEntscheidHinterlegen = true;
+			}
+		});
 	}
 
 	public showAuftraegeAbschliessenModal() {
@@ -331,6 +373,18 @@ export class OrdersDetailPageComponent {
 		});
 	}
 
+	public canDeactivate(): boolean {
+		return !this.formOrderDetail.dirty;
+	}
+
+	public promptForMessage(): false | 'question' | 'message' {
+		return  'question';
+	}
+
+	public message(): string {
+		return this._txt.get('hints.unsavedChanges', 'Sie haben ungespeicherte Änderungen. Wollen Sie die Seite tatsächlich verlassen?');
+	}
+
 	private verifyGebrauchskopieStatus(): boolean {
 		if (this.detailRecord && (this.detailRecord.gebrauchskopieStatus === GebrauchskopieStatus.NichtErstellt ||
 			this.detailRecord.gebrauchskopieStatus === GebrauchskopieStatus.Versendet)) {
@@ -367,5 +421,47 @@ export class OrdersDetailPageComponent {
 		if (this.isNavFixed) {
 			this.isNavFixed = false;
 		}
+	}
+
+	public getFormIsDirty():boolean {
+		if (this.formOrderDetail) {
+			return this.formOrderDetail.dirty;
+		}
+		return false;
+	}
+
+	public ausleihdauerChange(): void {
+		if (this.canFieldAusleihdauerChange()) {
+			const ausgabe = moment(this?.detailRecord?.ausgabedatum);
+			this.detailRecord.erwartetesRueckgabeDatum = ausgabe.add(this.detailRecord.ausleihdauer, 'days').toDate();
+			this.isValidRueckgabeNumber = this?.detailRecord?.ausleihdauer > 0;
+		}
+	}
+
+	public erwartetesRueckgabeDatumChange(): void {
+		if (this.canFieldAusleihdauerChange()) {
+			let rueckgabe = moment(this?.detailRecord?.erwartetesRueckgabeDatum);
+			const ausgabe = moment(this?.detailRecord?.ausgabedatum);
+			// it has already deducted one day more
+			// if the order was after 0 o'clock
+			rueckgabe.add(ausgabe.hours(), 'hours');
+			rueckgabe.add(ausgabe.minute() + 1, 'minutes');
+			let ausgabeDays = rueckgabe.diff(ausgabe, 'days');
+
+			this.detailRecord.ausleihdauer = ausgabeDays;
+			if (ausgabeDays > 0) {
+				this.isValidRueckgabeNumber = true;
+			} else {
+				this.isValidRueckgabeNumber = false;
+			}
+		}
+	}
+
+	public rueckgabeDatumValidChanged(isValid: boolean) {
+		this.isValidRueckgabeDatum = isValid;
+	}
+
+	public orderingLesesaalDatumValidChanged(isValid: boolean) {
+		this.isValidOrderingLesesaalDatum = isValid;
 	}
 }

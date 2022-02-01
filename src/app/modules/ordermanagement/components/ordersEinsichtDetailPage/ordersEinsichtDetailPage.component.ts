@@ -1,10 +1,10 @@
-import {Component, HostListener, ViewEncapsulation} from '@angular/core';
+import {Component, HostListener, ViewChild, ViewEncapsulation} from '@angular/core';
 import {
 	EntityDecoratorService,
 	TranslationService,
 	ApplicationFeatureEnum,
 	EntscheidGesuchStatus,
-	Abbruchgrund, StammdatenService, ArtDerArbeit, ShippingType, ApproveStatus
+	Abbruchgrund, StammdatenService, ArtDerArbeit, ShippingType, ApproveStatus, ComponentCanDeactivate
 } from '@cmi/viaduc-web-core';
 import {AuthorizationService, DetailPagingService, ErrorService, UrlService} from '../../../shared/services';
 import {Bestellhistorie, OrderingFlatDetailItem, OrderingFlatItem, StatusHistory} from '../../model';
@@ -12,6 +12,7 @@ import {OrderService} from '../../services';
 import {ActivatedRoute} from '@angular/router';
 import * as moment from 'moment';
 import {ToastrService} from 'ngx-toastr';
+import {NgForm} from '@angular/forms';
 
 @Component({
 	selector: 'cmi-viaduc-orders-einsichtsgesuche-detail-page',
@@ -19,7 +20,10 @@ import {ToastrService} from 'ngx-toastr';
 	encapsulation: ViewEncapsulation.None,
 	styleUrls: ['./ordersEinsichtDetailPage.component.less']
 })
-export class OrdersEinsichtDetailPageComponent {
+export class OrdersEinsichtDetailPageComponent  extends ComponentCanDeactivate {
+	@ViewChild('formEinsichtDetail', {static: false})
+	public formEinsichtDetail: NgForm;
+
 	public loading: boolean;
 	public crumbs: any[] = [];
 	public detailRecord: OrderingFlatDetailItem;
@@ -50,6 +54,7 @@ export class OrdersEinsichtDetailPageComponent {
 				private _err: ErrorService,
 				private _route: ActivatedRoute) {
 
+		super();
 		this._route.params.subscribe(params => {
 			this._recordId = params['id'];
 			this.init();
@@ -59,10 +64,30 @@ export class OrdersEinsichtDetailPageComponent {
 		});
 	}
 
+	@HostListener('window:scroll', ['$event'])
+	public onScroll(event) {
+		const verticalOffset = window.pageYOffset
+			|| document.documentElement.scrollTop
+			|| document.body.scrollTop || 0;
+
+		if (verticalOffset >= 222) {
+			// make nav fixed
+			this.isNavFixed = true;
+			return;
+		}
+
+		if (this.isNavFixed) {
+			this.isNavFixed = false;
+		}
+	}
+
 	public init(): void {
+		this.loading = true;
 		this.detailPagingEnabled = this._dps.getCurrentIndex() > -1;
 		this._ord.getOrderingDetail(this._recordId).subscribe(r => {
+			this.loading = false;
 			this.detailRecord = r;
+			this.formEinsichtDetail.resetForm();
 			this._buildCrumbs();
 			this._ord.getEinsichtsgesuchOrderingDetailFields().subscribe(fields => {
 				this.fieldInfos = fields;
@@ -164,8 +189,19 @@ export class OrdersEinsichtDetailPageComponent {
 	}
 
 	public setStringAsDateTime(str: string, key: string): void {
+		// Required for adding a date by hand
+		if (!moment(str, 'DD.MM.YYYY', true).isValid()) {
+			return;
+		}
+
+		const oldValue = moment(this.detailRecord[key]).format('DD.MM.YYYY, HH:mm:ss');
 		this.detailRecord[key] = (str && str.length > 0) ? moment.utc(str, 'DD.MM.YYYY, HH:mm:ss').toDate() : null;
+		// Required to check old/new values as loading the form also calls this method
+		if (str !== oldValue) {
+			this.formEinsichtDetail.form.markAsDirty();
+		}
 	}
+
 	public getDateTimeAsString(field: any): string {
 		if (field) {
 			const val = moment.utc(field).format('DD.MM.YYYY, HH:mm:ss');
@@ -241,20 +277,22 @@ export class OrdersEinsichtDetailPageComponent {
 		this.showInVorlageExportieren = true;
 	}
 
-	@HostListener('window:scroll', ['$event'])
-	public onScroll(event) {
-		const verticalOffset = window.pageYOffset
-			|| document.documentElement.scrollTop
-			|| document.body.scrollTop || 0;
+	public canDeactivate(): boolean {
+		return !this.formEinsichtDetail.dirty;
+	}
 
-		if (verticalOffset >= 222) {
-			// make nav fixed
-			this.isNavFixed = true;
-			return;
-		}
+	public promptForMessage(): false | 'question' | 'message' {
+		return  'question';
+	}
 
-		if (this.isNavFixed) {
-			this.isNavFixed = false;
+	public message(): string {
+		return this._txt.get('hints.unsavedChanges', 'Sie haben ungespeicherte Änderungen. Wollen Sie die Seite tatsächlich verlassen?');
+	}
+
+	public getFormIsDirty():boolean {
+		if (this.formEinsichtDetail) {
+			return this.formEinsichtDetail.dirty;
 		}
+		return false;
 	}
 }

@@ -48,12 +48,12 @@ export class UiService {
 
 			// force EDGE + IE to show correct title
 			if (/MSIE|Trident|Edge/.test(navigator.userAgent)) {
-				wnd.document.location.reload(false);
+				wnd.document.location.reload();
 			}
 
 		} catch (e) {
 			this.showError('Beim Öffnen des neuen Fensters ist ein Fehler aufgetreten.');
-			console.log(e);
+			console.error(e);
 		}
 	}
 }

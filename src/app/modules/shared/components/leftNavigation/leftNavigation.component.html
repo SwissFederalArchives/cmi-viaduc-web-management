@@ -48,11 +48,14 @@
 		<span>{{'Reporting' | translate:'home.reportingTitle' }}</span>
 	</div>
 	<ul>
-		<li>
-			<a (click)="nyi()" href="javascript:void(0)">{{'Statistiken und Reports' | translate:'home.reportsLabel' }}</a>
+		<li [ngClass]="canSeeStatisticReportsViewReports() ? '' : 'disabled'" data-toggle="tooltip" [title]="!canSeeStatisticReportsViewReports() ? 'Keine Berechtigung' : ''">
+			<a href="#{{ '/de/reporting/statisticsReports' | localizeLink }}">{{'Statistiken und Reports' | translate:'home.reportsLabel' }}</a>
 		</li>
 		<li>
 			<a (click)="nyi()" href="javascript:void(0)">{{'Audit-Log' | translate:'home.auditLogLabel' }}</a>
+		</li>
+		<li [ngClass]="canSeeLoginformationen() ? '' : 'disabled'" data-toggle="tooltip" [title]="!canSeeLoginformationen() ? 'Keine Berechtigung' : ''">
+			<a href="#{{ '/de/reporting/converterProgress' | localizeLink }}">{{'Abbyy Aktivität' | translate:'home.converterProgressLabel' }}</a>
 		</li>
 	</ul>
 </div>
@@ -66,7 +69,7 @@
 			<a href="#{{ '/de/administration/einstellungen' | localizeLink }}">{{'Einstellungen' | translate:'home.settingsLabel' }}</a>
 		</li>
 		<li [ngClass]="canSeeLoginformationen() ? '' : 'disabled'" data-toggle="tooltip" [title]="!canSeeLoginformationen() ? 'Keine Berechtigung' : ''">
-			<a href="#{{ '/de/administration/logInformationen' | localizeLink }}">{{'Loginformationen' | translate:'home.settingsLabel' }}</a>
+			<a href="#{{ '/de/administration/logInformationen' | localizeLink }}">{{'Loginformationen' | translate:'home.logInformationLabel' }}</a>
 		</li>
 		<li [ngClass]="canSeeNews() ? '' : 'disabled'" data-toggle="tooltip" [title]="!canSeeNews() ? 'Keine Berechtigung' : ''">
 			<a href="#{{ '/de/kommunikation/news' | localizeLink }}">{{'News' | translate:'home.newsLabel' }}</a>

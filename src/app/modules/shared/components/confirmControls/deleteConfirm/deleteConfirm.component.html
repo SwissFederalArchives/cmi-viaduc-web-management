@@ -1,9 +1,9 @@
 <cmi-viaduc-modal [(opened)]="showDeleteModal" [id]="controlId == null ? 'deleteCofirm' : controlId" [modalTitle]="'Löschen' | translate:'confirm.delete.loeschentitle'">
 	<cmi-viaduc-modal-body>
-		<p *ngIf="countOfSelectedItem == 1">{{'Wollen Sie den gewählten Eintrag "{0}" definitiv löschen?' |
+		<p *ngIf="countOfCheckedItem == 1">{{'Wollen Sie den gewählten Eintrag "{0}" definitiv löschen?' |
 			translate:'confirm.delete.confirmDeleteOne': nameOfSelectedItem}}</p>
-		<p *ngIf="countOfSelectedItem > 1">{{'Wollen Sie die gewählten {0} Einträge definitiv löschen?' |
-			translate:'confirm.delete.confirmDeleteMany': countOfSelectedItem}}</p>
+		<p *ngIf="countOfCheckedItem > 1">{{'Wollen Sie die gewählten {0} Einträge definitiv löschen?' |
+			translate:'confirm.delete.confirmDeleteMany': countOfCheckedItem}}</p>
 	</cmi-viaduc-modal-body>
 	<cmi-viaduc-modal-footer>
 		<div class="row">

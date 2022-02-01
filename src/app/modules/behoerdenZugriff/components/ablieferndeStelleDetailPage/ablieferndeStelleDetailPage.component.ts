@@ -1,13 +1,13 @@
 import {Component, OnInit, ViewChild} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
-import {TranslationService, Utilities as _util} from '@cmi/viaduc-web-core';
+import {ComponentCanDeactivate, TranslationService, Utilities as _util} from '@cmi/viaduc-web-core';
 import {AblieferndeStelleService, UrlService, UiService} from '../../../shared/services';
 import {AblieferndeStelle} from '../../../shared/model/ablieferndeStelle';
 import {TokenService} from '../../services';
 import {AsToken} from '../../model/asToken';
 import {AblieferndeStelleToken} from '../../../shared/model/ablieferndeStelleToken';
 import {WjListBox} from '@grapecity/wijmo.angular2.input';
-import {FormControl, NgModel} from '@angular/forms';
+import {FormControl, NgForm, NgModel} from '@angular/forms';
 
 @Component({
 	selector: 'cmi-viaduc-ablieferndestelle-page-edit',
@@ -15,7 +15,31 @@ import {FormControl, NgModel} from '@angular/forms';
 	styleUrls: ['ablieferndeStelleDetailPage.component.less']
 })
 
-export class AblieferndeStelleDetailPageComponent implements OnInit {
+export class AblieferndeStelleDetailPageComponent extends ComponentCanDeactivate implements OnInit {
+
+	@ViewChild('wjListbox', { static: false })
+	public wjListbox: WjListBox;
+
+	@ViewChild('newKontrollstelle', { static: false })
+	public newKontrollstelle: FormControl;
+
+	@ViewChild('bezeichnung', { static: false })
+	public modelBezeichnung: NgModel;
+
+	@ViewChild('kuerzel', { static: false })
+	public modelKuerzel: NgModel;
+
+	@ViewChild('tokens', { static: false })
+	public modelTokens: NgModel;
+
+	@ViewChild('formStelleDetail', { static: false })
+	public formStelleDetail: NgForm;
+
+	public hasKontrollstelle: boolean = true;
+	public showDeleteModal: boolean = false;
+	public emailToDelete: string;
+	public saveClicked: boolean = false;
+	public showConfirmModal: boolean = false;
 	public crumbs: any[] = [];
 	public ablieferndeStelleHeaderName: string;
 	public id: any;
@@ -27,26 +51,6 @@ export class AblieferndeStelleDetailPageComponent implements OnInit {
 
 	private _mode: ModeD;
 
-	@ViewChild('wjListbox', { static: false })
-	public wjListbox: WjListBox;
-
-	@ViewChild('newKontrollstelle', { static: false })
-	public newKontrollstelle: FormControl;
-
-	@ViewChild('bezeichnung', { static: false })
-	public bezeichnung: NgModel;
-
-	@ViewChild('kuerzel', { static: false })
-	public kuerzel: NgModel;
-
-	public hasKontrollstelle: boolean = true;
-
-	public showDeleteModal: boolean = false;
-	public emailToDelete: string;
-
-	public saveClicked: boolean = false;
-	public showConfirmModal: boolean = false;
-
 	constructor(private _ablieferndeStelleService: AblieferndeStelleService,
 				private _tokenService: TokenService,
 				private _txt: TranslationService,
@@ -54,6 +58,7 @@ export class AblieferndeStelleDetailPageComponent implements OnInit {
 				private _ui: UiService,
 				private _route: ActivatedRoute,
 				private _router: Router) {
+		super();
 	}
 
 	public ngOnInit(): void {
@@ -64,6 +69,18 @@ export class AblieferndeStelleDetailPageComponent implements OnInit {
 
 	private _reload() {
 		this.saveClicked = false;
+		if (this.formStelleDetail) {
+			this.formStelleDetail.form.markAsPristine();
+		}
+		if (this.modelKuerzel) {
+			this.modelKuerzel.control.markAsPristine();
+		}
+		if (this.modelBezeichnung) {
+			this.modelBezeichnung.control.markAsPristine();
+		}
+		if (this.modelTokens) {
+			this.modelTokens.control.markAsPristine();
+		}
 		this._tokenService.getAllTokens().subscribe(
 			res => this._fillDisplayNameAsToken(res),
 			err => this._ui.showError(err));
@@ -85,6 +102,10 @@ export class AblieferndeStelleDetailPageComponent implements OnInit {
 		try {
 			if (this._mode === ModeD.Add) {
 				await this._ablieferndeStelleService.createAblieferndeStelle(this.ablieferndeStelle);
+				this.modelBezeichnung.reset();
+				this.modelKuerzel.reset();
+				this.formStelleDetail.reset();
+				this.modelTokens.reset();
 				this._ui.showSuccess('Erfolgreich gespeichert.');
 				this.goToAblieferndeStelleList();
 				return;
@@ -116,6 +137,18 @@ export class AblieferndeStelleDetailPageComponent implements OnInit {
 		this._router.navigate([this._url.getNormalizedUrl('/benutzerundrollen/benutzer') + '/' + id]);
 	}
 
+	public canDeactivate(): boolean {
+		return !this.modelBezeichnung.dirty && !this.modelKuerzel.dirty && !this.formStelleDetail.dirty && !this.modelTokens.dirty;
+	}
+
+	public promptForMessage(): false | 'question' | 'message' {
+		return 'question';
+	}
+
+	public message(): string {
+		return this._txt.get('hints.unsavedChanges', 'Sie haben ungespeicherte Änderungen. Wollen Sie die Seite tatsächlich verlassen?');
+	}
+
 	private _clearAndAddError(error: string): void {
 		this.errors = [];
 		this.errors.push(error);
@@ -126,14 +159,15 @@ export class AblieferndeStelleDetailPageComponent implements OnInit {
 			return false;
 		}
 
-		this.kuerzel.control.markAsDirty({ onlySelf: true });
-		this.bezeichnung.control.markAsDirty({ onlySelf: true });
+		this.modelKuerzel.control.markAsDirty({ onlySelf: true });
+		this.modelBezeichnung.control.markAsDirty({ onlySelf: true });
+		this.modelTokens.control.markAsDirty({onlySelf: true});
 
-		if (this.kuerzel.invalid) {
+		if (this.modelKuerzel.invalid) {
 			return false;
 		}
 
-		if (this.bezeichnung.invalid) {
+		if (this.modelBezeichnung.invalid) {
 			return false;
 		}
 
@@ -180,7 +214,6 @@ export class AblieferndeStelleDetailPageComponent implements OnInit {
 		this._mode = this.id ? ModeD.Edit : ModeD.Add;
 
 		if (this._mode === ModeD.Add) {
-			console.log(id);
 			this.ablieferndeStelle = new AblieferndeStelle();
 			this.hasKontrollstelle = true;
 			this.ablieferndeStelleHeaderName = this._txt.get('behoerdenZugriff.detail.addablieferndestelleheader', 'Hinzufügen');
@@ -262,6 +295,7 @@ export class AblieferndeStelleDetailPageComponent implements OnInit {
 
 		this.wjListbox.refresh();
 		this.newKontrollstelle.reset();
+		this.formStelleDetail.form.markAsDirty();
 	}
 
 	public showDeleteModalClick(email: string) {
@@ -274,6 +308,7 @@ export class AblieferndeStelleDetailPageComponent implements OnInit {
 		if (index >= 0) {
 			this.ablieferndeStelle.kontrollstellen.splice(index, 1);
 			this.wjListbox.refresh();
+			this.formStelleDetail.form.markAsDirty();
 		}
 	}
 

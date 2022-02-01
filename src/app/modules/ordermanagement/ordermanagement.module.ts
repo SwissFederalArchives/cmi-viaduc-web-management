@@ -4,7 +4,6 @@ import {ROUTES} from './routes';
 import {RouterModule} from '@angular/router';
 import {SharedModule} from '../shared';
 import {ALL_SERVICES} from './services/_all';
-import { AuftraegeMahnungSendenModalComponent } from './components/modals/auftraegeMahnungSendenModal/auftraege-mahnung-senden-modal.component';
 
 @NgModule({
 	imports: [
@@ -13,7 +12,7 @@ import { AuftraegeMahnungSendenModalComponent } from './components/modals/auftra
 	],
 	providers: [ ... ALL_SERVICES ],
 	exports: [ ...ALL_COMPONENTS ],
-	declarations: [ ...ALL_COMPONENTS, AuftraegeMahnungSendenModalComponent ]
+	declarations: [ ...ALL_COMPONENTS ]
 })
 export class OrderManagementModule {
 }

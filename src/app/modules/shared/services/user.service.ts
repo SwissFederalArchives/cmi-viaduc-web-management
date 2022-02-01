@@ -21,6 +21,12 @@ export class UserService {
 		return this._http.get<User>(url, this._http.noCaching).toPromise();
 	}
 
+	public async getUsers(userIds: string[]): Promise<User[]> {
+		const queryParams = userIds.map(i => i).join('&userIds=');
+		const url = this._createBaseUrl() + 'GetUsers?userIds=' + queryParams;
+		return this._http.get<User[]>(url, this._http.noCaching).toPromise();
+	}
+
 	public async getUserSettings(): Promise<any> {
 		const url = this._createBaseUrl() + 'GetUserSettings';
 		return this._http.get<any>(url, this._http.noCaching).toPromise();
@@ -44,8 +50,6 @@ export class UserService {
 		this.getUserSettings().then((settings) => {
 			if (settings) {
 				this._cfg.setSetting('user.settings', settings);
-				console.log('userService: saved Settings are:', settings, this._cfg.getSetting('user.settings'));
-
 				this._userSettingsLoaded = true;
 				this._isLoadingUserSettings = false;
 				this.userSettingsLoaded.next(true);

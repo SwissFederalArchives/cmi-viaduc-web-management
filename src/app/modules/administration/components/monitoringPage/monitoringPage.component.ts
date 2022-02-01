@@ -2,7 +2,7 @@ import {Component, OnInit} from '@angular/core';
 import {TranslationService} from '@cmi/viaduc-web-core';
 import {UrlService} from '../../../shared/services';
 import {MonitoringService} from '../../services';
-import {MonitoringResult} from '../../model/MonitoringResult';
+import {MonitoringResult} from '../../model/monitoringResult';
 
 @Component({
 	selector: 'cmi-viaduc-monitoringPage',

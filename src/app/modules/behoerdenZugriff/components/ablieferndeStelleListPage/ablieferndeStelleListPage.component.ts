@@ -26,6 +26,9 @@ import * as moment from 'moment';
 	styleUrls: ['./ablieferndeStelleListPage.component.less']
 })
 export class AblieferndeStellePageComponent implements OnInit {
+	@ViewChild('flexGrid', { static: true })
+	public flexGrid: CmiGridComponent;
+
 	public loading: boolean;
 	public crumbs: any[] = [];
 	public ablieferndeStellen: CollectionView = new CollectionView();
@@ -33,9 +36,6 @@ export class AblieferndeStellePageComponent implements OnInit {
 	public hiddenColumns: any[] = [];
 	public visibleColumns: any[] = [];
 	public showColumnPicker = false;
-
-	@ViewChild('flexGrid', { static: true })
-	public flexGrid: CmiGridComponent;
 	public columns: any[];
 
 	constructor(private _ablieferndeStelleService: AblieferndeStelleService,
@@ -68,12 +68,12 @@ export class AblieferndeStellePageComponent implements OnInit {
 		return item.ablieferndeStelleTokenList.map(t => `${t.token} (${t.bezeichnung})`).join(', ');
 	}
 
-	public deleteSelectetAblieferndeStelle(): void {
+	public deleteCheckedAblieferndeStelle(): void {
 		if (!this.flexGrid) {
 			return;
 		}
 
-		let toDelete: number[] = this.flexGrid.selectedItems.map(s => s.ablieferndeStelleId);
+		let toDelete: number[] = this.flexGrid.checkedItems.map(s => s.ablieferndeStelleId);
 
 		if (toDelete.length === 0) {
 			return;
@@ -85,7 +85,7 @@ export class AblieferndeStellePageComponent implements OnInit {
 				this.showDeleteModal = false;
 			},
 			(error) => {
-				console.log(error);
+				console.error(error);
 			});
 	}
 
@@ -103,24 +103,24 @@ export class AblieferndeStellePageComponent implements OnInit {
 			return true;
 		}
 
-		return this.flexGrid.selectedItems.length <= 0;
+		return this.flexGrid.checkedItems.length <= 0;
 	}
 
 	public getElementToDelete(): string {
-		if (this.getQuantityOfSelectetItmesToDelete() !== 1) {
+		if (this.getQuantityOfCheckedItmesToDelete() !== 1) {
 			return '';
 		}
 
-		return this.flexGrid.selectedItems[0].bezeichnung;
+		return this.flexGrid.checkedItems[0].bezeichnung;
 	}
 
-	public getQuantityOfSelectetItmesToDelete(): number {
+	public getQuantityOfCheckedItmesToDelete(): number {
 		let counter: number = 0;
 		if (!this.flexGrid) {
 			return counter;
 		}
 
-		return this.flexGrid.selectedItems.length;
+		return this.flexGrid.checkedItems.length;
 	}
 
 	public toggleDeleteModal(): void {

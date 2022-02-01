@@ -19,13 +19,13 @@
 			<div class="action-container" *ngIf="detailPagingEnabled()">
 				<div class="row action-buttons">
 					<div class="col-md-4 col-xs-12 pull-right">
-						<cmi-viaduc-detail-paging [detailUrl]="getDetailBaseUrl()" [idProperty]="'id'"></cmi-viaduc-detail-paging>
+						<cmi-viaduc-detail-paging [detailUrl]="getDetailBaseUrl()" [idProperty]="'id'" [disableNavigation]="getFormIsDirty()"></cmi-viaduc-detail-paging>
 					</div>
 				</div>
 			</div>
-			<div *ngIf="detail" class="user-roles-detail">
+				<div *ngIf="detail" class="user-roles-detail">
 					<div class="col-md-12 col-xs-12 tablecontainer with-border">
-					<form #formUserDetail="ngForm" >
+					<form #formUserDetail="ngForm">
 						<h3 class="title">
 							<span>{{'Benutzerdaten' | translate:'user.userdata'}}</span>
 						</h3>
@@ -174,7 +174,8 @@
 									<div class="col-md-9 col-xs-9">
 										<input class="form-control"
 											   type="text"
-											   [(ngModel)]="detail.item.birthday"
+											   [ngModel]="detail.item.birthday"
+											   (ngModelChange)="setDate($event, 'birthday')"
 											   datePicker
 											   [minDateToday]="false"
 											   aria-labelledby="Date DD.MM.YYYY"
@@ -269,7 +270,7 @@
 												<a href="javascript:void(0)" role="menuitem" (click)="onOpenModalClick($event, _authorization.roles.Oe2, allowBenutzerrollePublicClientBearbeiten)">
 													<label for="chkRolePublicOe2Radio">
 														<input type="radio" id="chkRolePublicOe2Radio"
-															   [checked]="getCheckedStatusForRolePublic(_authorization.roles.Oe2)"
+															   [attr.checked]="getCheckedStatusForRolePublic(_authorization.roles.Oe2) ? '' : null"
 															   value="Ö2"
 															   [disabled]="!allowBenutzerrollePublicClientBearbeiten">
 														<span>{{'Ö2' |translate:'user.userrolepublic.oe2'}}</span>
@@ -280,7 +281,7 @@
 												<a href="javascript:void(0)" role="menuitem" (click)="onOpenModalClick($event, _authorization.roles.Oe3, !oeDreiDisabled())">
 													<label for="chkRolePublicOe3Radio">
 														<input type="radio" id="chkRolePublicOe3Radio"
-															   [checked]="getCheckedStatusForRolePublic(_authorization.roles.Oe3)"
+															   [attr.checked]="getCheckedStatusForRolePublic(_authorization.roles.Oe3) ? '' : null"
 															   value="Ö3"
 															   [disabled]="oeDreiDisabled()">
 														<span>{{'Ö3' |translate:'user.userrolepublic.oe3'}}</span>
@@ -291,7 +292,7 @@
 												<a href="javascript:void(0)" role="menuitem" (click)="onOpenModalClick($event, _authorization.roles.BVW, allowBenutzerrollePublicClientBearbeiten)">
 													<label for="chkRolePublicBvwRadio">
 														<input type="radio" id="chkRolePublicBvwRadio"
-															   [checked]="getCheckedStatusForRolePublic(_authorization.roles.BVW)"
+															   [attr.checked]="getCheckedStatusForRolePublic(_authorization.roles.BVW) ? '' : null"
 															   value="BVW"
 															   [disabled]="!allowBenutzerrollePublicClientBearbeiten">
 														<span>{{'BVW' |translate:'user.userrolepublic.bvw'}}</span>
@@ -302,7 +303,7 @@
 												<a href="javascript:void(0)" role="menuitem" (click)="onOpenModalClick($event, _authorization.roles.AS, allowBenutzerrollePublicClientBearbeiten)">
 													<label for="chkRolePublicAsRadio">
 														<input type="radio" id="chkRolePublicAsRadio"
-															   [checked]="getCheckedStatusForRolePublic(_authorization.roles.AS)"
+															   [attr.checked]="getCheckedStatusForRolePublic(_authorization.roles.AS) ? '' : null"
 															   value="AS"
 															   [disabled]="!allowBenutzerrollePublicClientBearbeiten">
 														<span>{{'AS' |translate:'user.userrolepublic.as'}}</span>
@@ -313,7 +314,7 @@
 												<a href="javascript:void(0)" role="menuitem" (click)="onOpenModalClick($event, _authorization.roles.BAR, allowBenutzerrollePublicClientBearbeiten)">
 													<label for="chkRolePublicBarRadio">
 														<input type="radio" id="chkRolePublicBarRadio"
-															   [checked]="getCheckedStatusForRolePublic(_authorization.roles.BAR)"
+															   [attr.checked]="getCheckedStatusForRolePublic(_authorization.roles.BAR) ? '' : null"
 															   value="BAR"
 															   [disabled]="!allowBenutzerrollePublicClientBearbeiten">
 														<span>{{'BAR' |translate:'user.userrolepublic.bar'}}</span>
@@ -331,7 +332,8 @@
 												   name="downloadLimitDisabledUntil"
 												   [minDateToday]="true"
 												   [openingDays]="getNextThirtyDays()"
-												   [(ngModel)]="detail.item.downloadLimitDisabledUntil"
+												   [ngModel]="detail.item.downloadLimitDisabledUntil"
+												   (ngModelChange)="setDate($event, 'downloadLimitDisabledUntil')"
 												   aria-labelledby="Date DD.MM.YYYY"
 												   placeholder="{{'Downloadbeschränkung aufheben bis (dd.mm.jjjj)' | translate: 'user.placeholder.downloadLimitDisabledUntil'}}"
 												   [disabled]="!allowDownloadbeschraenkungBearbeiten"
@@ -353,7 +355,8 @@
 												   name="digitalisierungLimitDisabledUntil"
 												   [minDateToday]="true"
 												   [openingDays]="getNextThirtyDays()"
-												   [(ngModel)]="detail.item.digitalisierungsbeschraenkungAufgehobenBis"
+												   [ngModel]="detail.item.digitalisierungsbeschraenkungAufgehobenBis"
+												   (ngModelChange)="setDate($event, 'digitalisierungsbeschraenkungAufgehobenBis')"
 												   aria-labelledby="Date DD.MM.YYYY"
 												   placeholder="{{'Digitalisierungsbeschränkung aufheben bis (dd.mm.jjjj)' | translate: 'user.placeholder.digitalisierungsbeschraenkungAufgehobenBis'}}"
 												   [disabled]="!allowDigitalisierungsbeschraenkungBearbeiten"
@@ -383,7 +386,7 @@
 										<label tooltip="{{'Forschungsgruppe DDS' | translate:'user.researcherGroup'}}" class="col-md-3 col-xs-3 control-label ">{{'Forschungsgruppe DDS' | translate:'user.researcherGroup'}}</label>
 										<div class="col-md-9 col-xs-9">
 											<input class="checkbox checkbox&#45;&#45;left" type="checkbox"
-												   (click)="toggelSelectedResearcherGroup()"
+												   (click)="toggelSelectedResearcherGroup($event)"
 												   [(ngModel)]="selectedResearcherGroup"
 												   [disabled]="researcherGroupDdsDisabled()"
 												   [ngModelOptions]="{standalone: true}">
@@ -466,141 +469,142 @@
 							</button>
 						</div>
 					</form>
-				</div>
+					</div>
 
-				<div *ngIf="detail.item.eiamRoles" class="col-md-6 col-xs-12 tableandborder">
-					<h3 class="col-md-12 col-xs-12title">
-						<span>{{'Rollenverwaltung Management-Client' | translate:'usersAndRoles.roleadmin.management'}}</span>
-					</h3>
-					<div class="col-md-12 col-xs-12 tablecontainer">
-						<div class="row">
-							<label tooltip="{{'eIAM-Rolle Management-Client' | translate:'user.eiamRoles'}}" class="col-md-3 col-xs-3 control-label">{{'eIAM-Rolle Management-Client' | translate:'user.eiamRoles'}}</label>
-							<div class="col-md-9 col-xs-9">
-								<input class="form-control"
-									   [value]="detail.item.eiamRoles"
-									   disabled
-									   name="eiamRoles">
+					<div *ngIf="detail.item.eiamRoles" class="col-md-6 col-xs-12 tableandborder">
+						<h3 class="col-md-12 col-xs-12title">
+							<span>{{'Rollenverwaltung Management-Client' | translate:'usersAndRoles.roleadmin.management'}}</span>
+						</h3>
+						<div class="col-md-12 col-xs-12 tablecontainer">
+							<div class="row">
+								<label tooltip="{{'eIAM-Rolle Management-Client' | translate:'user.eiamRoles'}}" class="col-md-3 col-xs-3 control-label">{{'eIAM-Rolle Management-Client' | translate:'user.eiamRoles'}}</label>
+								<div class="col-md-9 col-xs-9">
+									<input class="form-control"
+										   [value]="detail.item.eiamRoles"
+										   disabled
+										   name="eiamRoles">
+								</div>
 							</div>
-						</div>
-						<div class="tablerowcontainer">
-							<div class="left">
-								<h4>{{ 'Zugewiesene Rollen' | translate:'user.assignedRoles' }}</h4>
-							</div>
-							<div *ngIf="canManageManagementClientRole(detail.item.eiamRoles)" class="middle">
-							</div>
-							<div *ngIf="canManageManagementClientRole(detail.item.eiamRoles)" class="right">
-								<h4>{{ 'Verfügbare Rollen' | translate:'user.availableRoles' }}</h4>
-							</div>
-						</div>
-						<div *ngIf="canManageManagementClientRole(detail.item.eiamRoles)" class="tablerowcontainer">
-							<div class="left with-border">
-								<wj-list-box #listIncluded [itemsSource]="detail.item.roles" displayMemberPath="name"
-											 [selectedItem]="null"></wj-list-box>
-							</div>
-							<div class="middle">
-								<button type="button" class="btn btn-default"
-										[disabled]="!listExcluded || !listExcluded.selectedItem"
-										(click)="include()">
-									<i class="glyphicon glyphicon-chevron-left"></i>
-								</button>
-								<br/>
-								<br/>
-								<button type="button" class="btn btn-default" [disabled]="!listIncluded.selectedItem"
-										(click)="exclude()">
-									<i class="glyphicon glyphicon-chevron-right"></i>
-								</button>
-							</div>
-							<div class="right with-border">
-								<wj-list-box #listExcluded [itemsSource]="detail.roles"
-											 displayMemberPath="name"></wj-list-box>
-							</div>
-						</div>
-
-						<div *ngIf="!canManageManagementClientRole(detail.item.eiamRoles)">
 							<div class="tablerowcontainer">
+								<div class="left">
+									<h4>{{ 'Zugewiesene Rollen' | translate:'user.assignedRoles' }}</h4>
+								</div>
+								<div *ngIf="canManageManagementClientRole(detail.item.eiamRoles)" class="middle">
+								</div>
+								<div *ngIf="canManageManagementClientRole(detail.item.eiamRoles)" class="right">
+									<h4>{{ 'Verfügbare Rollen' | translate:'user.availableRoles' }}</h4>
+								</div>
+							</div>
+							<div *ngIf="canManageManagementClientRole(detail.item.eiamRoles)" class="tablerowcontainer">
 								<div class="left with-border">
-									<wj-list-box #listIncluded [itemsSource]="detail.item.roles"
-												 displayMemberPath="name"
+									<wj-list-box #listIncluded [itemsSource]="detail.item.roles" displayMemberPath="name"
+												 [selectedItem]="null"></wj-list-box>
+								</div>
+								<div class="middle">
+									<button type="button" class="btn btn-default"
+											[disabled]="!listExcluded || !listExcluded.selectedItem"
+											(click)="include()">
+										<i class="glyphicon glyphicon-chevron-left"></i>
+									</button>
+									<br/>
+									<br/>
+									<button type="button" class="btn btn-default" [disabled]="!listIncluded.selectedItem"
+											(click)="exclude()">
+										<i class="glyphicon glyphicon-chevron-right"></i>
+									</button>
+								</div>
+								<div class="right with-border">
+									<wj-list-box #listExcluded [itemsSource]="detail.roles"
+												 displayMemberPath="name"></wj-list-box>
+								</div>
+							</div>
+
+							<div *ngIf="!canManageManagementClientRole(detail.item.eiamRoles)">
+								<div class="tablerowcontainer">
+									<div class="left with-border">
+										<wj-list-box #listIncluded [itemsSource]="detail.item.roles"
+													 displayMemberPath="name"
+													 [selectedItem]="null"></wj-list-box>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="col-md-12 col-xs-12">
+							<button id="buttonSaveRoles" *ngIf="canManageManagementClientRole(detail.item.eiamRoles)" type="button" class="btn btn-primary"
+									(click)="saveRoles()">{{
+								'Speichern' |
+								translate:'save' }}
+							</button>
+							<button *ngIf="canManageManagementClientRole(detail.item.eiamRoles)" type="button" class="btn btn-default"
+									(click)="reset()">{{
+								'Zurücksetzen' |
+								translate:'reset' }}
+							</button>
+							<button class="btn btn-secondary" (click)="goToBenutzerList()">{{'Abbrechen' |
+								translate:'cancel'}}
+							</button>
+						</div>
+					</div>
+					<div *ngIf="detail.item.isInternalUser"  class="col-md-6 col-xs-12 tableandborder">
+						<h3 class="col-md-12 col-xs-12 title">
+							{{'Access-Tokens für AS-Benutzer' | translate:'usersAndRoles.accesstokens.title'}}
+						</h3>
+						<div class="col-md-12 col-xs-12">
+							<div class="left">
+								<h4>
+									{{ 'Zugewiesene zuständige Stellen' | translate:'user.assignedAblieferndeStellen' }}
+								</h4>
+							</div>
+							<div class="left form-control">
+								<wj-multi-auto-complete *ngIf="allowZustaendigeStelleBearbeiten" #mac1
+														[itemsSource]="ablieferndeStelleAllList"
+														[displayMemberPath]="'bezeichnung'"
+														[selectedValuePath]="'bezeichnung'"
+														[(ngModel)]="detail.item.ablieferndeStelleList"
+														placeholder="{{'Zuständige Stellen' | translate: 'user.ablieferndeStelle'}}"
+														[isDisabled]="asTokenManageDisabled()"
+								>
+								</wj-multi-auto-complete>
+
+								<div *ngIf="!allowZustaendigeStelleBearbeiten" class="left">
+									<wj-list-box [itemsSource]="detail.item.ablieferndeStelleList"
+												 displayMemberPath="kuerzel"
 												 [selectedItem]="null"></wj-list-box>
 								</div>
 							</div>
 						</div>
-					</div>
-					<div class="col-md-12 col-xs-12">
-						<button id="buttonSaveRoles" *ngIf="canManageManagementClientRole(detail.item.eiamRoles)" type="button" class="btn btn-primary"
-								(click)="saveRoles()">{{
-							'Speichern' |
-							translate:'save' }}
-						</button>
-						<button *ngIf="canManageManagementClientRole(detail.item.eiamRoles)" type="button" class="btn btn-default"
-								(click)="reset()">{{
-							'Zurücksetzen' |
-							translate:'reset' }}
-						</button>
-						<button class="btn btn-secondary" (click)="goToBenutzerList()">{{'Abbrechen' |
-							translate:'cancel'}}
-						</button>
-					</div>
-				</div>
-				<div *ngIf="detail.item.isInternalUser"  class="col-md-6 col-xs-12 tableandborder">
-					<h3 class="col-md-12 col-xs-12 title">
-						{{'Access-Tokens für AS-Benutzer' | translate:'usersAndRoles.accesstokens.title'}}
-					</h3>
-					<div class="col-md-12 col-xs-12">
-						<div class="left">
-							<h4>
-								{{ 'Zugewiesene zuständige Stellen' | translate:'user.assignedAblieferndeStellen' }}
-							</h4>
-						</div>
-						<div class="left form-control">
-							<wj-multi-auto-complete *ngIf="allowZustaendigeStelleBearbeiten" #mac1
-													[itemsSource]="ablieferndeStelleAllList"
-													[displayMemberPath]="'bezeichnung'"
-													[selectedValuePath]="'bezeichnung'"
-													[(ngModel)]="detail.item.ablieferndeStelleList"
-													placeholder="{{'Zuständige Stellen' | translate: 'user.ablieferndeStelle'}}"
-													[isDisabled]="asTokenManageDisabled()"
-							>
-							</wj-multi-auto-complete>
-
-							<div *ngIf="!allowZustaendigeStelleBearbeiten" class="left">
-								<wj-list-box [itemsSource]="detail.item.ablieferndeStelleList"
-											 displayMemberPath="kuerzel"
+						<div class="col-md-12 col-xs-12">
+							<div class="left">
+								<h4>
+									{{ 'Zugewiesene Access-Tokens' | translate:'user.assignedAblieferndeStellenToken' }}
+								</h4>
+							</div>
+							<div class="left form-control">
+								<wj-list-box [itemsSource]="detail.item.tokens"
 											 [selectedItem]="null"></wj-list-box>
 							</div>
 						</div>
-					</div>
-					<div class="col-md-12 col-xs-12">
-						<div class="left">
-							<h4>
-								{{ 'Zugewiesene Access-Tokens' | translate:'user.assignedAblieferndeStellenToken' }}
-							</h4>
+						<div class="col-md-12 col-xs-12">
+							<button id="buttonSaveAblieferndeStellen" *ngIf="allowZustaendigeStelleBearbeiten" [disabled]="asTokenManageDisabled()" type="button" class="btn btn-primary"
+									(click)="saveAblieferndeStellen()">{{
+								'Speichern' |
+								translate:'save' }}
+							</button>
+							<button *ngIf="allowZustaendigeStelleBearbeiten" [disabled]="asTokenManageDisabled()" type="button" class="btn btn-default"
+									(click)="reset()">{{
+								'Zurücksetzen' |
+								translate:'reset' }}
+							</button>
+							<button class="btn btn-secondary" (click)="goToBenutzerList()">{{'Abbrechen' |
+								translate:'cancel'}}
+							</button>
 						</div>
-						<div class="left form-control">
-							<wj-list-box [itemsSource]="detail.item.tokens"
-										 [selectedItem]="null"></wj-list-box>
-						</div>
-					</div>
-					<div class="col-md-12 col-xs-12">
-						<button id="buttonSaveAblieferndeStellen" *ngIf="allowZustaendigeStelleBearbeiten" [disabled]="asTokenManageDisabled()" type="button" class="btn btn-primary"
-								(click)="saveAblieferndeStellen()">{{
-							'Speichern' |
-							translate:'save' }}
-						</button>
-						<button *ngIf="allowZustaendigeStelleBearbeiten" [disabled]="asTokenManageDisabled()" type="button" class="btn btn-default"
-								(click)="reset()">{{
-							'Zurücksetzen' |
-							translate:'reset' }}
-						</button>
-						<button class="btn btn-secondary" (click)="goToBenutzerList()">{{'Abbrechen' |
-							translate:'cancel'}}
-						</button>
 					</div>
 				</div>
-			</div>
-
 		</div>
 	</cmi-viaduc-layout-left-content>
 
 	<cmi-loader *ngIf="loading" class="cmi-visible"></cmi-loader>
+
 </div>
+<cmi-viaduc-modal-service-container></cmi-viaduc-modal-service-container>

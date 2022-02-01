@@ -51,6 +51,27 @@
 						</textarea>
 					</div>
 				</div>
+				<div class="form-group" *ngIf="currentRolePublicClient==='Ö2' && haveToEnterBewilligungsDatum" [ngClass]="{'has-warning': currentRolePublicClient==='Ö2' && !isOe2UserConfirmed}">
+					<div class="col-sm-8 col-sm-offset-4">
+						<div class="checkbox checkbox--left">
+							<label for="chkConfirmOe2user">
+								<input type="checkbox" id="chkConfirmOe2user"
+								name="chkConfirmOe2user"
+								[checked]="false"
+								[required]="currentRolePublicClient==='Ö2'"
+								[(ngModel)]="isOe2UserConfirmed"
+								#chkConfirmOe2user="ngModel"
+								value="Nein">
+								{{'Benutzer/in ist nicht identifiziert. Auftrag trotzdem freigeben.' |
+								translate:'entscheidHinterlegenModal.confirmOe2Checkbox'}}
+							</label>
+						</div>
+						<span *ngIf="!isOe2UserConfirmed" class="help-block" role="alert">
+							<span>{{'Sie müssen die Freigabe bestätigen.' |
+								translate:'entscheidHinterlegenModal.confirmOe2RequiredMessage'}}</span>
+						</span>
+					</div>
+				</div>
 			</fieldset>
 		</form>
 	</cmi-viaduc-modal-body>

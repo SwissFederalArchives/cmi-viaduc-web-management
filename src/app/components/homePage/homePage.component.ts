@@ -47,7 +47,7 @@ export class HomePageComponent implements OnInit {
 					this._authenticating = false;
 					this._authentication.onSignedIn.next(success);
 				}).catch(err => {
-					console.log(err);
+					console.error(err);
 					this._authentication.isSigningIn = false;
 					this._authenticating = false;
 					this._authentication.onSignedIn.next(false);

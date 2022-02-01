@@ -27,19 +27,16 @@
 			display: inline;
 			color: #03344D;
 
-			> a:not(.disabled) {
+			> a:not(.disabled) & > a:not(.disabledDiv) {
 				color: #03344D;
 				cursor: pointer;
-			}
-
-			> a:hover {
-				text-decoration: none;
 			}
 
 			&.disabled > a {
 				color: #999;
 				border-color: #ddd;
 				cursor: not-allowed;
+				pointer-events: none;
 			}
 		}
 	}

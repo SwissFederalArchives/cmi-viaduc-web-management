@@ -37,24 +37,25 @@ export class OrdersListComponent implements OnInit {
 
 	public loading: boolean;
 
-	public get selectedIds(): number[] {
+	public get checkedRowsCount(): number {
 		if (this.flexGrid) {
-			return this.currentSelection.map(i => i.itemId);
-		}
-
-		return [];
-	}
-	public get selectedRowsCount(): number {
-		if (this.flexGrid) {
-			return this.currentSelection.length;
+			return this.flexGrid.checkedItems.length;
 		}
 
 		return 0;
 	}
 
-	public get currentSelection(): OrderingFlatItem[] {
+	public get checkedRowsIds(): number[] {
 		if (this.flexGrid) {
-			return this.flexGrid.selectedItems;
+			return this.flexGrid.checkedItems.map(i => i.itemId);
+		}
+
+		return [];
+	}
+
+	public get currentChecked(): OrderingFlatItem[] {
+		if (this.flexGrid) {
+			return this.flexGrid.checkedItems;
 		}
 
 		return [];

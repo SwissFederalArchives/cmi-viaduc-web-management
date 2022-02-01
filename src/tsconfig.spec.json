@@ -1,8 +1,7 @@
 {
 	"extends": "../tsconfig.json",
-	"compilerOptions": {
-		"emitDecoratorMetadata": true,
-		"experimentalDecorators": true,
+  "compilerOptions": {
+    "experimentalDecorators": true,
 		"outDir": "../out-tsc/spec",
 		"baseUrl": "./",
 		"module": "commonjs",

@@ -1,4 +1,5 @@
 import {ChangeDetectorRef, Component, OnInit, ViewChild, ViewEncapsulation} from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import {
 	ConfigService, TranslationService, WijmoService, ApplicationFeatureEnum, DigitalisierungsKategorie,
 	EntityDecoratorService, CmiGridComponent
@@ -37,6 +38,7 @@ export class DigipoolListPageComponent implements OnInit {
 
 	private placeholderDate = 'dd.MM.yyyy';
 	private placeholderTime = '12:00';
+	private selectedListItem: number;
 
 	constructor(private _orderService: OrderService,
 				private _txt: TranslationService,
@@ -48,21 +50,29 @@ export class DigipoolListPageComponent implements OnInit {
 				private _cfg: ConfigService,
 				private _dec: EntityDecoratorService,
 				private _err: ErrorService,
-				private _cdRef: ChangeDetectorRef) {
+				private _cdRef: ChangeDetectorRef,
+				private _router: ActivatedRoute) {
 	}
 
 	public ngOnInit(): void {
 		this._buildCrumbs();
 		this._loadColumns();
 		this._loadDigipoolList();
+
+		this._router.queryParams.subscribe(params => {
+			this.selectedListItem = params['itemId'];
+			if (this.selectedListItem) {
+				this.clearDigipoolListSavedState();
+			}
+		});
 	}
 
 	public hasRight(): boolean {
 		return this._aut.hasApplicationFeature(ApplicationFeatureEnum.AuftragsuebersichtAuftraegeView);
 	}
 
-	public get hasSelectedItems() {
-		return this.flexGrid ? this.flexGrid.selectedItems.length > 0 : false;
+	public get hasCheckedItems() {
+		return this.flexGrid ? this.flexGrid.checkedItems.length > 0 : false;
 	}
 
 	public saveColumns() {
@@ -124,7 +134,7 @@ export class DigipoolListPageComponent implements OnInit {
 	}
 
 	public onSavePriorisierungOverviewClick(event): void {
-		let selectedDigipoolItemsIds = this.flexGrid.selectedItems.map(i => i.orderItemId);
+		let selectedDigipoolItemsIds = this.flexGrid.checkedItems.map(i => i.orderItemId);
 
 		let digitalisierungskategorie = null;
 		if (this.setStatusSpezial) {
@@ -160,7 +170,7 @@ export class DigipoolListPageComponent implements OnInit {
 	}
 
 	public onYesAufbereitungsfehlerZuruecksetzenClick(event): void {
-		let selectedDigipoolItemsIds = this.flexGrid.selectedItems.map(i => i.orderItemId);
+		let selectedDigipoolItemsIds = this.flexGrid.checkedItems.map(i => i.orderItemId);
 
 		this._orderService.resetAufbereitungsfehler(selectedDigipoolItemsIds).subscribe(
 			() => {
@@ -178,11 +188,19 @@ export class DigipoolListPageComponent implements OnInit {
 	}
 
 	public get getAufbereitungsfehlerZuruecksetzenText(): string {
-		if ( this.flexGrid && this.flexGrid.selectedItems.length === 1) {
+		if ( this.flexGrid && this.flexGrid.checkedItems.length === 1) {
 			return this._txt.get('digipoolList.aufbereitungsfehlerTextSingleItem', 'Wollen Sie den Auftrag wirklich zurücksetzen?');
 		}
 
 		return this._txt.get('digipoolList.aufbereitungsfehlerTextMultipleItems', 'Wollen Sie die Aufträge wirklich zurücksetzen?');
+	}
+
+	private clearDigipoolListSavedState() {
+		for (let i = window.sessionStorage.length - 1; i >= 0; i--) {
+			if (window.sessionStorage.key(i).startsWith('digipool')) {
+				window.sessionStorage.removeItem(window.sessionStorage.key(i));
+			}
+		}
 	}
 
 	private _buildCrumbs(): void {
@@ -231,11 +249,47 @@ export class DigipoolListPageComponent implements OnInit {
 		}
 		this.digipoolList = new CollectionView(result);
 		this.digipoolList.pageSize = 10;
+
+		if (this.selectedListItem) {
+			this.selectRowFromParameter();
+		}
+
 		/* As selected items might get deselected the
 		* getAufbereitungsfehlerZuruecksetzenText will change and produce a
 		* Expression has changed after it was checked. error.
 		* with that call we prevent the error. */
 		this._cdRef.detectChanges();
+	}
+
+	private selectRowFromParameter() {
+		if (this.selectedListItem) {
+
+			let currItem = this.digipoolList.sourceCollection.find(i => Number(i.orderItemId) === Number(this.selectedListItem));
+
+			if (this.selectPageOfItem(currItem)) {
+				this.digipoolList.currentItem = currItem;
+			} else {
+				this.digipoolList.currentItem = null;
+			}
+		}
+	}
+
+	// Falls das Item nicht gefunden wurde, wird false zurückgegeben.
+	private selectPageOfItem(item):boolean {
+		this.digipoolList.beginUpdate();
+		this.digipoolList.moveToFirstPage();
+
+		let found:boolean = true;
+
+		while (!this.digipoolList.contains(item)) {
+			if (!this.digipoolList.moveToNextPage()) {
+				found = false;
+				this.digipoolList.moveToFirstPage();
+				break;
+			}
+		}
+		this.digipoolList.endUpdate();
+		return found;
 	}
 
 	private _loadColumns(): void {
@@ -259,22 +313,22 @@ export class DigipoolListPageComponent implements OnInit {
 		this._usr.updateUserSettings(existingSettings);
 	}
 
-	private hasOnlySelectedItemsOfSpecificPriority(priority: number): boolean {
-		let selectedItems = this.flexGrid.selectedItems.map(i => i.priority);
-		let selectedOfPriority = selectedItems.filter( value => value === priority);
-		return selectedItems.length === selectedOfPriority.length;
+	private hasOnlyCheckedItemsOfSpecificPriority(priority: number): boolean {
+		let checkedItems = this.flexGrid.checkedItems.map(i => i.priority);
+		let checkedOfPriority = checkedItems.filter( value => value === priority);
+		return checkedItems.length === checkedOfPriority.length;
 	}
 
-	private hasSelectedItemsOfSpecificPriority(priority: number): boolean {
-		let selectedOfPriority =  this.flexGrid.selectedItems.map(i => i.priority).filter( value => value === priority);
-		return selectedOfPriority.length > 0;
+	private hasCheckedItemsOfSpecificPriority(priority: number): boolean {
+		let checkedOfPriority =  this.flexGrid.checkedItems.map(i => i.priority).filter( value => value === priority);
+		return checkedOfPriority.length > 0;
 	}
 
 	public get allowPriorisierungAnpassenAusfuehren(): boolean {
-		return this._aut.hasApplicationFeature(ApplicationFeatureEnum.AuftragsuebersichtDigipoolPriorisierungAnpassenAusfuehren) && this.hasSelectedItems && !this.hasSelectedItemsOfSpecificPriority(9);
+		return this._aut.hasApplicationFeature(ApplicationFeatureEnum.AuftragsuebersichtDigipoolPriorisierungAnpassenAusfuehren) && this.hasCheckedItems && !this.hasCheckedItemsOfSpecificPriority(9);
 	}
 
 	public get allowAufbereitungsfehlerZuruecksetzen(): boolean {
-		return this._aut.hasApplicationFeature(ApplicationFeatureEnum.AuftragsuebersichtDigipoolAufbereitungsfehlerZuruecksetzen) && this.hasSelectedItems && this.hasOnlySelectedItemsOfSpecificPriority(9);
+		return this._aut.hasApplicationFeature(ApplicationFeatureEnum.AuftragsuebersichtDigipoolAufbereitungsfehlerZuruecksetzen) && this.hasCheckedItems && this.hasOnlyCheckedItemsOfSpecificPriority(9);
 	}
 }

@@ -16,4 +16,5 @@ export class User {
 	public setting: any;
 	public tokens: string[];
 	public ablieferndeStelleList: AblieferndeStelle[];
+	public rolePublicClient: string;
 }

@@ -85,24 +85,24 @@
 						<hr/>
 						<div class="row action-buttons">
 							<div class="col-xs-12">
-								<button class="btn btn-link" [disabled]="selectedCount === 0"  (click)="showEntscheidHinterlegenModal()">
-									<span><span class="glyphicon glyphicon-ok"></span>&nbsp;{{ 'Entscheid Gesuch hinterlegen ({0})' | translate:'ordersEinsichtDetailPage.entscheidHinterlegen':selectedCount }}</span>
+								<button class="btn btn-link" [disabled]="checkedCount === 0"  (click)="showEntscheidHinterlegenModal()">
+									<span><span class="glyphicon glyphicon-ok"></span>&nbsp;{{ 'Entscheid Gesuch hinterlegen ({0})' | translate:'ordersEinsichtDetailPage.entscheidHinterlegen':checkedCount }}</span>
 								</button>
 
-								<button class="btn btn-link" [disabled]="selectedCount === 0"  (click)="showInVorlageExportierenModal()">
-									<span><span class="glyphicon glyphicon-message-forward"></span>&nbsp;{{ 'In Vorlage exportieren ({0})' | translate:'ordersEinsichtDetailPage.inVorlageExportieren':selectedCount }}</span>
+								<button class="btn btn-link" [disabled]="checkedCount === 0"  (click)="showInVorlageExportierenModal()">
+									<span><span class="glyphicon glyphicon-message-forward"></span>&nbsp;{{ 'In Vorlage exportieren ({0})' | translate:'ordersEinsichtDetailPage.inVorlageExportieren':checkedCount }}</span>
 								</button>
 
-								<button class="btn btn-link" [disabled]="selectedCount === 0"  (click)="showDigitalisierungsauftragAusfuehren()">
-									<span><span class="glyphicon glyphicon-transfer"></span>&nbsp;{{ 'Digitalisierung auslösen ({0})' | translate:'ordersEinsichtDetailPage.digitalisierungsauftragAusfuehren':selectedCount }}</span>
+								<button class="btn btn-link" [disabled]="checkedCount === 0"  (click)="showDigitalisierungsauftragAusfuehren()">
+									<span><span class="glyphicon glyphicon-transfer"></span>&nbsp;{{ 'Digitalisierung auslösen ({0})' | translate:'ordersEinsichtDetailPage.digitalisierungsauftragAusfuehren':checkedCount }}</span>
 								</button>
 
-								<button class="btn btn-link" [disabled]="selectedCount === 0"  (click)="showAuftraegeZuruecksetzenModal()">
-									<span><span class="glyphicon glyphicon-restart"></span>&nbsp;{{ 'Aufträge zurücksetzen ({0})' | translate:'orderOverviewPage.zuruecksetzen':selectedCount }}</span>
+								<button class="btn btn-link" [disabled]="checkedCount === 0"  (click)="showAuftraegeZuruecksetzenModal()">
+									<span><span class="glyphicon glyphicon-restart"></span>&nbsp;{{ 'Aufträge zurücksetzen ({0})' | translate:'orderOverviewPage.zuruecksetzen':checkedCount }}</span>
 								</button>
 
-								<button class="btn btn-link"  [disabled]="selectedCount === 0" (click)="showEinsichtsgesucheAbbrechenModal()">
-									<span><span class="glyphicon glyphicon-ban-circle"></span>&nbsp;{{ 'Aufträge abbrechen ({0})' | translate:'orderOverviewPage.abbrechen':selectedCount }}</span>
+								<button class="btn btn-link"  [disabled]="checkedCount === 0" (click)="showEinsichtsgesucheAbbrechenModal()">
+									<span><span class="glyphicon glyphicon-ban-circle"></span>&nbsp;{{ 'Aufträge abbrechen ({0})' | translate:'orderOverviewPage.abbrechen':checkedCount }}</span>
 								</button>
 							</div>
 						</div>
@@ -118,32 +118,32 @@
 						</div>
 
 						<cmi-viaduc-entscheid-hinterlegen-modal *ngIf="showEntscheidHinterlegen"
-															[items]="selectedItems"
+															[items]="detailRecords"
 															(onSubmitted)="refreshTable()"
 															[(open)]="showEntscheidHinterlegen"
 															[user]="selectedUser">
 						</cmi-viaduc-entscheid-hinterlegen-modal>
 
 						<cmi-viaduc-in-vorlage-exportieren-modal *ngIf="showInVorlageExportieren"
-																  [ids]="selectedIds"
+																  [ids]="checkedIds"
 																  [(open)]="showInVorlageExportieren"
 																  (onSubmitted)="refreshTable()">
 						</cmi-viaduc-in-vorlage-exportieren-modal>
 
 						<cmi-viaduc-digitalisierung-ausloesen-modal *ngIf="showDigitalisierungAusloesen"
-																	[ids]="selectedIds"
+																	[ids]="checkedIds"
 																	[(open)]="showDigitalisierungAusloesen"
 																	(onSubmitted)="refreshTable()">
 						</cmi-viaduc-digitalisierung-ausloesen-modal>
 
 						<cmi-viaduc-auftraege-zuruecksetzen-modal *ngIf="showAuftraegeZuruecksetzen"
-															  [ids]="selectedIds"
+															  [ids]="checkedIds"
 															  [(open)]="showAuftraegeZuruecksetzen"
 															  (onSubmitted)="refreshTable()">
 						</cmi-viaduc-auftraege-zuruecksetzen-modal>
 
 						<cmi-viaduc-auftraege-abbrechen-modal *ngIf="showEinsichtsgesucheAbbrechen"
-															  [ids]="selectedIds"
+															  [ids]="checkedIds"
 															  [(open)]="showEinsichtsgesucheAbbrechen"
 															  (onSubmitted)="refreshTable()">
 						</cmi-viaduc-auftraege-abbrechen-modal>

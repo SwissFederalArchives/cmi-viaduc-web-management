@@ -27,6 +27,7 @@
 				<b class="col-md-3">Name</b>
 				<b class="col-md-3">Beschreibung</b>
 				<b class="col-md-4">Wert</b>
+				<b class="col-md-2">Ist Default</b>
 			</div>
 			<div *ngFor="let name of parameterGroupNames">
 				<a data-toggle="collapse" class="collapsed datatoggle" [href]="'#'+ GetIdByName(name)"><h3><cmi-viaduc-highlight [text]="name" [highlight]="searchString"></cmi-viaduc-highlight></h3></a>
@@ -44,3 +45,4 @@
 		</div>
 	</cmi-viaduc-layout-left-content>
 </div>
+<cmi-viaduc-modal-service-container></cmi-viaduc-modal-service-container>

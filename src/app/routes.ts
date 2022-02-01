@@ -3,7 +3,7 @@ import {AuthPageComponent} from './components/authPage/authPage.component';
 import {HomePageComponent} from './components/homePage/homePage.component';
 import {ErrorPageComponent} from './components/errorPage/errorPage.component';
 import {NewsManagementPageComponent} from './components/communication/newsManagementPage/newsManagementPage.component';
-import {Utilities as _util, Routing, CountriesResolver, ApplicationFeatureEnum} from '@cmi/viaduc-web-core';
+import {Utilities as _util, Routing, CountriesResolver, ApplicationFeatureEnum, CanDeactivateGuard} from '@cmi/viaduc-web-core';
 import {NewsManagementDetailsPageComponent} from './components/communication/newsManagementDetailPage/newsManagementDetailsPage.component';
 import {
 	DefaultContextGuard, DefaultRedirectGuard, DefaultAuthenticatedGuard,
@@ -30,6 +30,11 @@ const defaultRouteChildren: any = <Routes>[
 	{
 		path: 'administration',
 		loadChildren:  () => import('./modules/administration/administration.module').then(m => m.AdministrationModule),
+		resolve: {preloaded: PreloadedResolver, authenticated: AuthenticatedResolver},
+	},
+	{
+		path: 'reporting',
+		loadChildren:  () => import('./modules/reporting/reporting.module').then(m => m.ReportingModule),
 		resolve: {preloaded: PreloadedResolver, authenticated: AuthenticatedResolver},
 	},
 	{
@@ -76,6 +81,7 @@ const defaultRouteChildren: any = <Routes>[
 						_localize: {'fr': 'create', 'it': 'create', 'en': 'create'},
 						component: NewsManagementDetailsPageComponent,
 						canActivate: [ApplicationFeatureGuard],
+						canDeactivate: [CanDeactivateGuard],
 						data: { applicationFeature: [ApplicationFeatureEnum.AdministrationNewsBearbeiten] }
 					},
 					{
@@ -83,6 +89,7 @@ const defaultRouteChildren: any = <Routes>[
 						_localize: {'fr': 'edit', 'it': 'edit', 'en': 'edit'},
 						component: NewsManagementDetailsPageComponent,
 						canActivate: [ApplicationFeatureGuard],
+						canDeactivate: [CanDeactivateGuard],
 						data: { applicationFeature: [ApplicationFeatureEnum.AdministrationNewsBearbeiten] }
 					},
 				],
@@ -103,7 +110,7 @@ const defaultRouteChildren: any = <Routes>[
 		path:'errorpermission',
 		_localize: {'fr': 'fr-errorpermission', 'it': 'it-errorpermission', 'en': 'en-errorpermission'},
 		component: ErrorPermissionPageComponent
-	},
+	}
 ];
 
 // endregion
@@ -186,6 +193,4 @@ export function initRoutes(routes: any[]) {
 			}
 		}
 	});
-
-	console.log('initRoutes', routes);
 }

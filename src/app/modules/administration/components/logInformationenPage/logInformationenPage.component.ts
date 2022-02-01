@@ -59,7 +59,7 @@ export class LogInformationenPageComponent implements OnInit {
 		if (err.headers.get('content-type').startsWith('application/json')) {
 			const reader = new FileReader();
 			reader.addEventListener('loadend', (e) => {
-				const errorInfo = JSON.parse(e.srcElement['result']);
+				const errorInfo = JSON.parse(e.target.result.toString());
 				this._ui.showError(errorInfo.message, this._txt.get('logInformationen.downloadFail', 'Loginformationen konnten nicht heruntergeladen werden.'));
 			});
 			reader.readAsText(err.error);

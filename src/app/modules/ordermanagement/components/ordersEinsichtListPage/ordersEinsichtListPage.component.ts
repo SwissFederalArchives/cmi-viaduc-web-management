@@ -7,6 +7,7 @@ import {EinsichtsgesuchUserSettings, ManagementUserSettings} from '../../../shar
 import {OrdersListComponent} from '../ordersList/ordersList.component';
 import {ToastrService} from 'ngx-toastr';
 import {SessionStorageService} from '../../../client/services';
+import {NgForm} from '@angular/forms';
 
 @Component({
 	selector: 'cmi-viaduc-orders-einsichtsgesuche-list-page',
@@ -23,6 +24,11 @@ export class OrdersEinsichtListPageComponent implements OnInit, AfterViewInit {
 
 	@ViewChild(OrdersListComponent, { static: false })
 	public ordersList: OrdersListComponent;
+
+	@ViewChild(NgForm, { static: false })
+	public formOrderEinsichtlist: NgForm;
+
+	public detailRecords: OrderingFlatItem[];
 
 	public crumbs: any[] = [];
 	public columns: any[] = [];
@@ -85,8 +91,12 @@ export class OrdersEinsichtListPageComponent implements OnInit, AfterViewInit {
 		}
 	}
 
-	public get selectedCount() {
-		return this.ordersList ? this.ordersList.selectedRowsCount : 0;
+	public get checkedCount() {
+		return this.ordersList ? this.ordersList.checkedRowsCount : 0;
+	}
+
+	public get checkedIds() {
+		return this.ordersList?.checkedRowsCount ? this.ordersList.checkedRowsIds : [];
 	}
 
 	private _buildCrumbs(): void {
@@ -175,14 +185,6 @@ export class OrdersEinsichtListPageComponent implements OnInit, AfterViewInit {
 		this.ordersList.refreshTable();
 	}
 
-	public get selectedItems() {
-		return this.ordersList ? this.ordersList.currentSelection : [];
-	}
-
-	public get selectedIds() {
-		return this.ordersList ? this.ordersList.selectedIds : [];
-	}
-
 	public saveColumns() {
 		const cols = this.ordersList.getCurrentColumns();
 		this._saveColumnsAsUserSettings(cols);
@@ -226,10 +228,9 @@ export class OrdersEinsichtListPageComponent implements OnInit, AfterViewInit {
 			return;
 		}
 
-		if (this.ordersList.selectedIds.length > 0) {
-			const selectedItems = Array.from(this.ordersList.currentSelection.values());
-
-			const users = selectedItems.map((i: OrderingFlatItem) => i.user);
+		if (this.ordersList.checkedRowsCount > 0) {
+			this.detailRecords = this.ordersList.currentChecked;
+			const users = this.detailRecords.map((i: OrderingFlatItem) => i.user);
 			if (users && users.length > 0) {
 				if (users.length > 1) {
 					for (let c of users)	{
@@ -252,7 +253,10 @@ export class OrdersEinsichtListPageComponent implements OnInit, AfterViewInit {
 			return;
 		}
 
-		this.showInVorlageExportieren = true;
+		if (this.ordersList.checkedRowsCount > 0) {
+			this.detailRecords = this.ordersList.currentChecked;
+			this.showInVorlageExportieren = true;
+		}
 	}
 
 	public showDigitalisierungsauftragAusfuehren() {
@@ -260,7 +264,7 @@ export class OrdersEinsichtListPageComponent implements OnInit, AfterViewInit {
 			return;
 		}
 
-		const ids = this.selectedIds;
+		const ids = this.checkedIds;
 		if (ids.length !== 0) {
 			this.showDigitalisierungAusloesen = true;
 		}

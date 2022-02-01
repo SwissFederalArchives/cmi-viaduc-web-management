@@ -1,12 +1,13 @@
 import {MonitoringPageComponent, ParameterPageComponent, LogInformationenPageComponent} from './components';
 import {ApplicationFeatureGuard} from '../client';
-import {ApplicationFeatureEnum} from '@cmi/viaduc-web-core';
+import {ApplicationFeatureEnum, CanDeactivateGuard} from '@cmi/viaduc-web-core';
 
 export const ROUTES: any = [
 	{
 		path: 'einstellungen',
 		component: ParameterPageComponent,
 		canActivate: [ApplicationFeatureGuard],
+		canDeactivate: [CanDeactivateGuard],
 		data: { applicationFeature: [ApplicationFeatureEnum.AdministrationEinstellungenEinsehen] },
 	},
 	{

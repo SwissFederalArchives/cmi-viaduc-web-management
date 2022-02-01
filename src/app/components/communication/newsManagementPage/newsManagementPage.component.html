@@ -22,7 +22,7 @@
 								<button type="button" class="btn btn-link" (click)="addNews()">
 									<span><span class="glyphicon glyphicon-plus-sign"></span> {{'Hinzufügen' | translate:'communication.add'}}</span>
 								</button>
-								<button type="button" class="btn btn-link" [disabled]="deleteButtonDisabledText" (click)="deleteSelected()">
+								<button type="button" class="btn btn-link" [disabled]="deleteButtonDisabledText" (click)="deleteChecked()">
 									<span><span class="icon icon--trash"></span> {{'Ausgewählte Meldungen löschen' | translate:'communication.dDeleteSelected'}}</span>
 								</button>
 							</span>

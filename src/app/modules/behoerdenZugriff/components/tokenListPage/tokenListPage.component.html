@@ -83,7 +83,7 @@
 
 	</cmi-viaduc-layout-left-content>
 	<cmi-viaduc-delete-confirm [(showDeleteModal)]="showDeleteModal"
-							   (deleteClicked)="deleteSelectetToken()"
-							   [countOfSelectedItem]="getQuantityOfSelectedItemsToDelete()"
-							   [nameOfSelectedItem]="getElementToDelete()"></cmi-viaduc-delete-confirm>
+							   (deleteClicked)="deleteCheckedToken()"
+							   [countOfCheckedItem]="getQuantityOfCheckedItemsToDelete()"
+							   [nameOfCheckedItem]="getElementToDelete()"></cmi-viaduc-delete-confirm>
 </div>

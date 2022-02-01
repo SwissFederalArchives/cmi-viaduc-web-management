@@ -39,14 +39,6 @@ export class ParameterComponent implements OnInit {
 		});
 
 		this.buildForm();
-		if (this.parameter.mandatory) {
-			console.log('mandatory', this.parameter);
-		}
-		if (this.parameter.type === 'checkbox') {
-
-			console.log('checkbox', this.parameter, this.myForm);
-		}
-
 	}
 
 	public saveParameter() {
@@ -118,7 +110,8 @@ export class ParameterComponent implements OnInit {
 
 	private buildForm() {
 		this.myForm = this._formBuilder.group({
-			parameterValue: this.parameter.value
+			parameterValue: this.parameter.value,
+			isDefault: this.parameter?.value?.toString() === this.parameter?.default?.toString()
 		});
 
 		if (this.parameter.regexValidation) {

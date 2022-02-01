@@ -1,7 +1,7 @@
 import { Component, OnInit, ViewChild, ChangeDetectorRef, AfterViewChecked } from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 import {WjListBox} from '@grapecity//wijmo.angular2.input';
-import {ApplicationFeatureEnum, ClientContext, CountriesService, HttpService, TranslationService, Utilities as _util} from '@cmi/viaduc-web-core';
+import {ApplicationFeatureEnum, ClientContext, ComponentCanDeactivate, CountriesService, HttpService, TranslationService, Utilities as _util} from '@cmi/viaduc-web-core';
 import {
 	AblieferndeStelleService, AuthorizationService, DetailPagingService, ErrorService, UiService, UrlService,
 	UserService
@@ -12,19 +12,21 @@ import * as fileSaver from 'file-saver';
 import {HttpEventType} from '@angular/common/http';
 import * as moment from 'moment';
 
+import { NgForm} from '@angular/forms';
+
 @Component({
 	selector: 'cmi-viaduc-user-roles-detail-page',
 	templateUrl: 'userRolesDetailPage.component.html',
 	styleUrls: ['./userRolesDetailPage.component.less']
 })
-export class UserRolesDetailPageComponent implements OnInit, AfterViewChecked {
+export class UserRolesDetailPageComponent extends ComponentCanDeactivate implements OnInit, AfterViewChecked {
 
 	public loading: boolean;
 
 	public crumbs: any[];
 	public detail: DetailResult<any>;
-
 	private _hasChanges: boolean;
+
 	public selectedRolepublic: string;
 	public preSelectedRolepublic: string;
 	public selectedResearcherGroup: boolean;
@@ -41,23 +43,29 @@ export class UserRolesDetailPageComponent implements OnInit, AfterViewChecked {
 
 	public showModal: boolean;
 	public showVerifyModal:boolean;
-
 	public get hasChanges(): boolean {
 		return this._hasChanges;
 	}
 
 	public set hasChanges(value: boolean) {
 		this._hasChanges = value;
-		this.listExcluded.refresh();
-		this.listIncluded.refresh();
+		if (this.listExcluded) {
+			this.listExcluded.refresh();
+		}
+		if (this.listIncluded) {
+			this.listIncluded.refresh();
+		}
 	}
 
 	@ViewChild('listExcluded', { static: false })
 	public listExcluded: WjListBox;
 	@ViewChild('listIncluded', { static: false })
 	public listIncluded: WjListBox;
+	@ViewChild('formUserDetail', {static: false})
+	public formUserDetail: NgForm;
 
 	public ablieferndeStelleAllList: AblieferndeStelle[];
+	private ablieferndeStelleListInitial: AblieferndeStelle[];
 
 	constructor(private _context: ClientContext, public _authorization: AuthorizationService, private _roleService: RoleService, private _txt: TranslationService,
 				private _url: UrlService,
@@ -70,6 +78,7 @@ export class UserRolesDetailPageComponent implements OnInit, AfterViewChecked {
 				private _dps: DetailPagingService,
 				private _errService: ErrorService,
 				private _changeDetectionRef: ChangeDetectorRef) {
+		super();
 	}
 
 	public ngOnInit(): void {
@@ -106,7 +115,7 @@ export class UserRolesDetailPageComponent implements OnInit, AfterViewChecked {
 		this.hasChanges = true;
 	}
 
-	public saveUser(): void {
+	public async saveUser(): Promise<void> {
 		this.loading = true;
 
 		// Checkbox Wert abfüllen für Mapping bzw. speichern
@@ -115,9 +124,9 @@ export class UserRolesDetailPageComponent implements OnInit, AfterViewChecked {
 		this.detail.item.barInternalConsultation = this.selectedBarInternalConsultation;
 
 		this._userService.updateAllUserData(this.detail.item).subscribe(
-			res => {
+			async res => {
 				this._ui.showSuccess(this._txt.get('userAndRoles.userSuccessfullySaved', 'Benutzerdaten erfolgreich gespeichert'));
-				this._reload();
+				await this._reload();
 			},
 			err => {
 				this.loading = false;
@@ -129,7 +138,7 @@ export class UserRolesDetailPageComponent implements OnInit, AfterViewChecked {
 		);
 	}
 
-	public saveRoles(): void {
+	public async saveRoles(): Promise<void> {
 		this.loading = true;
 
 		const roleIds = [];
@@ -138,28 +147,30 @@ export class UserRolesDetailPageComponent implements OnInit, AfterViewChecked {
 		}
 
 		this._roleService.setUserRoles(this.detail.item.id, roleIds).then(
-			res => {
+			async res => {
 				this.loading = false;
 				this._ui.showSuccess(this._txt.get('userAndRoles.userroleSuccessfullySaved', 'Benutzerrollen erfolgreich gespeichert'));
-				this._reload();
+				await this._reload();
 			},
 			err => {
 				this.loading = false;
 				this._ui.showError(this._txt.get('userAndRoles.userroleCouldNotBeSaved', 'Benutzerrollen konnte nicht gespeichert werden'), err.message);
 			}
 		);
+
 	}
 
-	public saveAblieferndeStellen(): void {
+	public async saveAblieferndeStellen(): Promise<void> {
 		this.loading = true;
 		const ablieferndeStelleIds = this.detail.item.ablieferndeStelleList != null ? this.detail.item.ablieferndeStelleList.map(as => as.ablieferndeStelleId) : [];
-
+		this.hasChanges = false;
 		this._userService.cleanAndAddAblieferndeStelle(this.detail.item.id, ablieferndeStelleIds).subscribe(
-			res => {
+			async res => {
 				let access = this.detail.item.access || {};
 				this.detail.item.tokens = access.asTokens || [];
 				this._ui.showSuccess(this._txt.get('userAndRoles.assignedAblieferndeStellenSuccessfullySaved', 'Zuständige Stellen erfolgreich gespeichert'));
-				this._reload();
+				await this._reload();
+				this.ablieferndeStelleListInitial =  Object.assign([], this.detail.item.ablieferndeStelleList);
 			},
 			err => {
 				this.loading = false;
@@ -171,11 +182,13 @@ export class UserRolesDetailPageComponent implements OnInit, AfterViewChecked {
 		);
 	}
 
-	public reset(): void {
-		this._reload();
+	public async reset(): Promise<void> {
+		await this._reload();
+		this.hasChanges = false;
 	}
 
 	public goToBenutzerList(): void {
+		// BT Abbrechen
 		this._router.navigate([this._url.getNormalizedUrl('/benutzerundrollen/benutzer')]);
 	}
 
@@ -189,8 +202,11 @@ export class UserRolesDetailPageComponent implements OnInit, AfterViewChecked {
 	}
 
 	public researcherGroupDdsDisabled(): boolean {
-		return this.editUserHasOe3Role ||
-			!this.detail.item.emailAddress.endsWith('@dodis.ch') || !this.allowForschungsgruppeDdsBearbeiten;
+		if (this.detail.item.emailAddress) {
+			return this.editUserHasOe3Role ||
+				!this.detail.item.emailAddress.endsWith('@dodis.ch') || !this.allowForschungsgruppeDdsBearbeiten;
+		}
+		return false;
 	}
 
 	public researcherGroupDdsModalAnswer(value: boolean) {
@@ -223,16 +239,18 @@ export class UserRolesDetailPageComponent implements OnInit, AfterViewChecked {
 		this.selectedRolepublic = value;
 	}
 
-	public toggelSelectedResearcherGroup(): void {
+	public toggelSelectedResearcherGroup(e: MouseEvent): void {
 		if (this.selectedResearcherGroupOld === false) {
 			this.showVerifyModal = true;
-			event.preventDefault();
+			e.preventDefault();
 		}
+		this._hasChanges = true;
 		this.selectedResearcherGroupOld = false;
 		this.selectedResearcherGroup = false;
 	}
 
 	public toggelSelectedBarInternalConsultation(): void {
+		this._hasChanges = true;
 		this.selectedBarInternalConsultation = this.selectedBarInternalConsultation === true;
 	}
 
@@ -318,6 +336,7 @@ export class UserRolesDetailPageComponent implements OnInit, AfterViewChecked {
 	}
 
 	public onOpenModalClick(event, rolePublicClient: string, allowOpenModal: boolean): void {
+		this._hasChanges = true;
 		if (rolePublicClient === this.selectedRolepublic || !allowOpenModal) {
 			return;
 		}
@@ -409,6 +428,15 @@ export class UserRolesDetailPageComponent implements OnInit, AfterViewChecked {
 		}
 	}
 
+	public setDate(str: string, key: string): void {
+		const oldValue = this.detail.item[key];
+		// Required to check old/new values as loading the form also calls this method
+		if (str !== oldValue) {
+			this.detail.item[key] = str;
+			this.formUserDetail.form.markAsDirty();
+		}
+	}
+
 	public detailPagingEnabled(): boolean {
 		return this._dps.getCurrentIndex() > -1;
 	}
@@ -417,8 +445,57 @@ export class UserRolesDetailPageComponent implements OnInit, AfterViewChecked {
 		return this._url.getBenutzerUebersichtUrl();
 	}
 
-	private _reload(): void {
-		this._load(this.detail.item.id);
+	public canDeactivate(): boolean {
+		return !this.getFormIsDirty();
+	}
+
+	public promptForMessage(): false | 'question' | 'message' {
+		return  'question';
+	}
+
+	public message(): string {
+		return this._txt.get('hints.unsavedChanges', 'Sie haben ungespeicherte Änderungen. Wollen Sie die Seite tatsächlich verlassen?');
+	}
+
+	public getFormIsDirty():boolean {
+		if (this.formUserDetail && this.detail.item) {
+			return this.formUserDetail.dirty || this.hasChanges || this.isAblieferndeStelleChanged();
+		}
+		return this.hasChanges;
+	}
+
+	private isAblieferndeStelleChanged(): boolean {
+		// there are no AblieferndeStelle
+		if (!this.detail || (!this.ablieferndeStelleListInitial && !this.detail.item.ablieferndeStelleList)) {
+			return false;
+		} // different number of AblieferndeStelle -> one or more was added or deleted
+		if (this.ablieferndeStelleListInitial.length !== this.detail.item.ablieferndeStelleList.length) {
+			return true;
+			// Both lists have no entries -> no AblieferndeStelle
+		} else if (this.ablieferndeStelleListInitial.length === 0) {
+			return false;
+			// the lists have the same number of entries
+		} else {
+			let result = true;
+			for (let i = 0; i < this.ablieferndeStelleListInitial.length; i++) {
+				let item = this.ablieferndeStelleListInitial[i];
+
+				result = !this.detail.item.ablieferndeStelleList.includes(item);
+				if (result) {
+					// Different entries exist in the lists
+					return true;
+				}
+			}
+			return result;
+		}
+	}
+
+	private async _reload(): Promise<void> {
+		// Bt Zurücksetzen und Save
+		if (this.formUserDetail) {
+			this.formUserDetail.resetForm();
+		}
+		await this._load(this.detail.item.id);
 	}
 
 	private _remove(items: any[], item: any): void {
@@ -452,39 +529,47 @@ export class UserRolesDetailPageComponent implements OnInit, AfterViewChecked {
 
 		let access = result.item.access || {};
 		result.item.tokens = access.asTokens || [];
-
+		this.ablieferndeStelleListInitial =  Object.assign([], result.item.ablieferndeStelleList);
 		this.selectedRolepublic = result.item.rolePublicClient;
 		this.selectedResearcherGroup = result.item.researcherGroup;
 		this.selectedBarInternalConsultation = result.item.barInternalConsultation;
 
 		this.detail = result;
 		this.detail.item.birthday = this.detail.item.birthday ? moment(new Date(this.detail.item.birthday)).format('DD.MM.YYYY') : null;
-		this.detail.item.downloadLimitDisabledUntil = this.detail.item.downloadLimitDisabledUntil
-			? moment(new Date(this.detail.item.downloadLimitDisabledUntil)).format('DD.MM.YYYY')
-			: null;
 
-		this.detail.item.digitalisierungsbeschraenkungAufgehobenBis = this.detail.item.digitalisierungsbeschraenkungAufgehobenBis
-			? moment(new Date(this.detail.item.digitalisierungsbeschraenkungAufgehobenBis)).format('DD.MM.YYYY')
-			: null;
+		let dateTime = moment(new Date()).add(-1, 'days').toDate();
+		if (result.item.downloadLimitDisabledUntil) {
+			let compareDownloadLimitDisabledUntil = moment(new Date(result.item.downloadLimitDisabledUntil));
+			if (compareDownloadLimitDisabledUntil.diff(dateTime) > 0) {
+				this.detail.item.downloadLimitDisabledUntil = moment(new Date(this.detail.item.downloadLimitDisabledUntil)).format('DD.MM.YYYY');
+			} else {
+				this.detail.item.downloadLimitDisabledUntil = null;
+			}
+		}
+		if (result.item.digitalisierungsbeschraenkungAufgehobenBis) {
+			let compareDigitalisierungsbeschraenkungAufgehobenBis = moment(new Date(result.item.digitalisierungsbeschraenkungAufgehobenBis));
+			if (compareDigitalisierungsbeschraenkungAufgehobenBis.diff(dateTime) > 0) {
+				this.detail.item.digitalisierungsbeschraenkungAufgehobenBis = moment(new Date(this.detail.item.digitalisierungsbeschraenkungAufgehobenBis)).format('DD.MM.YYYY');
+			} else {
+				this.detail.item.digitalisierungsbeschraenkungAufgehobenBis = null;
+			}
+		}
+
 		this._hasChanges = false;
-
 		this._buildCrumbs();
 	}
 
 	private async _load(id: string): Promise<void> {
 		this.loading = true;
+		try {
+			let res = await this._roleService.getUserInfo(id);
+			this.selectedResearcherGroupOld = res.item.researcherGroup;
+			this._prepareResult(res);
+		} catch (err) {
+			this._ui.showError(err);
+		}
 
-		this._roleService.getUserInfo(id).then(
-			res => {
-				this.loading = false;
-				this.selectedResearcherGroupOld = res.item.researcherGroup;
-				this._prepareResult(res);
-			},
-			err => {
-				this.loading = false;
-				this._ui.showError(err);
-			}
-		);
+		this.loading = false;
 	}
 
 	private _eiamRoleHandlingWarnungen(roleIdentifier:any) {

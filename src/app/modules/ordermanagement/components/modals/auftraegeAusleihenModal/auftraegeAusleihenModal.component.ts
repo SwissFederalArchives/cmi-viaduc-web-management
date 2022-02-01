@@ -5,7 +5,7 @@ import {ErrorService} from '../../../../shared/services';
 
 @Component({
 	selector: 'cmi-viaduc-auftraege-ausleihen-modal',
-	templateUrl: 'auftraegeausleihenModal.component.html',
+	templateUrl: 'auftraegeAusleihenModal.component.html',
 	styleUrls: ['./auftraegeAusleihenModal.component.less']
 })
 export class AuftraegeAusleihenModalComponent implements OnInit {

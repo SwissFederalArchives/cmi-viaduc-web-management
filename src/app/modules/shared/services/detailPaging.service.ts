@@ -91,7 +91,7 @@ export class DetailPagingService {
 	private _delayMoveToLastAndReturnCurrent(): Observable<any> {
 		// delay, because paging is async and moveCurrentToLast must happen after it
 		// Wijmo does not provide Promise or Observable for that event to wait for it
-		return Observable.create((obs) => {
+		return new Observable((obs) => {
 			setTimeout(() => {
 				this._collectionView.moveCurrentToLast();
 				obs.next(this.getCurrent());

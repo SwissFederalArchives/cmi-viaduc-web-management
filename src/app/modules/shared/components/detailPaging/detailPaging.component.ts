@@ -15,30 +15,41 @@ export class DetailPagingComponent {
 	@Input()
 	public idProperty: string;
 
+	@Input()
+	public disableNavigation: boolean;
+
 	constructor(private _detailPaging: DetailPagingService,
 				private _router: Router) {
 	}
 
 	public goToNext(): void {
-		let item = this._detailPaging.goToNext();
-		this._router.navigate([this.detailUrl + '/' + item[this.idProperty]]);
+		if (!this.disableNavigation) {
+			let item = this._detailPaging.goToNext();
+			this._router.navigate([this.detailUrl + '/' + item[this.idProperty]]);
+		}
 	}
 
 	public goToPrevious(): void {
-		this._detailPaging.goToPrevious().subscribe(item => {
-			this._router.navigate([this.detailUrl + '/' + item[this.idProperty]]);
-		});
+		if (!this.disableNavigation) {
+			this._detailPaging.goToPrevious().subscribe(item => {
+				this._router.navigate([this.detailUrl + '/' + item[this.idProperty]]);
+			});
+		}
 	}
 
 	public goToLast(): void {
-		this._detailPaging.goToLast().subscribe(item => {
-			this._router.navigate([this.detailUrl + '/' + item[this.idProperty]]);
-		});
+		if (!this.disableNavigation) {
+			this._detailPaging.goToLast().subscribe(item => {
+				this._router.navigate([this.detailUrl + '/' + item[this.idProperty]]);
+			});
+		}
 	}
 
 	public goToFirst(): void {
-		let item = this._detailPaging.goToFirst();
-		this._router.navigate([this.detailUrl + '/' + item[this.idProperty]]);
+		if (!this.disableNavigation) {
+			let item = this._detailPaging.goToFirst();
+			this._router.navigate([this.detailUrl + '/' + item[this.idProperty]]);
+		}
 	}
 
 	public hasNext(): boolean {

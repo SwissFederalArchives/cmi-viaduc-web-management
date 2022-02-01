@@ -70,4 +70,12 @@ export class LeftNavigationComponent implements OnInit {
 	public canSeeLoginformationen(): boolean {
 		return this._authorization.hasApplicationFeature(ApplicationFeatureEnum.AdministrationLoginformationenEinsehen);
 	}
+
+	public canSeeStatisticReportsViewReports(): boolean {
+		return this._authorization.hasApplicationFeature(ApplicationFeatureEnum.ReportingStatisticsReportsEinsehen);
+	}
+
+	public canSeeStatisticReportsViewConverterProgress(): boolean {
+		return this._authorization.hasApplicationFeature(ApplicationFeatureEnum.ReportingStatisticsConverterProgressEinsehen);
+	}
 }

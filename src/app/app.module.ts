@@ -9,6 +9,8 @@ import {ClientModule} from './modules/client';
 import {CoreModule} from '@cmi/viaduc-web-core';
 import {ToastrModule} from 'ngx-toastr';
 import {AuthenticationService} from './modules/client/services';
+import {MarkdownModule} from 'ngx-markdown';
+import {FormsModule} from '@angular/forms';
 
 export const toastrOptions = {
 	timeOut: 3000,
@@ -26,20 +28,19 @@ export function tryActivateExistingSession(authentication: AuthenticationService
 @NgModule({
 	imports: [
 		BrowserModule,
+		FormsModule,
 		CoreModule.forRoot(),
 		SharedModule.forRoot(),
 		ClientModule.forRoot(),
-		RouterModule.forRoot(ROUTES, {useHash: true}),
-		ToastrModule.forRoot(toastrOptions)
+		RouterModule.forRoot(ROUTES, { useHash: true, relativeLinkResolution: 'legacy' }),
+		ToastrModule.forRoot(toastrOptions),
+		MarkdownModule.forRoot()
 	],
 	providers: [
 		{ provide: APP_INITIALIZER, useFactory: tryActivateExistingSession, deps: [AuthenticationService], multi: true },
 	],
 	bootstrap: [RootComponent],
 	declarations: [
-		...ALL_COMPONENTS
-	],
-	entryComponents: [
 		...ALL_COMPONENTS
 	]
 })

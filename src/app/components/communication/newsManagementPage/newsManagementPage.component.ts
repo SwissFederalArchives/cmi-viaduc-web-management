@@ -61,15 +61,15 @@ export class NewsManagementPageComponent implements OnInit {
 			return disabled;
 		}
 
-		return this.flexGrid.selectedItems.length > 0 ? null : disabled;
+		return this.flexGrid.checkedItems.length > 0 ? null : disabled;
 	}
 
-	public deleteSelected():void {
+	public deleteChecked():void {
 		if (!this.flexGrid) {
 			return;
 		}
 
-		let toDelete: string[] = this.flexGrid.selectedItems.map(n => n.id);
+		let toDelete: string[] = this.flexGrid.checkedItems.map(n => n.id);
 		if (toDelete.length === 0) {
 			return;
 		}

@@ -15,3 +15,5 @@ export * from './modals/inVorlageExportierenModal/inVorlageExportierenModal.comp
 export * from './modals/digitalisierungAusloesenModal/digitalisierungAusloesenModal.component';
 export * from './bestellhistorie/bestellHistorie.component';
 export * from './modals/auftraegeReponierenModal/auftraege-reponieren-modal.component';
+export * from  './modals/auftraegeMahnungSendenModal/auftraege-mahnung-senden-modal.component';
+export * from  './modals/auftraegeErinnerungSendenModal/auftraege-erinnerung-senden-modal.component';
