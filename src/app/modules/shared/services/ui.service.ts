@@ -22,8 +22,8 @@ export class UiService {
 		this._toastr.success(message, title);
 	}
 
-	public showWarning(message: string, title: string = null) {
-		this._toastr.warning(message, title);
+	public showWarning(message: string, title: string = null, options?: any) {
+		this._toastr.warning(message, title, options);
 	}
 
 	public showInfo(message: string, title: string = null) {

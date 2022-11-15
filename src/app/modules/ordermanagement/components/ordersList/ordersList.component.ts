@@ -1,7 +1,8 @@
 import {Component, Input, OnInit, ViewChild, ViewEncapsulation} from '@angular/core';
 import {
 	ApproveStatus,
-	ClientContext, CoreOptions, EntityDecoratorService, ExternalStatus, InternalStatus, ShippingType,
+	// ClientContext, CoreOptions, EntityDecoratorService, ExternalStatus, InternalStatus, ShippingType,
+	CoreOptions, EntityDecoratorService, ExternalStatus, InternalStatus, ShippingType,
 	WijmoService, TranslationService, Utilities as _util, Abbruchgrund, EntscheidGesuchStatus, StammdatenService,
 	ZugaenglichkeitGemaessBga, Eingangsart, DigitalisierungsKategorie, CmiGridComponent, GebrauchskopieStatus
 } from '@cmi/viaduc-web-core';
@@ -78,7 +79,7 @@ export class OrdersListComponent implements OnInit {
 				private _rtr: Router,
 				private _storage: SessionStorageService,
 				private _txt: TranslationService,
-				private _ctx: ClientContext,
+				// private _ctx: ClientContext,
 				private _stamm: StammdatenService) {
 		this.loading = true;
 	}
@@ -101,7 +102,7 @@ export class OrdersListComponent implements OnInit {
 		this.baseFilterString = this.isEinsichtsGesuchListe ? '(orderingType eq 4)' : '(orderingType ne 4)';
 
 		this.orderFlatItems = new ODataCollectionView(this._opt.odataUrl, 'OrderingFlatItems', {
-			requestHeaders: this._ctx.getRequestHeaders(),
+			requestHeaders:  { withCredentials: true },
 			fields: this.columns.filter(x => x.key !== 'unknown').map(x => x.key), // load all fields from server (regardless if visible or not), because some actions depends on them
 			dataTypes: {
 				orderingLesesaalDate: DataType.Date,

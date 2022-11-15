@@ -10,8 +10,15 @@
 			<h1>Systemstatus</h1>
 
 			<h2>Applicationsstatus</h2>
-			<div *ngIf="applicationStatus === true" style="padding: 10px; width: 300px;" class="alert-success">Ok</div>
-			<div *ngIf="applicationStatus != true" style="padding: 10px; width: 300px;" class="alert-danger">Nok</div>
+			<div class="row">
+				<div class="col-md-4">
+					<div *ngIf="applicationStatus === true" style="padding: 10px; width: 100%;" class="alert alert-success">Ok</div>
+					<div *ngIf="applicationStatus != true" style="padding: 10px; width: 100%;" class="alert alert-danger">Nok</div>
+				</div>
+				<div *ngIf="loadingWindowsServices === false"  class="col-md-2">
+					<button class="btn btn-primary icon-refresh"  type="button" (click)="onReload()">Aktualisieren</button>
+				</div>
+			</div>
 
 			<h2>Windows Services</h2>
 			<table>

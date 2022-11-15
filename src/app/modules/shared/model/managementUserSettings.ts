@@ -6,6 +6,16 @@ export interface ManagementUserSettings extends UserUiSettings {
 	userListSettings: UserListUserSettings;
 	einsichtsGesuchSettings: EinsichtsgesuchUserSettings;
 	ablieferndeStelleSettings: AblieferndeStelleSettings;
+	collectionSettings: CollectionSettings;
+	manuelleKorrekturSettings: ManuelleKorrekturSettings;
+}
+
+export interface CollectionSettings {
+	columns: any;
+}
+
+export interface ManuelleKorrekturSettings {
+	columns: any;
 }
 
 export interface OrderUserSettings {

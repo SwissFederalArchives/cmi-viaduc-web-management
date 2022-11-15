@@ -9,11 +9,13 @@ import { TranslationsLoadedResolver } from './translationsLoadedResolver';
 import { UserSettingsResolver } from './userSettingsResolver';
 import {AuthenticatedResolver} from './authenticatedResolver';
 import {ApplicationFeatureGuard} from './applicationFeatureGuard';
+import {AuthGuard} from './authGuard';
 
 export const ALL_GUARDS = [
 	DefaultContextGuard,
 	DefaultRedirectGuard,
-	DefaultAuthenticatedGuard
+	DefaultAuthenticatedGuard,
+	AuthGuard
 ];
 
 export const ALL_RESOLVERS = [

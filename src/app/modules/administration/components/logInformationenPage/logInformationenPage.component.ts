@@ -39,7 +39,7 @@ export class LogInformationenPageComponent implements OnInit {
 						let filename = contentDisposition.substring(contentDisposition.indexOf('filename=') + 10, contentDisposition.length - 1);
 						let blob = event.body;
 						this.loading = false;
-						fileSaver.saveAs(blob, filename);
+						fileSaver.saveAs(blob, filename, { autoBom: false });
 						this._ui.showSuccess(this._txt.get('logInformationen.downloadSuccess', 'Die Loginformationen werden gespeichert.'));
 					} catch (ex) {
 						console.error(ex);

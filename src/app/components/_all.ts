@@ -7,7 +7,6 @@ import {NewsManagementDetailsPageComponent} from './communication/newsManagement
 import {ErrorSmartcardPageComponent} from './errorSmartcardPage/errorSmartcardPage.component';
 import {ErrorNewUserPageComponent} from './errorNewUserPage/errorNewUserPage.component';
 import {ErrorPermissionPageComponent} from './errorPermission/errorPermissionPage.component';
-import {NewsMarkdownPreviewComponent} from './communication/newsMarkdownPreview/news-markdown-preview.component';
 
 export const ALL_COMPONENTS = [
 	RootComponent,
@@ -16,7 +15,6 @@ export const ALL_COMPONENTS = [
 	HomePageComponent,
 	NewsManagementPageComponent,
 	NewsManagementDetailsPageComponent,
-	NewsMarkdownPreviewComponent,
 	ErrorSmartcardPageComponent,
 	ErrorNewUserPageComponent,
 	ErrorPermissionPageComponent

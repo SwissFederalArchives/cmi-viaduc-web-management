@@ -1,3 +1,4 @@
+import {of as observableOf, Observable} from 'rxjs';
 import {Injectable} from '@angular/core';
 import {ActivatedRouteSnapshot, CanActivate} from '@angular/router';
 import {ContextService} from '../services/context.service';
@@ -11,7 +12,7 @@ export class DefaultContextGuard implements CanActivate {
 	constructor(protected context: ClientContext, protected contextService: ContextService) {
 	}
 
-	public async canActivate(route: ActivatedRouteSnapshot): Promise<boolean> {
+	public canActivate(route: ActivatedRouteSnapshot): Observable<boolean> {
 		let language: string = route.params['lang'];
 		if (!_util.isEmpty(language) && !this._languageTester.test(language)) {
 			language = undefined;
@@ -22,10 +23,10 @@ export class DefaultContextGuard implements CanActivate {
 		}
 		language = language || this.context.language;
 		if (language !== this.context.language) {
-			await this.contextService.updateLanguage(language);
+			this.contextService.updateLanguage(language);
 		}
 
-		return true;
+		return observableOf(true);
 	}
 
 }

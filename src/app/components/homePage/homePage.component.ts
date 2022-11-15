@@ -41,22 +41,30 @@ export class HomePageComponent implements OnInit {
 
 		if (!this.authenticated) {
 			this._authenticating = true;
-			if (this._authentication.hasExistingSession()) {
-				this._authentication.tryActivateExistingSession().then((success) => {
-					this._authentication.isSigningIn = false;
-					this._authenticating = false;
-					this._authentication.onSignedIn.next(success);
-				}).catch(err => {
-					console.error(err);
+			this._authentication.isSigningIn = true;
+			this._authentication.activateSession().subscribe(
+				r => {
+					if (r) {
+						this._authentication.isSigningIn = false;
+						this._authenticating = false;					
+						this._authentication.onSignedIn.next(r);
+						this.redirectToOriginBeforeLogin();
+					} else {
+						this._authenticating = false;
+						this._authentication.login();
+					}					
+				},
+				() => {					
 					this._authentication.isSigningIn = false;
 					this._authenticating = false;
 					this._authentication.onSignedIn.next(false);
-				});
-			} else {
-				this._authenticating = false;
-				this._authentication.login();
-			}
+				}
+			);
 		}
+	}
+
+	public redirectToOriginBeforeLogin(): void {
+		this._authentication.redirectToOriginBeforeLogin();
 	}
 
 	public login(): void {

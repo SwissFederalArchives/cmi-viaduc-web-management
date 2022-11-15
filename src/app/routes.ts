@@ -6,11 +6,9 @@ import {NewsManagementPageComponent} from './components/communication/newsManage
 import {Utilities as _util, Routing, CountriesResolver, ApplicationFeatureEnum, CanDeactivateGuard} from '@cmi/viaduc-web-core';
 import {NewsManagementDetailsPageComponent} from './components/communication/newsManagementDetailPage/newsManagementDetailsPage.component';
 import {
-	DefaultContextGuard, DefaultRedirectGuard, DefaultAuthenticatedGuard,
-	PreloadedResolver, ApplicationFeatureGuard
+	DefaultContextGuard, DefaultRedirectGuard, PreloadedResolver, ApplicationFeatureGuard, AuthGuard // , DefaultAuthenticatedGuard,
 } from './modules/client';
 import {UserSettingsResolver} from './modules/client/routing/userSettingsResolver';
-import {AuthenticatedResolver} from './modules/client/routing/authenticatedResolver';
 import {ErrorSmartcardPageComponent} from './components/errorSmartcardPage/errorSmartcardPage.component';
 import {ErrorNewUserPageComponent} from './components/errorNewUserPage/errorNewUserPage.component';
 import {ErrorPermissionPageComponent} from './components/errorPermission/errorPermissionPage.component';
@@ -30,36 +28,50 @@ const defaultRouteChildren: any = <Routes>[
 	{
 		path: 'administration',
 		loadChildren:  () => import('./modules/administration/administration.module').then(m => m.AdministrationModule),
-		resolve: {preloaded: PreloadedResolver, authenticated: AuthenticatedResolver},
+		canActivateChild: [AuthGuard],
+		resolve: {preloaded: PreloadedResolver},
+	},
+	{
+		path: 'collection',
+		loadChildren:  () => import('./modules/collection/collection.module').then(m => m.CollectionModule),
+		canActivateChild: [AuthGuard],
+		resolve: {preloaded: PreloadedResolver},
+	},
+	{
+		path: 'anonymization',
+		loadChildren:  () => import('./modules/anonymization/anonymization.module').then(m => m.AnonymizationModule),
+		canActivateChild: [AuthGuard],
+		resolve: {preloaded: PreloadedResolver},
 	},
 	{
 		path: 'reporting',
 		loadChildren:  () => import('./modules/reporting/reporting.module').then(m => m.ReportingModule),
-		resolve: {preloaded: PreloadedResolver, authenticated: AuthenticatedResolver},
+		canActivateChild: [AuthGuard],
+		resolve: {preloaded: PreloadedResolver},
 	},
 	{
 		path: 'benutzerundrollen',
 		_localize: {'fr': 'usersandroles', 'it': 'usersandroles', 'en': 'usersandroles'},
 		loadChildren:  () => import('./modules/usersAndRoles/usersAndRoles.module').then(m => m.UsersAndRolesModule),
-		canActivate: [DefaultAuthenticatedGuard],
+		canActivateChild: [AuthGuard],
 		resolve: {preloaded: UserSettingsResolver, countries: CountriesResolver}
 	},
 	{
 		path: 'auftragsuebersicht',
 		loadChildren:  () => import('./modules/ordermanagement/ordermanagement.module').then(m => m.OrderManagementModule),
-		canActivate: [DefaultAuthenticatedGuard],
+		canActivateChild: [AuthGuard],
 		resolve: {user: UserSettingsResolver}
 	},
 	{
 		path: 'behoerdenzugriff',
 		loadChildren:  () => import('./modules/behoerdenZugriff/behoerdenZugriff.module').then(m => m.BehoerdenZugriffModule),
-		canActivate: [DefaultAuthenticatedGuard],
+		canActivateChild: [AuthGuard],
 		resolve: {preloaded: PreloadedResolver}
 	},
 	{
 		path: 'kommunikation',
 		_localize: {'fr': 'communication', 'it': 'communication', 'en': 'communication'},
-		canActivate: [DefaultAuthenticatedGuard],
+		canActivateChild: [AuthGuard],
 		children: [
 			{
 				path: '',

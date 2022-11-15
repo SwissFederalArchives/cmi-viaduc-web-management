@@ -29,6 +29,19 @@
 	</ul>
 </div>
 
+
+
+<div class="nav-box box-collection">
+	<div class="header">
+		<span>{{'Anonymisierung' | translate:'home.anonymizationTitle' }}</span>
+	</div>
+	<ul>
+		<li [ngClass]="canSeeAnonymization() ? '' : 'disabled'" data-toggle="tooltip" [title]="!canSeeAnonymization() ? 'Keine Berechtigung' : ''">
+			<a href="#{{ '/de/anonymization/manuelleKorrekturen' | localizeLink }}">{{'Manuelle Korrekturen' | translate:'home.ManuelleKorrekturenTitle' }}</a>
+		</li>
+	</ul>
+</div>
+
 <div class="nav-box box-behoerdenZugriff">
 	<div class="header">
 		<span>{{'Behörden-Zugriff' | translate:'home.behoerdenZugriffTitle' }}</span>
@@ -39,6 +52,18 @@
 		</li>
 		<li [ngClass]="canSeeAccessTokens() ? '' : 'disabled'" data-toggle="tooltip" [title]="!canSeeAccessTokens() ? 'Keine Berechtigung' : ''">
 			<a href="#{{ '/de/behoerdenzugriff/token' | localizeLink }}">{{'Access-Tokens' | translate:'home.tokenLabel' }}</a>
+		</li>
+	</ul>
+</div>
+
+
+<div class="nav-box box-collection">
+	<div class="header">
+		<span>{{'Sammlungen' | translate:'home.collectionTitle' }}</span>
+	</div>
+	<ul>
+		<li [ngClass]="canSeeCollection() ? '' : 'disabled'" data-toggle="tooltip" [title]="!canSeeCollection() ? 'Keine Berechtigung' : ''">
+			<a href="#{{ '/de/collection/collection' | localizeLink }}">{{'Virtuelle Sammlungen' | translate:'home.canSeeCollection' }}</a>
 		</li>
 	</ul>
 </div>

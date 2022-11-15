@@ -1,5 +1,5 @@
 import {Component, Input} from '@angular/core';
-import {Entity} from '@cmi/viaduc-web-core';
+import {ArchiveRecordContextItem} from '@cmi/viaduc-web-core';
 
 @Component({
 	selector: 'cmi-archivplan-context',
@@ -8,7 +8,7 @@ import {Entity} from '@cmi/viaduc-web-core';
 })
 export class ArchivplanKontextComponent {
 	@Input()
-	public items: Entity[];
+	public items: ArchiveRecordContextItem[];
 
 	public inset: number = 1;
 

@@ -212,7 +212,7 @@ export class UserRolesPageComponent implements OnInit {
 		this._loadDataMaps();
 		this._refreshHiddenVisibleColumns();
 		this.userList = new ODataCollectionView(this._opt.odataUrl, 'UserOverview', {
-			requestHeaders: this._context.getRequestHeaders(),
+			requestHeaders: { withCredentials: true },
 			fields: this._getFieldsToLoad(),
 			dataTypes: {
 				created: DataType.Date,

@@ -1,6 +1,7 @@
 import {Injectable, Injector} from '@angular/core';
 import {Router} from '@angular/router';
-import {Observable, BehaviorSubject} from 'rxjs';
+import {Observable, BehaviorSubject, of} from 'rxjs';
+import {catchError, map} from 'rxjs/operators';
 import {ContextService} from './context.service';
 import {
 	ConfigService,
@@ -38,7 +39,9 @@ export class AuthenticationService {
 	}
 
 	public login(): void {
-		const callbackUrl = _util.addToString(window.location.pathname, '/', '#/auth/success?login'); // relative url
+
+		const callbackUrl = `${window.location.pathname}Auth/ExternalSignIn`; // relative url
+
 		let returnUrl = window.location.hash.replace('#', '');
 
 		let loginUrl = _util.addToString(this._options.serverUrl + this._options.publicPort, '/', 'AuthServices/SignIn?ReturnUrl=' + encodeURIComponent(callbackUrl));
@@ -47,23 +50,25 @@ export class AuthenticationService {
 	}
 
 	public logout(): void {
+		const callbackUrl = `${window.location.pathname}Auth/ExternalSignOut`; // relative url
 		this.clearCurrentSession();
-		const baseUrl = window.location.pathname;
-		const logoutUrl = _util.addToString(baseUrl, '/', (baseUrl.indexOf('private') < 0 ? 'private/' : '') + '?logout'); // relative url
+
+		const logoutUrl = _util.addToString(this._options.serverUrl + this._options.publicPort, '/', 'AuthServices/Logout?ReturnUrl=' + encodeURIComponent(callbackUrl));
 		window.location.assign(logoutUrl);
 	}
 
-	public clearRedirectUrl(): void {
-		this._sessionStorage.setItem(authReturnUrlKey, '');
+	public setDefaultRedirectUrl(): void {
+		const homeUrl = this._urlService.getHomeUrl();
+		this._sessionStorage.setUrl(authReturnUrlKey, homeUrl);
 	}
 
-	public async redirectToOriginBeforeLogin(): Promise<void> {
-		const returnUrl = this._sessionStorage.getUrl(authReturnUrlKey);
+	public redirectToOriginBeforeLogin(): void {
+		let returnUrl = this._sessionStorage.getUrl(authReturnUrlKey);
 
-		this.clearRedirectUrl();
-		if (returnUrl !== '') {
+		this.setDefaultRedirectUrl();
+		if (returnUrl && returnUrl !== '') {
 			const router = this._injector.get(Router);
-			await router.navigate([returnUrl]);
+			router.navigate([returnUrl]);
 		}
 	}
 
@@ -77,9 +82,8 @@ export class AuthenticationService {
 		this.setCurrentSession(<Session>{});
 	}
 
-	private _initSession(token: string, identity?: any): void {
+	private _initSession(identity?: any): void {
 		const session = <Session>{
-			token: token,
 			inited: new Date().getTime()
 		};
 
@@ -144,65 +148,28 @@ export class AuthenticationService {
 		return this._http.get<any>(claimsUrl);
 	}
 
-	public activateSession(): Promise<any> {
-		const baseUrl = this._options.serverUrl + this._options.publicPort;
-		const tokenUrl = baseUrl + '/token';
-		const oAuthParameters = 'grant_type=client_credentials';
-
-		return this._http.post<any>(tokenUrl, oAuthParameters).toPromise().then(
-			response => {
-				let token = response.access_token;
-				this._initSession(token);
-				if (token !== '') {
-					return this._getIdentity().toPromise().then(
-						r => {
-							return this.handleIdentityResponse(r, token);
-						},
-						err => {
-							this.clearCurrentSession();
-							console.error(err);
-							throw err;
-						}
-					);
-				} else {
-					return false;
-				}
-			},
-			error => {
-				console.error(error);
-				throw error;
-			}
+	public activateSession(): Observable<boolean> {
+		this._initSession();
+		return this._getIdentity().pipe(map((r) => {
+				return this.handleIdentityResponse(r);
+			}), catchError(() => {
+				this.clearCurrentSession();
+				return of(false);
+			})
 		);
-	}
-
-	public async activateSessionWithToken(token: string): Promise<any> {
-		this._initSession(token);
-		if (token !== '') {
-			return this._getIdentity().toPromise().then(response_identity => {
-				return this.handleIdentityResponse(response_identity, token);
-			});
-		} else {
-			return false;
-		}
 	}
 
 	private _getSessionFromStorage(): Session {
 		return this._sessionStorage.getItem<Session>(currentSessionKey);
 	}
 
-	public hasExistingSession(): boolean {
-		let session = this._getSessionFromStorage();
-		return _util.isDefined(session) && _util.isDefined(session.token);
-	}
-
 	public async tryActivateExistingSession(): Promise<any> {
 		let session = this._getSessionFromStorage();
 		if (session != null && session.authenticated) {
-			let token = session.token;
-			this._initSession(session.token);
+			this._initSession();
 
 			return this._getIdentity().toPromise().then(response_claims => {
-				return this.handleIdentityResponse(response_claims, token);
+				return this.handleIdentityResponse(response_claims);
 			}, err => {
 				console.error(err);
 				this.clearCurrentSession();
@@ -211,11 +178,11 @@ export class AuthenticationService {
 		}
 	}
 
-	private handleIdentityResponse(response: any, token: any) {
+	private handleIdentityResponse(response: any) {
 		const router = this._injector.get(Router);
 		switch (response.authStatus) {
 			case AuthStatus.ok:
-				this._initSession(token, response);
+				this._initSession(response);
 				return true;
 			case AuthStatus.keineKerberosAuthentication:
 				router.navigate([this._urlService.getErrorSmartcardUrl()]);

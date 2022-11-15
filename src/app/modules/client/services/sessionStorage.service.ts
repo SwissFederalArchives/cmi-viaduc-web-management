@@ -6,6 +6,10 @@ export class SessionStorageService {
 		return <T>JSON.parse(window.sessionStorage.getItem(key) || null);
 	}
 
+	public removeItem(key: string): void {
+		window.sessionStorage.removeItem(key);
+	}
+
 	public setItem(key: string, item: any): void {
 		window.sessionStorage.setItem(key, JSON.stringify(item));
 	}

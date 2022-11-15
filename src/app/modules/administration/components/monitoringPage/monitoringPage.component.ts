@@ -17,12 +17,20 @@ export class MonitoringPageComponent implements  OnInit {
 	public testResults: MonitoringResult[] = [];
 
 	constructor (private _txt: TranslationService, private _url:UrlService, private _monitoring: MonitoringService) {
-		this.getMonitoredServices();
-		this.getTestResults();
 	}
 
 	public ngOnInit(): void {
 		this._buildCrumbs();
+
+		this.getMonitoredServices();
+		this.getTestResults();
+	}
+
+	public onReload(): void {
+		this.statuses = [];
+		this.testResults = [];
+
+		this.ngOnInit();
 	}
 
 	private _buildCrumbs(): void {

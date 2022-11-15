@@ -13,8 +13,21 @@ export class User {
 	public emailAddress: string;
 	public phoneNumber: string;
 	public skypeName: string;
+	public mobileNumber: string;
 	public setting: any;
 	public tokens: string[];
 	public ablieferndeStelleList: AblieferndeStelle[];
 	public rolePublicClient: string;
+	public birthday: string;
+	public displayName: string;
+	public userExtId: string;
+	public language: string;
+	public legalAgreementConset: boolean;
+	public fabasoftDossier: string;
+	public createdOn: Date;
+	public createdBy: string;
+	public modifiedOn: Date;
+	public modifiedBy: string;
+	public downloadLimitDisabledUntil: Date;
+	public digitalisierungsbeschraenkung: Date;
 }

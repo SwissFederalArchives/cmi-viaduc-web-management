@@ -1,3 +1,5 @@
+
+import {Observable} from 'rxjs';
 import {Injectable, Injector} from '@angular/core';
 import {ActivatedRouteSnapshot, Router} from '@angular/router';
 import {ClientContext, Utilities as _util} from '@cmi/viaduc-web-core';
@@ -14,8 +16,8 @@ export class DefaultRedirectGuard extends DefaultContextGuard {
 		super(context, contextService);
 	}
 
-	public async canActivate(route: ActivatedRouteSnapshot): Promise<boolean> {
-		const can = await super.canActivate(route);
+	public canActivate(route: ActivatedRouteSnapshot): Observable<boolean> {
+		const can = super.canActivate(route);
 
 		let url = route.url.reduce((l, s) => {
 			l += '/' + s.path;

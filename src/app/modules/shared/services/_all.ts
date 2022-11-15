@@ -6,6 +6,7 @@ import {UserService} from './user.service';
 import {DetailPagingService} from './detailPaging.service';
 import {ErrorService} from './error.service';
 import {FileDownloadService} from './fileDownload.service';
+import {ConfigService, TranslationService} from '@cmi/viaduc-web-core';
 
 export const ALL_SERVICES = [
 	AuthorizationService,
@@ -15,5 +16,7 @@ export const ALL_SERVICES = [
 	DetailPagingService,
 	UserService,
 	ErrorService,
-	FileDownloadService
+	FileDownloadService,
+	TranslationService,
+	ConfigService
 ];

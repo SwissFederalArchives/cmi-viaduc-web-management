@@ -5,6 +5,7 @@ import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {ALL_SERVICES} from './services/_all';
 import {ALL_PIPES} from './pipes/_all';
 import {WijmoModule, CoreModule} from '@cmi/viaduc-web-core';
+import {MarkdownModule} from 'ngx-markdown';
 
 @NgModule({
 	declarations: [
@@ -16,12 +17,14 @@ import {WijmoModule, CoreModule} from '@cmi/viaduc-web-core';
 		WijmoModule,
 		CommonModule,
 		FormsModule,
+		MarkdownModule,
 		ReactiveFormsModule
 	],
 	exports: [
 		CoreModule,
 		WijmoModule,
 		FormsModule,
+		MarkdownModule,
 		ReactiveFormsModule,
 		...ALL_COMPONENTS,
 		...ALL_PIPES

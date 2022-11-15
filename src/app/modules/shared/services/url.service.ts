@@ -48,6 +48,10 @@ export class UrlService {
 		return this.localizeUrl(this._context.defaultLanguage, '/benutzerundrollen/benutzer');
 	}
 
+	public getManuelleKorrekturenUrl(): string {
+		return this.localizeUrl(this._context.defaultLanguage, '/anonymization/manuelleKorrekturen');
+	}
+
 	public getExternalHostUrl(): string {
 		const scheme = window.location.protocol;
 		let url = scheme + '//' + window.location.hostname;

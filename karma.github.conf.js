@@ -26,7 +26,7 @@ module.exports = function (config) {
 			thresholds: {
 				emitWarning: false,
 				global: {
-					statements: 45
+					statements: 25
 				}
 			}
 		},
@@ -44,6 +44,8 @@ module.exports = function (config) {
             }
         },
 		singleRun: false,
+		//if true, Karma fails on running empty test-suites
+		failOnEmptyTestSuite:false,
 		browserDisconnectTimeout: 10000,
 		browserDisconnectTolerance: 3,
 		browserNoActivityTimeout: 60000,

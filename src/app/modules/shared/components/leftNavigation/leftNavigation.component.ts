@@ -78,4 +78,12 @@ export class LeftNavigationComponent implements OnInit {
 	public canSeeStatisticReportsViewConverterProgress(): boolean {
 		return this._authorization.hasApplicationFeature(ApplicationFeatureEnum.ReportingStatisticsConverterProgressEinsehen);
 	}
+
+	public canSeeCollection(): boolean {
+		return this._authorization.hasApplicationFeature(ApplicationFeatureEnum.AdministrationSammlungenEinsehen);
+	}
+
+	public canSeeAnonymization(): boolean {
+		return true;
+	}
 }

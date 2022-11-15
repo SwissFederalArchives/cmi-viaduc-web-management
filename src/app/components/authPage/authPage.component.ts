@@ -15,26 +15,18 @@ export class AuthPageComponent implements OnInit {
 
 	public ngOnInit(): void {
 		this._authentication.isSigningIn = true;
-
-		let token = _util.getQueryParams(window.location.hash)['token'];
-		let activate = !_util.isEmpty(token)
-			? this._authentication.activateSessionWithToken(token)
-			: this._authentication.activateSession();
-
-		activate.then(
+		this._authentication.activateSession().subscribe(
 			r => {
 				this._authentication.isSigningIn = false;
 				this._authentication.onSignedIn.next(r);
-				this.success = true;
 				this.redirectToOriginBeforeLogin();
 			},
-			e => {
+			() => {
 				this.success = false;
 				this._authentication.isSigningIn = false;
 				this._authentication.onSignedIn.next(false);
-				throw e;
-			});
-
+			}
+		);
 	}
 
 	public redirectToOriginBeforeLogin(): void {

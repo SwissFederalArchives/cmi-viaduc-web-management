@@ -12,7 +12,8 @@ import * as fileSaver from 'file-saver';
 import {HttpEventType} from '@angular/common/http';
 import * as moment from 'moment';
 
-import { NgForm} from '@angular/forms';
+import {FormBuilder, FormControl, FormGroup, Validators} from '@angular/forms';
+import {UserRolesDetailPageErrorMessages} from './userRolesDetailPageErrorMessages';
 
 @Component({
 	selector: 'cmi-viaduc-user-roles-detail-page',
@@ -20,52 +21,33 @@ import { NgForm} from '@angular/forms';
 	styleUrls: ['./userRolesDetailPage.component.less']
 })
 export class UserRolesDetailPageComponent extends ComponentCanDeactivate implements OnInit, AfterViewChecked {
-
+	public errors: { [key: string]: string } = {};
 	public loading: boolean;
 
 	public crumbs: any[];
+	public stillSelectedRoles: any;
+	public stillAvailableRoles: any;
+	private allRoles: any;
+	private initialeRoles: any;
 	public detail: DetailResult<any>;
-	private _hasChanges: boolean;
-
-	public selectedRolepublic: string;
 	public preSelectedRolepublic: string;
-	public selectedResearcherGroup: boolean;
-	public selectedResearcherGroupOld: boolean;
-	public selectedBarInternalConsultation: boolean;
 	public selectedIdentifizierungsmittel: any;
-
-	// https://www.w3.org/TR/html5/forms.html#valid-e-mail-address
-	public emailRegexPattern: string = '^[a-zA-Z0-9.!#$%&\'*+\\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$';
-	public phonenumberRegexPattern: string = '^[()+]?([0-9][\\s()-]*){6,20}$';
 
 	public language: any = [{name:'Deutsch', code:'de'}, {name:'Französisch', code:'fr'}, {name:'Italienisch', code:'it'}, {name:'Englisch', code:'en'}];
 	private countries: any;
 
 	public showModal: boolean;
 	public showVerifyModal:boolean;
-	public get hasChanges(): boolean {
-		return this._hasChanges;
-	}
-
-	public set hasChanges(value: boolean) {
-		this._hasChanges = value;
-		if (this.listExcluded) {
-			this.listExcluded.refresh();
-		}
-		if (this.listIncluded) {
-			this.listIncluded.refresh();
-		}
-	}
 
 	@ViewChild('listExcluded', { static: false })
 	public listExcluded: WjListBox;
 	@ViewChild('listIncluded', { static: false })
 	public listIncluded: WjListBox;
-	@ViewChild('formUserDetail', {static: false})
-	public formUserDetail: NgForm;
-
+	public myForm: FormGroup;
 	public ablieferndeStelleAllList: AblieferndeStelle[];
-	private ablieferndeStelleListInitial: AblieferndeStelle[];
+	private stillSelectedAblieferndeStelleList: any;
+	private initialeAblieferndeStelleList: any;
+	private rolesIsDirty: Boolean;
 
 	constructor(private _context: ClientContext, public _authorization: AuthorizationService, private _roleService: RoleService, private _txt: TranslationService,
 				private _url: UrlService,
@@ -77,7 +59,8 @@ export class UserRolesDetailPageComponent extends ComponentCanDeactivate impleme
 				private _http: HttpService,
 				private _dps: DetailPagingService,
 				private _errService: ErrorService,
-				private _changeDetectionRef: ChangeDetectorRef) {
+				private _changeDetectionRef: ChangeDetectorRef,
+				private formbuilder: FormBuilder) {
 		super();
 	}
 
@@ -96,33 +79,32 @@ export class UserRolesDetailPageComponent extends ComponentCanDeactivate impleme
 		this.countries = this._countriesService.sortCountriesByName(countries);
 	}
 
+	public include(): void {
+		this.rolesIsDirty = true;
+		const role = this.listExcluded.selectedItem;
+		this.detail.item.roles.push(role);
+		this._remove(this.stillAvailableRoles, role);
+		this.listExcluded.refresh();
+		this.listIncluded.refresh();
+	}
+
+	public exclude(): void {
+		this.rolesIsDirty = true;
+		const role = this.listIncluded.selectedItem;
+		this._eiamRoleHandlingWarnungen(role.identifier);
+		this.stillAvailableRoles.push(role);
+		this._remove(this.detail.item.roles, role);
+		this.listExcluded.refresh();
+		this.listIncluded.refresh();
+	}
+
 	public ngAfterViewChecked(): void {
 		this._changeDetectionRef.detectChanges();
 	}
 
-	public include(): void {
-		const role = this.listExcluded.selectedItem;
-		this.detail.item.roles.push(role);
-		this._remove(this.detail['roles'], role);
-		this.hasChanges = true;
-	}
-
-	public exclude(): void {
-		const role = this.listIncluded.selectedItem;
-		this._eiamRoleHandlingWarnungen(role.identifier);
-		this.detail['roles'].push(role);
-		this._remove(this.detail.item.roles, role);
-		this.hasChanges = true;
-	}
-
 	public async saveUser(): Promise<void> {
 		this.loading = true;
-
-		// Checkbox Wert abfüllen für Mapping bzw. speichern
-		this.detail.item.rolePublicClient = this.selectedRolepublic;
-		this.detail.item.researcherGroup = this.selectedResearcherGroup;
-		this.detail.item.barInternalConsultation = this.selectedBarInternalConsultation;
-
+		this.reassembleDatatype();
 		this._userService.updateAllUserData(this.detail.item).subscribe(
 			async res => {
 				this._ui.showSuccess(this._txt.get('userAndRoles.userSuccessfullySaved', 'Benutzerdaten erfolgreich gespeichert'));
@@ -150,27 +132,29 @@ export class UserRolesDetailPageComponent extends ComponentCanDeactivate impleme
 			async res => {
 				this.loading = false;
 				this._ui.showSuccess(this._txt.get('userAndRoles.userroleSuccessfullySaved', 'Benutzerrollen erfolgreich gespeichert'));
+				this.stillSelectedRoles = null;
+				this.rememberSelectedAblieferndeStelle();
 				await this._reload();
+				this.rolesIsDirty = false;
 			},
 			err => {
 				this.loading = false;
 				this._ui.showError(this._txt.get('userAndRoles.userroleCouldNotBeSaved', 'Benutzerrollen konnte nicht gespeichert werden'), err.message);
 			}
 		);
-
 	}
 
 	public async saveAblieferndeStellen(): Promise<void> {
 		this.loading = true;
+		this.stillSelectedAblieferndeStelleList = null;
 		const ablieferndeStelleIds = this.detail.item.ablieferndeStelleList != null ? this.detail.item.ablieferndeStelleList.map(as => as.ablieferndeStelleId) : [];
-		this.hasChanges = false;
 		this._userService.cleanAndAddAblieferndeStelle(this.detail.item.id, ablieferndeStelleIds).subscribe(
 			async res => {
-				let access = this.detail.item.access || {};
+			let access = this.detail.item.access || {};
 				this.detail.item.tokens = access.asTokens || [];
 				this._ui.showSuccess(this._txt.get('userAndRoles.assignedAblieferndeStellenSuccessfullySaved', 'Zuständige Stellen erfolgreich gespeichert'));
+				this.rememberSelectedRoles();
 				await this._reload();
-				this.ablieferndeStelleListInitial =  Object.assign([], this.detail.item.ablieferndeStelleList);
 			},
 			err => {
 				this.loading = false;
@@ -182,9 +166,51 @@ export class UserRolesDetailPageComponent extends ComponentCanDeactivate impleme
 		);
 	}
 
-	public async reset(): Promise<void> {
-		await this._reload();
-		this.hasChanges = false;
+	public resetUserData(): void {
+		this.myForm.reset();
+		this.myForm.patchValue({
+			familyName: this.detail.item.familyName,
+			firstName: this.detail.item.firstName,
+			organization: this.detail.item.organization,
+			street: this.detail.item.street,
+			streetAttachment: this.detail.item.streetAttachment,
+			zipCode: this.detail.item.zipCode,
+			town: this.detail.item.town,
+			countryCode: this.detail.item.countryCode,
+			phoneNumber: this.detail.item.phoneNumber,
+			mobileNumber: this.detail.item.mobileNumber,
+			birthday: this.detail.item.birthday,
+			emailAddress: this.detail.item.emailAddress,
+			fabasoftDossier: this.detail.item.fabasoftDossier,
+			id: this.detail.item.id,
+			userExtId: this.detail.item.userExtId,
+			language: this.detail.item.language,
+			downloadLimitDisabledUntil: this.detail.item.downloadLimitDisabledUntil,
+			digitalisierungsbeschraenkungAufgehobenBis: this.detail.item.digitalisierungsbeschraenkungAufgehobenBis,
+			createModifiyData: this.detail.item.createModifiyData,
+			rolePublicClient: this.detail.item.rolePublicClient,
+			researcherGroup: this.detail.item.researcherGroup,
+			barInternalConsultation: this.detail.item.barInternalConsultation,
+		});
+		this.recalculateResearcherGroup();
+	}
+
+	public resetRoleManagement (): void {
+		this.rolesIsDirty = false;
+		this.detail.item.roles = [];
+		this.stillAvailableRoles = [];
+		this.distributeAssignedRoles(this.initialeRoles, this.detail.item.roles );
+		this.listIncluded.refresh();
+		this.listExcluded.refresh();
+	}
+
+	public resetAccessTokens(): void {
+		this.detail.item.ablieferndeStelleList = [];
+		if (this.initialeAblieferndeStelleList) {
+			this.initialeAblieferndeStelleList.forEach(ablieferndeStelle => {
+				this.detail.item.ablieferndeStelleList.push(ablieferndeStelle);
+			});
+		}
 	}
 
 	public goToBenutzerList(): void {
@@ -201,17 +227,9 @@ export class UserRolesDetailPageComponent extends ComponentCanDeactivate impleme
 			(eiamRoles.indexOf(this._authorization.roles.APPO) >= 0 || eiamRoles.indexOf(this._authorization.roles.ALLOW) >= 0 );
 	}
 
-	public researcherGroupDdsDisabled(): boolean {
-		if (this.detail.item.emailAddress) {
-			return this.editUserHasOe3Role ||
-				!this.detail.item.emailAddress.endsWith('@dodis.ch') || !this.allowForschungsgruppeDdsBearbeiten;
-		}
-		return false;
-	}
-
 	public researcherGroupDdsModalAnswer(value: boolean) {
-		this.selectedResearcherGroupOld = value;
-		this.selectedResearcherGroup = value;
+		this.myForm.controls['researcherGroup'].setValue(value);
+		this.myForm.controls['researcherGroup'].markAsDirty();
 	}
 
 	public oeDreiDisabled(): boolean {
@@ -223,7 +241,7 @@ export class UserRolesDetailPageComponent extends ComponentCanDeactivate impleme
 	}
 
 	public getCheckedStatusForRolePublic(value: string): boolean {
-		return value && value.indexOf(this.selectedRolepublic) === 0;
+		return value && value.indexOf(this.myForm.controls['rolePublicClient'].value ) === 0;
 	}
 
 	public setCheckedStatusForRolePublic(value: string) {
@@ -233,25 +251,18 @@ export class UserRolesDetailPageComponent extends ComponentCanDeactivate impleme
 
 		// Forschungsgruppe DDS darf nicht für Ö2 gewählt werden
 		if (value.indexOf(this._authorization.roles.Oe2) === 0) {
-			this.selectedResearcherGroup = false;
+			this.myForm.controls['researcherGroup'].setValue(false);
 		}
 
-		this.selectedRolepublic = value;
+		this.myForm.controls['rolePublicClient'].setValue(value);
+		this.myForm.controls['rolePublicClient'].markAsDirty();
 	}
 
 	public toggelSelectedResearcherGroup(e: MouseEvent): void {
-		if (this.selectedResearcherGroupOld === false) {
+		if (this.myForm.controls['researcherGroup'].value === false) {
 			this.showVerifyModal = true;
 			e.preventDefault();
 		}
-		this._hasChanges = true;
-		this.selectedResearcherGroupOld = false;
-		this.selectedResearcherGroup = false;
-	}
-
-	public toggelSelectedBarInternalConsultation(): void {
-		this._hasChanges = true;
-		this.selectedBarInternalConsultation = this.selectedBarInternalConsultation === true;
 	}
 
 	public onChangedentIfierungsmittel(event) {
@@ -274,7 +285,7 @@ export class UserRolesDetailPageComponent extends ComponentCanDeactivate impleme
 					try {
 						this.loading = false;
 						let blob = event.body;
-						fileSaver.saveAs(blob, this.detail.item.id + '.pdf');
+						fileSaver.saveAs(blob, this.detail.item.id + '.pdf', { autoBom: false });
 					} catch (ex) {
 						console.error(ex);
 					}
@@ -300,11 +311,13 @@ export class UserRolesDetailPageComponent extends ComponentCanDeactivate impleme
 				const detailErrorMessage = err.error && err.error.message ? this._txt.get('userAndRoles.uploadfail', 'Identifizierungsmittel konnte nicht gespeichert werden') +
 					' (' + err.error.message + ')' :
 					this._txt.get('userAndRoles.uploadfail', 'Identifizierungsmittel konnte nicht gespeichert werden');
-				this._ui.showError(detailErrorMessage, err.message);
+
+				this._ui.showError(detailErrorMessage,  err.message);
 			},
 			() => {
 				this.detail.item.hasIdentifizierungsmittel = true;
 				this.setCheckedStatusForRolePublic(this._authorization.roles.Oe3);
+				this.recalculateResearcherGroup();
 				this.selectedIdentifizierungsmittel = null;
 				this.loading = false;
 			}
@@ -326,6 +339,7 @@ export class UserRolesDetailPageComponent extends ComponentCanDeactivate impleme
 				this.detail.item.hasIdentifizierungsmittel = false;
 				this.setCheckedStatusForRolePublic(this._authorization.roles.Oe2);
 				this.selectedIdentifizierungsmittel = null;
+				this.recalculateResearcherGroup();
 				this.loading = false;
 			}
 		);
@@ -336,8 +350,10 @@ export class UserRolesDetailPageComponent extends ComponentCanDeactivate impleme
 	}
 
 	public onOpenModalClick(event, rolePublicClient: string, allowOpenModal: boolean): void {
-		this._hasChanges = true;
-		if (rolePublicClient === this.selectedRolepublic || !allowOpenModal) {
+		// Auswahl muss zurückgesetzt werden, denn der effektive Wechsel muss im Dialog bestätigt werden
+		this.setCheckedStatusForRolePublic(this.myForm.controls['rolePublicClient'].value);
+		// Es kann nicht von Oe2 zu Oe3 gewechselt werden. Dies muss ueber ein PDF upload gemacht werden.
+		if (rolePublicClient === this.myForm.controls['rolePublicClient'].value || !allowOpenModal) {
 			return;
 		}
 
@@ -345,12 +361,12 @@ export class UserRolesDetailPageComponent extends ComponentCanDeactivate impleme
 		event.preventDefault();
 
 		this.preSelectedRolepublic = rolePublicClient;
-		// Auswahl muss zurückgesetzt werden, denn der effektive Wechsel muss im Dialog bestätigt werden
-		this.setCheckedStatusForRolePublic(this.selectedRolepublic);
 		this.showModal = true;
 	}
 
 	public onOkClick(event): void {
+		this.showModal = false;
+
 		switch (this.preSelectedRolepublic) {
 			case this._authorization.roles.Oe2:
 				this.downgradToOe2();
@@ -370,12 +386,40 @@ export class UserRolesDetailPageComponent extends ComponentCanDeactivate impleme
 			default:
 				throw new Error();
 		}
+	}
 
-		this.showModal = false;
+	public dateValidator(control: FormControl): any | null {
+		if (control.value === null || control.value === '' || moment(control.value, 'DD.MM.YYYY', true).isValid()) {
+			if (control.invalid) {
+				control.setErrors(null);
+				this.updateErrorMessages();
+			}
+			return null;
+		}
+		// return error object
+		return {'invalidDate': {'value': control.value}};
+	}
+
+	public dateRangeValidator(control: FormControl): any | null {
+		let dateString = control.value;
+		if (!dateString || dateString === '' )  {
+			if (control.invalid) {
+				control.setErrors(null);
+				this.updateErrorMessages();
+			}
+			return null;
+		}
+
+		if (this.getNextThirtyDays.findIndex(e => e === dateString) >= 0) {
+			return null;
+		}
+
+		// return error object
+		return {'invalidDateRange': {'value': control.value}};
 	}
 
 	public GetModalMessage(): string {
-		switch (this.selectedRolepublic) {
+		switch (this.myForm.controls['rolePublicClient'].value) {
 			case this._authorization.roles.Oe2:
 				return this._txt.get('user.upload.oe2ToOe3Message', 'Nach erfolgtem Upload des Identifizierungsnachweises als PDF-Datei ' +
 					'erfolgt ein automatischer Rollenwechsel durch das System. Der Benutzer erhält durch den Rollenwechsel erweiterte Rechte. Möchten Sie fortfahren?');
@@ -400,7 +444,7 @@ export class UserRolesDetailPageComponent extends ComponentCanDeactivate impleme
 	}
 
 	public GetModalTitel(): string {
-		switch (this.selectedRolepublic) {
+		switch (this.myForm.controls['rolePublicClient'].value) {
 			case this._authorization.roles.Oe2:
 				return this._txt.get('user.upload.toOe3Title', 'Upload Identifizierungsmittel');
 			case this._authorization.roles.Oe3:
@@ -428,15 +472,6 @@ export class UserRolesDetailPageComponent extends ComponentCanDeactivate impleme
 		}
 	}
 
-	public setDate(str: string, key: string): void {
-		const oldValue = this.detail.item[key];
-		// Required to check old/new values as loading the form also calls this method
-		if (str !== oldValue) {
-			this.detail.item[key] = str;
-			this.formUserDetail.form.markAsDirty();
-		}
-	}
-
 	public detailPagingEnabled(): boolean {
 		return this._dps.getCurrentIndex() > -1;
 	}
@@ -458,43 +493,25 @@ export class UserRolesDetailPageComponent extends ComponentCanDeactivate impleme
 	}
 
 	public getFormIsDirty():boolean {
-		if (this.formUserDetail && this.detail.item) {
-			return this.formUserDetail.dirty || this.hasChanges || this.isAblieferndeStelleChanged();
-		}
-		return this.hasChanges;
-	}
-
-	private isAblieferndeStelleChanged(): boolean {
-		// there are no AblieferndeStelle
-		if (!this.detail || (!this.ablieferndeStelleListInitial && !this.detail.item.ablieferndeStelleList)) {
-			return false;
-		} // different number of AblieferndeStelle -> one or more was added or deleted
-		if (this.ablieferndeStelleListInitial.length !== this.detail.item.ablieferndeStelleList.length) {
+		if (this.rolesIsDirty) {
 			return true;
-			// Both lists have no entries -> no AblieferndeStelle
-		} else if (this.ablieferndeStelleListInitial.length === 0) {
-			return false;
-			// the lists have the same number of entries
-		} else {
-			let result = true;
-			for (let i = 0; i < this.ablieferndeStelleListInitial.length; i++) {
-				let item = this.ablieferndeStelleListInitial[i];
-
-				result = !this.detail.item.ablieferndeStelleList.includes(item);
-				if (result) {
-					// Different entries exist in the lists
-					return true;
-				}
+		}
+		if (this.hasAblieferndeStelleListChanged()) {
+			return true;
+		}
+		if (this.myForm) {
+			// Form reagiert auf Datum Änderungen nicht mit dirty, wenn der Wert davor "null" war
+			if (this.myForm.controls['digitalisierungsbeschraenkungAufgehobenBis'].value !== this.detail.item.digitalisierungsbeschraenkungAufgehobenBis ||
+				this.myForm.controls['downloadLimitDisabledUntil'].value !== this.detail.item.downloadLimitDisabledUntil ) {
+				return true;
 			}
-			return result;
+			return this.myForm.dirty;
+		} else {
+			return false;
 		}
 	}
 
 	private async _reload(): Promise<void> {
-		// Bt Zurücksetzen und Save
-		if (this.formUserDetail) {
-			this.formUserDetail.resetForm();
-		}
 		await this._load(this.detail.item.id);
 	}
 
@@ -513,30 +530,37 @@ export class UserRolesDetailPageComponent extends ComponentCanDeactivate impleme
 			url: this._url.getNormalizedUrl('/benutzerundrollen/benutzer'),
 			label: this._txt.get('breadcrumb.usersRoles', 'Benutzerverwaltung')
 		});
-		if (this.detail && this.detail.item) {
+		if (this.detail.item) {
 			this.crumbs.push({label: this.detail.item.emailAddress});
 		}
 	}
 
 	private _prepareResult(result: DetailResult<any>) {
-		const roles = result['roles'];
-		const item = result.item;
-		if (item) {
-			_util.forEach(item['roles'], (role) => {
-				this._remove(roles, role);
-			});
+		this.detail = result;
+		this.stillAvailableRoles = [];
+		/// User was saved without roles and roles were already changed
+		if (this.stillSelectedRoles && this.initialeRoles) {
+			this.detail.item.roles = [];
+			this.distributeAssignedRoles(this.stillSelectedRoles, this.detail.item.roles);
+		} else {
+			this.initialeRoles = [];
+			this.allRoles  = this.detail['roles'];
+			this.distributeAssignedRoles(this.detail.item.roles, this.initialeRoles);
 		}
-
 		let access = result.item.access || {};
 		result.item.tokens = access.asTokens || [];
-		this.ablieferndeStelleListInitial =  Object.assign([], result.item.ablieferndeStelleList);
-		this.selectedRolepublic = result.item.rolePublicClient;
-		this.selectedResearcherGroup = result.item.researcherGroup;
-		this.selectedBarInternalConsultation = result.item.barInternalConsultation;
-
-		this.detail = result;
-		this.detail.item.birthday = this.detail.item.birthday ? moment(new Date(this.detail.item.birthday)).format('DD.MM.YYYY') : null;
-
+		if (this.stillSelectedAblieferndeStelleList) {
+			this.detail.item.ablieferndeStelleList = [];
+			_util.forEach(this.stillSelectedAblieferndeStelleList, (ablieferndeStelleList) => {
+				this.detail.item.ablieferndeStelleList.push(ablieferndeStelleList);
+			});
+		} else {
+			this.initialeAblieferndeStelleList = [];
+			_util.forEach(this.detail.item.ablieferndeStelleList, (ablieferndeStelleList) => {
+				this.initialeAblieferndeStelleList.push(ablieferndeStelleList);
+			});
+		}
+		this.detail.item.birthday = result.item.birthday ? moment(new Date(result.item.birthday)).format('DD.MM.YYYY') : null;
 		let dateTime = moment(new Date()).add(-1, 'days').toDate();
 		if (result.item.downloadLimitDisabledUntil) {
 			let compareDownloadLimitDisabledUntil = moment(new Date(result.item.downloadLimitDisabledUntil));
@@ -554,16 +578,138 @@ export class UserRolesDetailPageComponent extends ComponentCanDeactivate impleme
 				this.detail.item.digitalisierungsbeschraenkungAufgehobenBis = null;
 			}
 		}
-
-		this._hasChanges = false;
+		this.initForm();
 		this._buildCrumbs();
+	}
+
+	private distributeAssignedRoles(source: any, target: any) {
+		if (source) {
+			_util.forEach(source, (role) => {
+				target.push(role);
+			});
+		}
+		if (this.allRoles) {
+			_util.forEach(this.allRoles, (role) => {
+				this.stillAvailableRoles.push(role);
+			});
+		}
+		if (source) {
+			_util.forEach(source, (role) => {
+				this._remove(this.stillAvailableRoles, role);
+			});
+		}
+	}
+
+	private updateErrorMessages() {
+		this.errors = {};
+		if ( this.myForm) {
+			for (const message of UserRolesDetailPageErrorMessages) {
+				const control = this.myForm.get(message.forControl);
+				if (control &&
+					control.dirty &&
+					control.invalid &&
+					control.errors[message.forValidator] &&
+					!this.errors[message.forControl]) {
+					this.errors[message.forControl] = this._txt.get(message.text, message.text);
+				}
+			}
+		}
+	}
+
+	private initForm(): void {
+		this.myForm = this.formbuilder.group({
+			familyName: new FormControl({value: this.detail.item.familyName,
+					disabled: (!this.allowBereichBenutzerdatenBearbeiten || this.detail.item.rolePublicClient === this._authorization.roles.Oe3 || this.detail.item.isInternalUser) },
+				[Validators.required, Validators.maxLength(200)]),
+			firstName: new FormControl({value: this.detail.item.firstName,
+					disabled: (!this.allowBereichBenutzerdatenBearbeiten || this.detail.item.rolePublicClient === this._authorization.roles.Oe3) || this.detail.item.isInternalUser },
+				[Validators.required, Validators.maxLength(200)]),
+			organization: new FormControl({value: this.detail.item.organization, disabled: (!this.allowBereichBenutzerdatenBearbeiten || this.detail.item.isInternalUser) },
+				[Validators.maxLength(200)]),
+			street: new FormControl({value: this.detail.item.street, disabled: !this.allowBereichBenutzerdatenBearbeiten },
+				[Validators.required, Validators.maxLength(200)]),
+			streetAttachment: new FormControl({value: this.detail.item.streetAttachment, disabled: !this.allowBereichBenutzerdatenBearbeiten },
+				[Validators.maxLength(200)]),
+			zipCode:  new FormControl({ value: this.detail.item.zipCode, disabled: !this.allowBereichBenutzerdatenBearbeiten },
+				[Validators.required, Validators.maxLength(200)]),
+			town: new FormControl({ value: this.detail.item.town, disabled: !this.allowBereichBenutzerdatenBearbeiten},
+				[Validators.required, Validators.maxLength(200)]),
+			countryCode: new FormControl({ value: this.detail.item.countryCode, disabled: !this.allowBereichBenutzerdatenBearbeiten}),
+			phoneNumber: new FormControl({ value: this.detail.item.phoneNumber,  disabled: !this.allowBereichBenutzerdatenBearbeiten},
+				[Validators.pattern('^[()+]?([0-9][\\s()-]*){6,20}$')]),
+			mobileNumber: new FormControl({ value: this.detail.item.mobileNumber,  disabled: !this.allowBereichBenutzerdatenBearbeiten},
+				[Validators.pattern('^[()+]?([0-9][\\s()-]*){6,20}$')]),
+			emailAddress:  new FormControl({value: this.detail.item.emailAddress, disabled: (!this.allowBereichBenutzerdatenBearbeiten || this.detail.item.isInternalUser)},
+				[Validators.required, Validators.email, Validators.maxLength(200)]),
+			fabasoftDossier:  new FormControl({value: this.detail.item.fabasoftDossier, disabled: !this.allowBereichBenutzerdatenBearbeiten}),
+			id: [this.detail.item.id],
+			userExtId: [this.detail.item.userExtId],
+			downloadLimitDisabledUntil: [this.detail.item.downloadLimitDisabledUntil, [this.dateRangeValidator.bind(this), this.dateValidator.bind(this)]],
+			digitalisierungsbeschraenkungAufgehobenBis: [this.detail.item.digitalisierungsbeschraenkungAufgehobenBis, [this.dateRangeValidator.bind(this), this.dateValidator.bind(this)]],
+			language: [{value: this.detail.item.language, disabled: !this.allowBereichBenutzerdatenBearbeiten}],
+			createModifiyData: [this.detail.item.createModifiyData],
+			rolePublicClient: [{value: this.detail.item.rolePublicClient, disabled: !this.allowBereichBenutzerdatenBearbeiten}],
+			birthday:[{value: this.detail.item.birthday,  disabled: (!this.allowBereichBenutzerdatenBearbeiten || this.detail.item.rolePublicClient === this._authorization.roles.Oe3 ) },
+				[this.dateValidator.bind(this)]],
+			researcherGroup: new FormControl({value: this.detail.item.researcherGroup,
+					disabled: (this.detail.item.rolePublicClient !== this._authorization.roles.Oe3 || !this.detail.item.emailAddress.endsWith('@dodis.ch') || !this.allowForschungsgruppeDdsBearbeiten) }),
+			barInternalConsultation: new FormControl({value: this.detail.item.barInternalConsultation,
+				disabled: !this.allowBarInterneKonsultationBearbeiten})
+		});
+		if (this.detail.item.isInternalUser) {
+			this.myForm.controls['organization'].setValidators([Validators.required, Validators.maxLength(200)]);
+		}
+		this.myForm.statusChanges.subscribe(() => this.updateErrorMessages());
+	}
+
+	private reassembleDatatype() {
+		let detailItem = this.myForm.getRawValue();
+
+		this.detail.item.familyName = detailItem.familyName;
+		this.detail.item.firstName = detailItem.firstName;
+		this.detail.item.organization = detailItem.organization;
+		this.detail.item.street = detailItem.street;
+		this.detail.item.streetAttachment = detailItem.streetAttachment;
+		this.detail.item.zipCode = detailItem.zipCode;
+		this.detail.item.town = detailItem.town;
+		this.detail.item.countryCode = detailItem.countryCode;
+		this.detail.item.phoneNumber = detailItem.phoneNumber;
+		this.detail.item.mobileNumber = detailItem.mobileNumber;
+		this.detail.item.birthday = detailItem.birthday;
+		this.detail.item.emailAddress = detailItem.emailAddress;
+		this.detail.item.fabasoftDossier = detailItem.fabasoftDossier;
+		this.detail.item.id = detailItem.id;
+		this.detail.item.userExtId = detailItem.userExtId;
+		this.detail.item.downloadLimitDisabledUntil = detailItem.downloadLimitDisabledUntil;
+		this.detail.item.digitalisierungsbeschraenkungAufgehobenBis = detailItem.digitalisierungsbeschraenkungAufgehobenBis;
+		this.detail.item.language = detailItem.language;
+		this.detail.item.rolePublicClient = detailItem.rolePublicClient;
+		this.detail.item.researcherGroup = detailItem.researcherGroup;
+		this.detail.item.barInternalConsultation = detailItem.barInternalConsultation;
+		this.rememberSelectedRoles();
+		this.rememberSelectedAblieferndeStelle();
+		this.detail.item.roles = this.initialeRoles;
+		this.detail.item.ablieferndeStelleList = this.initialeAblieferndeStelleList;
+	}
+
+	private rememberSelectedRoles() {
+		this.stillSelectedRoles = [];
+		_util.forEach(this.detail.item.roles, (role) => {
+			this.stillSelectedRoles.push(role);
+		});
+	}
+
+	private rememberSelectedAblieferndeStelle() {
+		this.stillSelectedAblieferndeStelleList = [];
+		_util.forEach(this.detail.item.ablieferndeStelleList, (ablieferndeStelleList) => {
+			this.stillSelectedAblieferndeStelleList.push(ablieferndeStelleList);
+		});
 	}
 
 	private async _load(id: string): Promise<void> {
 		this.loading = true;
 		try {
 			let res = await this._roleService.getUserInfo(id);
-			this.selectedResearcherGroupOld = res.item.researcherGroup;
 			this._prepareResult(res);
 		} catch (err) {
 			this._ui.showError(err);
@@ -581,31 +727,12 @@ export class UserRolesDetailPageComponent extends ComponentCanDeactivate impleme
 		}
 	}
 
-	public getNextThirtyDays(): string[] {
+	public get getNextThirtyDays(): string[] {
 		let days = [];
 		for (let i = 0; i <= moment().daysInMonth(); i++) {
 			days.push(moment().add(i, 'days').format('DD.MM.YYYY'));
 		}
 		return days;
-	}
-
-	public isValidDate(dateString: string): boolean {
-		if (!dateString) {
-			return true;
-		}
-		const pattern = '^(?:(?:31(\\/|-|\\.)(?:0?[13578]|1[02]))\\1|(?:(?:29|30)(\\/|-|\\.)(?:0?[1,3-9]|1[0-2])\\2))(?:(?:1[6-9]|[2-9]\\d)?\\d{2})$' +
-		'|^(?:29(\\/|-|\\.)0?2\\3(?:(?:(?:1[6-9]|[2-9]\\d)?(?:0[48]|[2468][048]|[13579][26])|(?:(?:16|[2468][048]|[3579][26])00))))$|^(?:0?[1-9]|1\\d|2[0-8])' +
-		'(\\/|-|\\.)(?:(?:0?[1-9])|(?:1[0-2]))\\4(?:(?:1[6-9]|[2-9]\\d)?\\d{2})$';
-		let rex = new RegExp(pattern, 'i');
-		return rex.test(dateString);
-	}
-
-	public isInValidRange(dateString: string): boolean {
-		if (!dateString) {
-			return true;
-		}
-
-		return this.getNextThirtyDays().findIndex(e => e === dateString) >= 0;
 	}
 
 	public get allowBarInterneKonsultationBearbeiten(): boolean {
@@ -645,6 +772,34 @@ export class UserRolesDetailPageComponent extends ComponentCanDeactivate impleme
 	}
 
 	public get editUserHasOe3Role(): boolean {
-		return this.selectedRolepublic.indexOf(this._authorization.roles.Oe3) === -1 ;
+		return this.myForm.controls['rolePublicClient'].value === this._authorization.roles.Oe3;
+	}
+
+	private hasAblieferndeStelleListChanged(): boolean {
+
+		const ablieferndeStelleIds = this.detail.item.ablieferndeStelleList != null ? this.detail.item.ablieferndeStelleList.map(as => as.ablieferndeStelleId) : [];
+		if (this.initialeAblieferndeStelleList.length === this.detail.item.ablieferndeStelleList.length) {
+			let length = this.initialeAblieferndeStelleList.length;
+			for (let i = 0; i < length; i++) {
+				if (ablieferndeStelleIds.indexOf(this.initialeAblieferndeStelleList[i].ablieferndeStelleId) < 0) {
+					return true;
+				}
+			}
+		} else {
+			return true;
+		}
+		return false;
+	}
+
+	public recalculateResearcherGroup() {
+		if (!this.myForm.controls['emailAddress'].value.endsWith('@dodis.ch')) {
+			// Forschungsgruppe DDS muss @dodis.ch Endung haben
+			this.myForm.controls['researcherGroup'].setValue(false);
+			this.myForm.controls['researcherGroup'].disable();
+		} else if (this.editUserHasOe3Role && this.allowForschungsgruppeDdsBearbeiten) {
+			this.myForm.controls['researcherGroup'].enable();
+		} else {
+			this.myForm.controls['researcherGroup'].disable();
+		}
 	}
 }
