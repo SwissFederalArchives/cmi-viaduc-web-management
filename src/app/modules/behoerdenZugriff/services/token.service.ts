@@ -24,17 +24,17 @@ export class TokenService {
 	}
 
 	public async deleteToken(tokenIds: number[]): Promise<any> {
-		let url = `${this._apiUrl}/DeleteToken`;
+		const url = `${this._apiUrl}/DeleteToken`;
 		return await this._http.post(url, tokenIds, this._http.noCaching).toPromise();
 	}
 
 	public async createToken(token: AblieferndeStelleToken): Promise<any> {
-		let url = `${this._apiUrl}/CreateToken`;
+		const url = `${this._apiUrl}/CreateToken`;
 		return await this._http.post(url, token, this._http.noCaching).toPromise();
 	}
 
 	public async updateToken(token: AblieferndeStelleToken): Promise<any> {
-		let url = `${this._apiUrl}/UpdateToken`;
+		const url = `${this._apiUrl}/UpdateToken`;
 		return await this._http.post(url, token, this._http.noCaching).toPromise();
 	}
 }

@@ -1,4 +1,4 @@
-import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
+import {Component, EventEmitter, Input, Output} from '@angular/core';
 import {OrderService} from '../../../services';
 import {ErrorService} from '../../../../shared/services';
 import {ToastrService} from 'ngx-toastr';
@@ -8,7 +8,7 @@ import {ToastrService} from 'ngx-toastr';
 	templateUrl: './auftraege-erinnerung-senden-modal.component.html',
 	styleUrls: ['./auftraege-erinnerung-senden-modal.component.less']
 })
-export class AuftraegeErinnerungSendenModalComponent implements OnInit {
+export class AuftraegeErinnerungSendenModalComponent {
 
 	@Input()
 	public ids: number[] = [];
@@ -34,9 +34,6 @@ export class AuftraegeErinnerungSendenModalComponent implements OnInit {
 	constructor(private _ord: OrderService,
 				private _err: ErrorService,
 				private _toastr: ToastrService) {
-	}
-
-	public ngOnInit(): void {
 	}
 
 	public cancel() {

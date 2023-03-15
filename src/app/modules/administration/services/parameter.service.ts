@@ -12,12 +12,12 @@ export class ParameterService {
 	}
 
 	public async getAllParameters() {
-		let url = this._apiUrl + '/GetAllParameters';
+		const url = this._apiUrl + '/GetAllParameters';
 		return await this._http.get<Parameter[]>(url, this._http.noCaching).toPromise();
 	}
 
 	public async saveParameter(param: Parameter) {
-		let url = this._apiUrl + '/SaveParameter';
+		const url = this._apiUrl + '/SaveParameter';
 		return await this._http.post<string>(url, param, this._http.noCaching).toPromise();
 	}
 }

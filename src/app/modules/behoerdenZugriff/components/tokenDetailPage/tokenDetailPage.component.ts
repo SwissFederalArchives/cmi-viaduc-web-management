@@ -49,7 +49,7 @@ export class TokenDetailPageComponent extends ComponentCanDeactivate implements 
 
 		this._allTokens = result;
 		if (this.ablieferndeStelleToken && this.ablieferndeStelleToken.token && this._allTokens.filter(t => t === this.ablieferndeStelleToken.token.toLocaleLowerCase())) {
-			let index = this._allTokens.indexOf(this.ablieferndeStelleToken.token.toLocaleLowerCase());
+			const index = this._allTokens.indexOf(this.ablieferndeStelleToken.token.toLocaleLowerCase());
 			if (index > -1) {
 				this._allTokens.splice(index, 1);
 			}
@@ -68,7 +68,7 @@ export class TokenDetailPageComponent extends ComponentCanDeactivate implements 
 		}
 
 		if (this._mode === Mode.Add) {
-			let promise: Promise<any> = this.tokenService.createToken(this.ablieferndeStelleToken);
+			const promise: Promise<any> = this.tokenService.createToken(this.ablieferndeStelleToken);
 			promise.then((data) => {
 					this.goToTokenList();
 				},
@@ -80,7 +80,7 @@ export class TokenDetailPageComponent extends ComponentCanDeactivate implements 
 					}
 				});
 		} else if (this._mode === Mode.Edit) {
-			let promise: Promise<any> = this.tokenService.updateToken(this.ablieferndeStelleToken);
+			const promise: Promise<any> = this.tokenService.updateToken(this.ablieferndeStelleToken);
 			promise.then((data) => {
 					this.goToTokenList();
 				},
@@ -136,7 +136,7 @@ export class TokenDetailPageComponent extends ComponentCanDeactivate implements 
 	}
 
 	private _buildCrumbs(): void {
-		let crumbs: any[] = this.crumbs = [];
+		const crumbs: any[] = this.crumbs = [];
 		crumbs.push({iconClasses: 'glyphicon glyphicon-home', _url: this._url.getHomeUrl()});
 		crumbs.push({
 			label: this._txt.get('breadcrumb.behoerdenZugriff', 'Behörden-Zugriff')

@@ -60,7 +60,7 @@ export class UserRolesPageComponent implements OnInit {
 	}
 
 	public show(item: any): void {
-		let index = this.userList.items.indexOf(item);
+		const index = this.userList.items.indexOf(item);
 		this._dps.setCurrent(this.userList, index);
 
 		const id = item ? item.id : 'new';
@@ -68,10 +68,10 @@ export class UserRolesPageComponent implements OnInit {
 	}
 
 	public saveColumns() {
-		let cols = [...this.columns];
+		const cols = [...this.columns];
 
-		for (let c of cols) {
-			let existing: Column = this.flexGrid.columns.filter(col => col.header === c.defaultLabel)[0];
+		for (const c of cols) {
+			const existing: Column = this.flexGrid.columns.filter(col => col.header === c.defaultLabel)[0];
 			if (existing) {
 				c.width = existing.renderWidth;
 				c.format = existing.format;
@@ -83,7 +83,7 @@ export class UserRolesPageComponent implements OnInit {
 			}
 		}
 
-		let sortedArray = cols.sort((a, b) => {
+		const sortedArray = cols.sort((a, b) => {
 			if (a.index > b.index) {
 				return 1;
 			}
@@ -112,7 +112,7 @@ export class UserRolesPageComponent implements OnInit {
 	}
 
 	private _loadColumns(): void {
-		let userSettings = this._cfg.getSetting('user.settings') as ManagementUserSettings;
+		const userSettings = this._cfg.getSetting('user.settings') as ManagementUserSettings;
 		if (userSettings && userSettings.userListSettings && userSettings.userListSettings.columns) {
 			this.columns = userSettings.userListSettings.columns;
 		} else {
@@ -136,7 +136,7 @@ export class UserRolesPageComponent implements OnInit {
 	}
 
 	private _getInitialSortDescriptions(): any[] {
-		let sortCol = this.visibleColumns.find(c => c.key === 'familyName');
+		const sortCol = this.visibleColumns.find(c => c.key === 'familyName');
 		if (sortCol) {
 			return [new SortDescription(sortCol.key, true)];
 		}
@@ -146,7 +146,7 @@ export class UserRolesPageComponent implements OnInit {
 
 	private _resetSorts() {
 		this.userList.sortDescriptions.clear();
-		for (let sc of this._getInitialSortDescriptions()) {
+		for (const sc of this._getInitialSortDescriptions()) {
 			this.userList.sortDescriptions.push(sc);
 		}
 	}
@@ -166,7 +166,7 @@ export class UserRolesPageComponent implements OnInit {
 	}
 
 	private _saveColumnsAsUserSettings(cols) {
-		let existingSettings = this._cfg.getUserSettings() as ManagementUserSettings;
+		const existingSettings = this._cfg.getUserSettings() as ManagementUserSettings;
 		existingSettings.userListSettings = <UserListUserSettings> {
 			columns: cols
 		};
@@ -185,8 +185,8 @@ export class UserRolesPageComponent implements OnInit {
 	}
 
 	private _getFieldsToLoad(): string[] {
-		let fieldsToLoad = this.visibleColumns.filter(x => x.key !== 'unknown').map(x => x.key);
-		let additionalFields = this.hiddenColumns.filter(x => x.loadPerDefault).map(x => x.key);
+		const fieldsToLoad = this.visibleColumns.filter(x => x.key !== 'unknown').map(x => x.key);
+		const additionalFields = this.hiddenColumns.filter(x => x.loadPerDefault).map(x => x.key);
 
 		// The following fields must be loaded in any case due to their data type, as it is important that the grid correctly initializes the filters and display type (e.g. checkbox)
 		const mustFields: string[] = ['barInternalConsultation', 'researcherGroup', 'identifizierungsmittel', 'created', 'createdOn',  'modifiedOn', 'birthday', 'downloadLimitDisabledUntil'];
@@ -197,7 +197,7 @@ export class UserRolesPageComponent implements OnInit {
 	}
 
 	private _buildCrumbs(): void {
-		let crumbs: any[] = this.crumbs = [];
+		const crumbs: any[] = this.crumbs = [];
 		crumbs.push({iconClasses: 'glyphicon glyphicon-home', url: this._url.getHomeUrl()});
 		crumbs.push({
 			url: this._url.getNormalizedUrl('/benutzerundrollen'),
@@ -233,7 +233,7 @@ export class UserRolesPageComponent implements OnInit {
 			this._err.showOdataErrorIfNecessary(error);
 		});
 
-		let onLoadedHandler = () => {
+		const onLoadedHandler = () => {
 			this.loading = false;
 			this.userList.loaded.removeHandler(onLoadedHandler);
 		};
@@ -243,12 +243,12 @@ export class UserRolesPageComponent implements OnInit {
 	}
 
 	private _loadDataMaps() {
-		let countries = this._countriesService.getCountries(this._context.language);
-		let countriesList = [];
+		const countries = this._countriesService.getCountries(this._context.language);
+		const countriesList = [];
 		this._countriesService.sortCountriesByName(countries).forEach(c => countriesList.push({name: c.code}));
-		let countrymap = new DataMap(countriesList, 'name', 'name');
+		const countrymap = new DataMap(countriesList, 'name', 'name');
 
-		let maps: { [id: string]: DataMap; } = {};
+		const maps: { [id: string]: DataMap; } = {};
 		maps['language'] = new DataMap(this._language, 'code', 'name');
 		maps['reasonForRejection'] = new DataMap(this._getListForRejection(), 'name', 'name');
 		maps['rolePublicClient'] = new DataMap(this._getListRolePublicClient(), 'name', 'name');

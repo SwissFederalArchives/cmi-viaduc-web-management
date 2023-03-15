@@ -135,7 +135,7 @@ export class OrdersListComponent implements OnInit {
 	}
 
 	private _getInitialSortDescriptions(): any[] {
-		let firstCol = this.visibleColumns.find(c => c.key === 'itemId');
+		const firstCol = this.visibleColumns.find(c => c.key === 'itemId');
 		if (firstCol) {
 			return [new SortDescription(firstCol.key, false)];
 		}
@@ -144,14 +144,14 @@ export class OrdersListComponent implements OnInit {
 	}
 
 	private _createFilterMaps(): Promise<any> {
-		let obs = forkJoin([
+		const obs = forkJoin([
 			this._stamm.getReasons().pipe(map(r => {
-				let pairs = [];
+				const pairs = [];
 				r.forEach(item => pairs.push({ name: item.name}));
 				return new DataMap(pairs, 'name', 'name');
 			})),
 			this._stamm.getArtDerArbeiten().pipe(map(a => {
-				let pairs = [];
+				const pairs = [];
 				a.forEach(item => pairs.push({name: item.name}));
 				return new DataMap(pairs, 'name', 'name');
 			}))]);
@@ -160,7 +160,7 @@ export class OrdersListComponent implements OnInit {
 				this._reasonList = res[0] as DataMap;
 				this._artDerArbeitList = res[1] as DataMap;
 
-				let maps: { [id: string]: DataMap; } = {};
+				const maps: { [id: string]: DataMap; } = {};
 				maps['orderingType'] = this._wjs.getDataMap(ShippingType, this._dec.translateOrderingType.bind(this));
 				maps['eingangsart'] = this._wjs.getDataMap( Eingangsart, this._dec.translateEingangsart.bind(this));
 				maps['status'] =  this._wjs.getDataMap(InternalStatus, this._dec.translateInternalStatus.bind(this));
@@ -195,7 +195,7 @@ export class OrdersListComponent implements OnInit {
 
 	public onFilterApplied(ev) {
 		if (!_util.isEmpty(this.baseFilterString)) {
-			let filterBefore = this.orderFlatItems.filterDefinition.toString();
+			const filterBefore = this.orderFlatItems.filterDefinition.toString();
 			if (_util.isEmpty(filterBefore) || filterBefore.indexOf(this.baseFilterString) < 0) {
 				let filter = this.baseFilterString
 					+ (this.preFilterString ? ' and ' + this.preFilterString : '');
@@ -218,7 +218,7 @@ export class OrdersListComponent implements OnInit {
 
 	public barCodesFilter(barcodes: string[]) {
 		let filter = '(';
-		for (let id of barcodes) {
+		for (const id of barcodes) {
 			if (id !== '') {
 				if (id !== barcodes[0]) {
 					filter += ' or ';
@@ -233,7 +233,7 @@ export class OrdersListComponent implements OnInit {
 	}
 
 	public showPendente(refresh = true) {
-		let preFilter = `(status ne ${InternalStatus.Abgebrochen.valueOf()} and status ne ${InternalStatus.Abgeschlossen.valueOf()})`;
+		const preFilter = `(status ne ${InternalStatus.Abgebrochen.valueOf()} and status ne ${InternalStatus.Abgeschlossen.valueOf()})`;
 		this._setPreFilter(preFilter, this.baseFilterString + ` and `  + preFilter, refresh);
 	}
 
@@ -257,10 +257,10 @@ export class OrdersListComponent implements OnInit {
 	}
 
 	public getCurrentColumns(): any[] {
-		let cols = [...this.columns];
+		const cols = [...this.columns];
 
-		for (let c of cols) {
-			let existing: Column = this.flexGrid.columns.filter(col => col.header === c.defaultLabel)[0];
+		for (const c of cols) {
+			const existing: Column = this.flexGrid.columns.filter(col => col.header === c.defaultLabel)[0];
 			if (existing) {
 				c.width = existing.renderWidth;
 				c.format = existing.format;
@@ -308,7 +308,7 @@ export class OrdersListComponent implements OnInit {
 
 	public resetSorts() {
 		this.orderFlatItems.sortDescriptions.clear();
-		for (let sc of this._getInitialSortDescriptions()) {
+		for (const sc of this._getInitialSortDescriptions()) {
 			this.orderFlatItems.sortDescriptions.push(sc);
 		}
 		this.orderFlatItems.load();
@@ -322,7 +322,7 @@ export class OrdersListComponent implements OnInit {
 	}
 
 	public openDetail(id: number) {
-		let item = this.orderFlatItems.items.find(i => i.itemId === id);
+		const item = this.orderFlatItems.items.find(i => i.itemId === id);
 		this._dps.setCurrent(this.orderFlatItems, this.orderFlatItems.items.indexOf(item));
 
 		if (this.isEinsichtsGesuchListe) {

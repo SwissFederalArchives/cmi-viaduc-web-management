@@ -1,4 +1,4 @@
-import {AfterViewInit, Component, ElementRef, OnInit} from '@angular/core';
+import {AfterViewInit, Component, ElementRef} from '@angular/core';
 import {AuthenticationService} from '../../../services';
 import {ClientContext, TranslationService, Utilities as _util} from '@cmi/viaduc-web-core';
 
@@ -6,7 +6,7 @@ import {ClientContext, TranslationService, Utilities as _util} from '@cmi/viaduc
 	selector: 'cmi-viaduc-header-content',
 	templateUrl: 'headerContent.component.html'
 })
-export class HeaderContentComponent implements OnInit, AfterViewInit {
+export class HeaderContentComponent implements AfterViewInit {
 	private _elem: any;
 	private _languages: any[];
 
@@ -17,30 +17,27 @@ export class HeaderContentComponent implements OnInit, AfterViewInit {
 		this._elem = this._elemRef.nativeElement;
 	}
 
-	public ngOnInit(): void {
-	}
-
 	public ngAfterViewInit(): void {
 		_util.initJQForElement(this._elem);
 	}
 
 	private refresh(): void {
-		let ls = this._languages = (this._languages || []);
+		const ls = this._languages = (this._languages || []);
 		if (_util.isEmpty(ls)) {
 			for (let i = 0; i < this._txt.supportedLanguages.length; i += 1) {
-				let l = {...this._txt.supportedLanguages[i]};
+				const l = {...this._txt.supportedLanguages[i]};
 				ls.push(l);
 			}
 		}
 		for (let i = 0; i < this._languages.length; i += 1) {
-			let l = this._languages[i];
+			const l = this._languages[i];
 			l.active = (l.key === this._context.language);
 			l.label = l.active === true ? this._txt.get('languages.' + l.key + '.labelActive', l.key) : l.name;
 		}
 	}
 
 	public get versionInfo(): string {
-		let v = this._context.client.version;
+		const v = this._context.client.version;
 		return v ? `${v.major}.${v.minor}.${v.revision}.${v.build}` : void 0;
 	}
 

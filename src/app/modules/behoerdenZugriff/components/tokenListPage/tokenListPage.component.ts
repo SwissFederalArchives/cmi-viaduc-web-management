@@ -65,7 +65,7 @@ export class TokenListPageComponent implements OnInit {
 			return;
 		}
 
-		let toDelete: number[] = this.flexGrid.checkedItems.map(t => t.tokenId);
+		const toDelete: number[] = this.flexGrid.checkedItems.map(t => t.tokenId);
 		if (toDelete.length === 0) {
 			return;
 		}
@@ -105,7 +105,7 @@ export class TokenListPageComponent implements OnInit {
 	}
 
 	public getQuantityOfCheckedItemsToDelete(): number {
-		let counter: number = 0;
+		const counter = 0;
 		if (!this.flexGrid) {
 			return counter;
 		}
@@ -118,7 +118,7 @@ export class TokenListPageComponent implements OnInit {
 	}
 
 	public exportExcel() {
-		let fileName = this._txt.get('behoerdenZugriff.tokenExportFileName', 'token.bar.ch.xlsx');
+		const fileName = this._txt.get('behoerdenZugriff.tokenExportFileName', 'token.bar.ch.xlsx');
 		this.flexGrid.exportToExcel(fileName).subscribe(() => {
 			// nothing
 		}, (err) => {
@@ -135,7 +135,7 @@ export class TokenListPageComponent implements OnInit {
 	}
 
 	private buildCrumbs(): void {
-		let crumbs: any[] = this.crumbs = [];
+		const crumbs: any[] = this.crumbs = [];
 		crumbs.push({iconClasses: 'glyphicon glyphicon-home', url: this._url.getHomeUrl()});
 		crumbs.push({
 			label: this._txt.get('breadcrumb.behoerdenZugriff', 'Behörden-Zugriff')
@@ -145,7 +145,7 @@ export class TokenListPageComponent implements OnInit {
 
 	private prepareResult(result: AsToken) {
 		if (!_util.isEmpty(result)) {
-			for (let arrayItem of result.tokens) {
+			for (const arrayItem of result.tokens) {
 				arrayItem.ablieferndeStellenKuerzel = this.getBehoerdenKuerzel(arrayItem);
 				arrayItem.ablieferndeStellenBezeichnung = this.getBehoerdenBeschreibung(arrayItem);
 			}

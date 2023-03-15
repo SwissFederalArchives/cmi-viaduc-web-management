@@ -59,8 +59,8 @@ export class SeoService {
 	}
 
 	public updatePageInfo(url: string): void {
-		let title = this._txt.get('header.title', 'Management-Client des Online-Zugangs');
-		let description = this._txt.get('page.description', 'recherche.admin.ch');
+		const title = this._txt.get('header.title', 'Management-Client des Online-Zugangs');
+		const description = this._txt.get('page.description', 'recherche.admin.ch');
 
 		try {
 			this.setTitle(title);

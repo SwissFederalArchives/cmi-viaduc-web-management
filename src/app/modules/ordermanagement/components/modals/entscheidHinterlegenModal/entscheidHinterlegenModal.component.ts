@@ -50,7 +50,7 @@ export class EntscheidHinterlegenModalComponent implements OnInit {
 	public stepNr = 1;
 	public hint: string;
 	public filteredItems: OrderingFlatItem[] = [];
-	public showUnHideDataButton: boolean = true;
+	public showUnHideDataButton = true;
 	private _open = true;
 
 	private _selectedEntscheid: EntscheidGesuchStatus = null;
@@ -96,9 +96,9 @@ export class EntscheidHinterlegenModalComponent implements OnInit {
 		this.hint = 'Daten werden geladen...';
 		this.isLoading = true;
 
-		let observables:Observable<OrderingFlatItem>[] = [];
-		for (let order of this.filteredItems) {
-			let obs = this._ord.getUnHiddenOrderingDetail(order.itemId);
+		const observables:Observable<OrderingFlatItem>[] = [];
+		for (const order of this.filteredItems) {
+			const obs = this._ord.getUnHiddenOrderingDetail(order.itemId);
 			observables.push(obs);
 		}
 

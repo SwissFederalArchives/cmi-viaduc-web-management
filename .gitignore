@@ -10,6 +10,7 @@
 
 # IDEs and editors
 /.idea
+/.angular
 .project
 .classpath
 .c9/
@@ -40,4 +41,3 @@ testem.log
 # System Files
 .DS_Store
 Thumbs.db
-.vscode/launch.json

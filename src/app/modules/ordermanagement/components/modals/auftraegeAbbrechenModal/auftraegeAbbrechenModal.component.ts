@@ -40,7 +40,7 @@ export class AuftraegeAbbrechenModalComponent {
 
 	public bemerkungDossier: string;
 	public interneBemerkung: string;
-	public loading: boolean = false;
+	public loading = false;
 	public gruende = [];
 	public isLoading = false;
 

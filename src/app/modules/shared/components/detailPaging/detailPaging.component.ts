@@ -7,7 +7,7 @@ import {DetailPagingService} from '../../services';
 	styleUrls: ['./detailPaging.component.less']
 })
 export class DetailPagingComponent {
-	public loading: boolean = false;
+	public loading = false;
 
 	@Input()
 	public detailUrl: string;
@@ -24,7 +24,7 @@ export class DetailPagingComponent {
 
 	public goToNext(): void {
 		if (!this.disableNavigation) {
-			let item = this._detailPaging.goToNext();
+			const item = this._detailPaging.goToNext();
 			this._router.navigate([this.detailUrl + '/' + item[this.idProperty]]);
 		}
 	}
@@ -47,7 +47,7 @@ export class DetailPagingComponent {
 
 	public goToFirst(): void {
 		if (!this.disableNavigation) {
-			let item = this._detailPaging.goToFirst();
+			const item = this._detailPaging.goToFirst();
 			this._router.navigate([this.detailUrl + '/' + item[this.idProperty]]);
 		}
 	}

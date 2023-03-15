@@ -73,7 +73,7 @@ export class UserService {
 		return this._http.post<string>(url, this._mapUserPostParameter(userItem), this._http.noCaching);
 	}
 
-	public getIdentifizierungsmittelPdfUrl(userId: string): string {
+	public getIdentifizierungsmittelPdfUrl(userId: string): string {
 		const urlParameter = `?userId=${userId}`;
 		const url = this._createUrl('GetIdentifizierungsmittelPdf' + urlParameter);
 		return url;

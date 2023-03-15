@@ -18,7 +18,7 @@ class Mocks extends ToastPackage {
 	}
 }
 
-let toastPackage = <Mocks>{};
+const toastPackage = <Mocks>{};
 @NgModule(
 	{
 	providers: [

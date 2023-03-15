@@ -506,10 +506,7 @@
 													<input class="form-control"
 														   name="datumDesEntscheids"
 														   id="datumDesEntscheids"
-														   [ngModel]="getDateAsString(detailRecord.datumDesEntscheids)"
-														   (ngModelChange)="setStringAsDate($event, detailRecord.datumDesEntscheids)"
-														   datePicker
-														   [minDateToday]="false"
+														   [ngModel]="getFormattedDateWithoutTime(detailRecord.datumDesEntscheids)"
 														   [disabled]="true">
 												</div>
 											</div>
@@ -557,12 +554,8 @@
 													<input class="form-control"
 														   name="abschlussdatum"
 														   id="abschlussdatum"
-														   [ngModel]="getDateTimeAsString(detailRecord.abschlussdatum)"
-														   (ngModelChange)="setStringAsDateTime($event, 'abschlussdatum')"
-														   datePicker
-														   [minDateToday]="false"
 														   [disabled]="true"
-														   required>
+														   [ngModel]="getFormattedDate(detailRecord.abschlussdatum)">
 												</div>
 											</div>
 										</div>

@@ -121,11 +121,17 @@ describe('FreigabeKontrolleModalPage', () => {
 			sut = fixture.componentInstance;
 			await sut.ngOnInit();
 			sut.currentRolePublicClient = 'Ö3';
+			sut.datumBewilligung = new Date('2025-08-26');
 			sut.selectedEntscheid = ApproveStatus.FreigegebenInSchutzfrist;
 			fixture.detectChanges();
 			await fixture.whenStable();
 
 		}));
+
+		it('test if the date is converted correctly'
+			,() => {
+				expect(sut.datumBewilligung).toEqual(new Date('2025-08-26'));
+			});
 
 		it('when user is Ö3 and ApproveStatus is FreigegebenInSchutzfris ' +
 			'field haveToEnterBewilligungsDatum appear and warn text not registered user should hide', () => {

@@ -6,13 +6,8 @@ import {Component, Input} from '@angular/core';
 	styleUrls: ['./record-info.component.less']
 })
 export class RecordInfoComponent {
-
-	constructor() {
-	}
-
 	@Input() public modifiedBy: string;
 	@Input() public modifiedOn: string;
 	@Input() public createdBy: string;
 	@Input() public createdOn: string;
-
 }

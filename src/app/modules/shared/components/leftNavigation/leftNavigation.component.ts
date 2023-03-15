@@ -1,4 +1,4 @@
-import {Component, OnInit} from '@angular/core';
+import {Component} from '@angular/core';
 import {ClientContext, ApplicationFeatureEnum} from '@cmi/viaduc-web-core';
 import {AuthorizationService} from '../../services';
 
@@ -7,7 +7,7 @@ import {AuthorizationService} from '../../services';
 	templateUrl: 'leftNavigation.component.html',
 	styleUrls: ['./leftNavigation.component.less']
 })
-export class LeftNavigationComponent implements OnInit {
+export class LeftNavigationComponent{
 
 	public get authenticated(): boolean {
 		return this._context.authenticated;
@@ -18,9 +18,6 @@ export class LeftNavigationComponent implements OnInit {
 	}
 
 	constructor(private _context: ClientContext, private _authorization: AuthorizationService) {
-	}
-
-	public ngOnInit(): void {
 	}
 
 	public nyi(): void {

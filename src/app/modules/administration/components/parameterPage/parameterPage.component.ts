@@ -15,11 +15,11 @@ export class ParameterPageComponent extends ComponentCanDeactivate implements On
 	@ViewChildren(ParameterComponent)
 	public paramComponents: QueryList<ParameterComponent>;
 
-	public loading: boolean = true;
+	public loading = true;
 	public filteredParameters: Parameter[] = [];
 	private _allParameters: Parameter[] = [];
 	public validationEvent: EventEmitter<void> = new EventEmitter<void>();
-	public searchString: string = '';
+	public searchString = '';
 	public searchedStringUpToDate: boolean;
 	public crumbs: any[] = [];
 
@@ -74,8 +74,8 @@ export class ParameterPageComponent extends ComponentCanDeactivate implements On
 	}
 
 	public GetIdByName(name: string): string {
-		let re = /\./gi;
-		let result = name.replace(re, '_');
+		const re = /\./gi;
+		const result = name.replace(re, '_');
 
 		return result;
 	}
@@ -93,7 +93,7 @@ export class ParameterPageComponent extends ComponentCanDeactivate implements On
 	}
 
 	private _buildCrumbs(): void {
-		let crumbs: any[] = this.crumbs = [];
+		const crumbs: any[] = this.crumbs = [];
 		crumbs.push({iconClasses: 'glyphicon glyphicon-home', _url: this._url.getHomeUrl()});
 		crumbs.push({
 			label: this._txt.get('breadcrumb.Administration', 'Administration')

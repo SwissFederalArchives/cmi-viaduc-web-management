@@ -64,12 +64,12 @@ export class MonitoringPageComponent implements  OnInit {
 	public get applicationStatus(): boolean {
 		if (this.statuses && this.testResults) {
 			if (this.statuses.length > 0 && this.testResults.length > 0) {
-				for (let status of this.statuses) {
+				for (const status of this.statuses) {
 					if (status.status !== 'Ok') {
 						return false;
 					}
 				}
-				for (let status of this.testResults) {
+				for (const status of this.testResults) {
 					if (status.status !== 'Ok') {
 						return false;
 					}

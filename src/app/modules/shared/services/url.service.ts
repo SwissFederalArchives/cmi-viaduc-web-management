@@ -62,7 +62,7 @@ export class UrlService {
 	}
 
 	public getPublicClientBaseURL(): string {
-		let baseUrl = this._cfg.getSetting('publicClientUrl') as string;
+		const baseUrl = this._cfg.getSetting('publicClientUrl') as string;
 
 		if (baseUrl.endsWith('/#')) {
 			return baseUrl;
@@ -78,7 +78,7 @@ export class UrlService {
 	}
 
 	public setQuery(qs: string): void {
-		let h = window.location.hash.split('?');
+		const h = window.location.hash.split('?');
 		window.location.hash = h[0] + '?' + qs;
 	}
 

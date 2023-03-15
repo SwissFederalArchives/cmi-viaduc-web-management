@@ -42,9 +42,9 @@ export class AuthenticationService {
 
 		const callbackUrl = `${window.location.pathname}Auth/ExternalSignIn`; // relative url
 
-		let returnUrl = window.location.hash.replace('#', '');
+		const returnUrl = window.location.hash.replace('#', '');
 
-		let loginUrl = _util.addToString(this._options.serverUrl + this._options.publicPort, '/', 'AuthServices/SignIn?ReturnUrl=' + encodeURIComponent(callbackUrl));
+		const loginUrl = _util.addToString(this._options.serverUrl + this._options.publicPort, '/', 'AuthServices/SignIn?ReturnUrl=' + encodeURIComponent(callbackUrl));
 		this._sessionStorage.setUrl(authReturnUrlKey, returnUrl);
 		window.location.assign(loginUrl);
 	}
@@ -63,7 +63,7 @@ export class AuthenticationService {
 	}
 
 	public redirectToOriginBeforeLogin(): void {
-		let returnUrl = this._sessionStorage.getUrl(authReturnUrlKey);
+		const returnUrl = this._sessionStorage.getUrl(authReturnUrlKey);
 
 		this.setDefaultRedirectUrl();
 		if (returnUrl && returnUrl !== '') {
@@ -144,7 +144,7 @@ export class AuthenticationService {
 
 	private _getIdentity(): Observable<any> {
 		const baseUrl = this._options.serverUrl + this._options.publicPort;
-		let claimsUrl = baseUrl + '/api/Auth/GetIdentity';
+		const claimsUrl = baseUrl + '/api/Auth/GetIdentity';
 		return this._http.get<any>(claimsUrl);
 	}
 
@@ -164,7 +164,7 @@ export class AuthenticationService {
 	}
 
 	public async tryActivateExistingSession(): Promise<any> {
-		let session = this._getSessionFromStorage();
+		const session = this._getSessionFromStorage();
 		if (session != null && session.authenticated) {
 			this._initSession();
 

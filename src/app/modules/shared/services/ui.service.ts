@@ -36,7 +36,7 @@ export class UiService {
 
 	public showHtmlInNewTab(html: string, title: string) {
 		try {
-			let wnd = window.open(`about:blank`, '_blank');
+			const wnd = window.open(`about:blank`, '_blank');
 			if (!wnd || wnd.closed || typeof wnd.closed === 'undefined') {
 				this._toastr.warning('Ihr Browser hat das neu geöffnete Fenster blockiert. Bitte erlauben Sie das Öffnen von Popups in Ihrem Browser (für diese Applikation) und versuchen Sie es erneut.', title, {
 					disableTimeOut: true

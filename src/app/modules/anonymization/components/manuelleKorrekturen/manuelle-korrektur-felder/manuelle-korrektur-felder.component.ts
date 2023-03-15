@@ -78,7 +78,7 @@ export class ManuelleKorrekturFelderComponent implements OnInit {
 
 	public anonymisieren() {
 		let text = this.myForm.controls['manuell'].value.toString();
-		let selecteted =  text.substr(this.selectionStart, this.selectionEnd - this.selectionStart);
+		const selecteted =  text.substr(this.selectionStart, this.selectionEnd - this.selectionStart);
 		text = text.replace(selecteted, '███');
 		this.selectionEnd = this.selectionStart = 0;
 		this.myForm.controls['manuell'].setValue(text);

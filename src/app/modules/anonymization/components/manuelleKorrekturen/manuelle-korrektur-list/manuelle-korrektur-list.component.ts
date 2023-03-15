@@ -36,8 +36,8 @@ export class ManuelleKorrekturListComponent implements OnInit {
 	public visibleColumns: any[] = [];
 	public visibleColumnsSelector: any[] = [];
 	public crumbs: any[] = [];
-	public veIds: string = '';
-	public baseFilterString: string = '';
+	public veIds = '';
+	public baseFilterString = '';
 
 	public loading: boolean;
 	public allowManuelleKorrekturenBearbeiten = true;
@@ -68,7 +68,7 @@ export class ManuelleKorrekturListComponent implements OnInit {
 	public ngOnInit(): void {
 		this.buildCrumbs();
 		this._initTableView();
-		let maps: { [id: string]: DataMap; } = {};
+		const maps: { [id: string]: DataMap; } = {};
 		maps['anonymisierungsstatus'] = new DataMap([
 		{ key: 2, name: 'Prüfung notwendig'},
 		{ key: 0, name: 'In Bearbeitung'},
@@ -80,7 +80,7 @@ export class ManuelleKorrekturListComponent implements OnInit {
 
 	private _loadColumns(): void {
 		this._usr.initUserSettings();
-		let userSettings = this._cfg.getSetting('user.settings') as ManagementUserSettings;
+		const userSettings = this._cfg.getSetting('user.settings') as ManagementUserSettings;
 		if (userSettings.manuelleKorrekturSettings && userSettings.manuelleKorrekturSettings.columns) {
 			this.columns = userSettings.manuelleKorrekturSettings.columns;
 		} else {
@@ -93,10 +93,10 @@ export class ManuelleKorrekturListComponent implements OnInit {
 	}
 
 	public getAndSortCurrentColumns(): any[] {
-		let cols = [...this.columns];
+		const cols = [...this.columns];
 
-		for (let c of cols) {
-			let existing: Column = this.flexGrid.columns.filter(col => col.header === c.defaultLabel)[0];
+		for (const c of cols) {
+			const existing: Column = this.flexGrid.columns.filter(col => col.header === c.defaultLabel)[0];
 			if (existing) {
 				c.width = existing.renderWidth;
 				c.format = existing.format;
@@ -140,7 +140,7 @@ export class ManuelleKorrekturListComponent implements OnInit {
 	}
 
 	private _saveColumnsAsUserSettings(cols) {
-		let existingSettings = this._cfg.getUserSettings() as ManagementUserSettings;
+		const existingSettings = this._cfg.getUserSettings() as ManagementUserSettings;
 		existingSettings.manuelleKorrekturSettings = <ManuelleKorrekturSettings> {
 			columns: cols
 		};
@@ -184,7 +184,7 @@ export class ManuelleKorrekturListComponent implements OnInit {
 
 	private restorePreFilterButtonState() {
 		setTimeout(() => {
-			let filter = this._storage.getItem('MK_PreFilterStringValue') as number;
+			const filter = this._storage.getItem('MK_PreFilterStringValue') as number;
 			if (filter !== null && filter !== undefined) {
 				this.preFilter = filter;
 			} else {
@@ -203,7 +203,7 @@ export class ManuelleKorrekturListComponent implements OnInit {
 	}
 
 	private buildCrumbs(): void {
-		let crumbs: any[] = this.crumbs = [];
+		const crumbs: any[] = this.crumbs = [];
 		crumbs.push({iconClasses: 'glyphicon glyphicon-home', url: this._url.getHomeUrl()});
 		crumbs.push({label: this._txt.get('breadcrumb.mauelleKorrekturen', 'Mauelle Korrekturen')});
 	}
@@ -227,7 +227,7 @@ export class ManuelleKorrekturListComponent implements OnInit {
 	}
 
 	public getQuantityOfCheckedItmesToDelete(): number {
-		let counter: number = 0;
+		const counter = 0;
 		if (!this.flexGrid) {
 			return counter;
 		}
@@ -248,7 +248,7 @@ export class ManuelleKorrekturListComponent implements OnInit {
 	}
 
 	public listMenuItemClicked(menu: WjMenu) {
-		let cmd = menu.selectedIndex;
+		const cmd = menu.selectedIndex;
 		switch (cmd) {
 			case 0:
 				this.saveColumns();
@@ -301,7 +301,7 @@ export class ManuelleKorrekturListComponent implements OnInit {
 
 	public onFilterApplied(ev) {
 		if (!_util.isEmpty(this.baseFilterString)) {
-			let filterBefore = this.manuelleKorrekturItems.filterDefinition.toString();
+			const filterBefore = this.manuelleKorrekturItems.filterDefinition.toString();
 			if (_util.isEmpty(filterBefore) || filterBefore.indexOf(this.baseFilterString) < 0) {
 				let filter = this.baseFilterString;
 
@@ -318,7 +318,7 @@ export class ManuelleKorrekturListComponent implements OnInit {
 			return;
 		}
 
-		let fileName = this._txt.get('anonymization.manuelleKorrekturen', 'anonymisierung.manuelleKorrekturen.xlsx');
+		const fileName = this._txt.get('anonymization.manuelleKorrekturen', 'anonymisierung.manuelleKorrekturen.xlsx');
 		this.flexGrid.exportToExcelOData(fileName).subscribe(() => {
 			// nothing
 		}, (err) => {
@@ -334,7 +334,7 @@ export class ManuelleKorrekturListComponent implements OnInit {
 		this._resetColumnsToDefault();
 		this.refreshHiddenVisibleColumns();
 		this.manuelleKorrekturItems.sortDescriptions.clear();
-		for (let sc of this._getInitialSortDescriptions()) {
+		for (const sc of this._getInitialSortDescriptions()) {
 			this.manuelleKorrekturItems.sortDescriptions.push(sc);
 			this.flexGrid.defaultSortColumnKey = 'manuelleKorrekturId';
 		}
@@ -354,12 +354,12 @@ export class ManuelleKorrekturListComponent implements OnInit {
 	public async addNewManuelleKorrekturenConfirm() {
 		this.showAddModal = false;
 		this.veIds = this.myForm.controls['veIds'].value;
-		let myArray = this.veIds .split('\n');
+		const myArray = this.veIds .split('\n');
 		this.loading = true;
-		let map = await this._service.BatchAddManuelleKorrektur(myArray) as  Map<string, string>;
-		let message: string = '' ;
+		const map = await this._service.BatchAddManuelleKorrektur(myArray) as  Map<string, string>;
+		let message = '' ;
 
-		let maxLength = myArray.length;
+		const maxLength = myArray.length;
 		for (let i = 0; i < maxLength; i++) {
 			if (map[i]) {
 				message = message + map[i] + '<br/>' + (i === maxLength - 1 ? '' : '-----------<br/>');
@@ -392,7 +392,7 @@ export class ManuelleKorrekturListComponent implements OnInit {
 
 		this.loading = true;
 		this.showDeleteModal = false;
-		let itemsToDelete: number[] = this.flexGrid.checkedItems.map(s => s.manuelleKorrekturId);
+		const itemsToDelete: number[] = this.flexGrid.checkedItems.map(s => s.manuelleKorrekturId);
 
 		let result: Observable<any>;
 		if (itemsToDelete.length === 1) {
@@ -422,7 +422,7 @@ export class ManuelleKorrekturListComponent implements OnInit {
 		this.manuelleKorrekturItems.sortDescriptions.clear();
 		this.manuelleKorrekturItems.filterDefinition = this.baseFilterString;
 		this.flexGrid.filter.clear();
-		for (let sc of this._getInitialSortDescriptions()) {
+		for (const sc of this._getInitialSortDescriptions()) {
 			this.manuelleKorrekturItems.sortDescriptions.push(sc);
 			this.flexGrid.defaultSortColumnKey = 'manuelleKorrekturId';
 		}
@@ -430,7 +430,7 @@ export class ManuelleKorrekturListComponent implements OnInit {
 	}
 
 	private _getInitialSortDescriptions(): any[] {
-		let firstCol = this.visibleColumns.find(c => c.key === 'manuelleKorrekturId');
+		const firstCol = this.visibleColumns.find(c => c.key === 'manuelleKorrekturId');
 		// is visisble then sort after this column
 		if (firstCol) {
 			return [new SortDescription('manuelleKorrekturId', false)];

@@ -21,6 +21,9 @@ import {ActivatedRoute} from '@angular/router';
 import * as moment from 'moment';
 import {ToastrService} from 'ngx-toastr';
 import {NgForm} from '@angular/forms';
+import flatpickr from 'flatpickr';
+import {German} from 'flatpickr/dist/l10n/de';
+import {FlatPickrOutputOptions} from 'angularx-flatpickr/lib/flatpickr.directive';
 
 @Component({
 	selector: 'cmi-viaduc-orders-list-page',
@@ -55,9 +58,7 @@ export class OrdersDetailPageComponent extends ComponentCanDeactivate {
 	@ViewChild('formOrderDetail', {static: false})
 	public formOrderDetail: NgForm;
 	public currentUserRole: string;
-	public isValidRueckgabeDatum: boolean;
 	public isValidRueckgabeNumber = true;
-	public isValidOrderingLesesaalDatum: boolean;
 
 	constructor(private _aut: AuthorizationService,
 				private _dec: EntityDecoratorService,
@@ -90,6 +91,8 @@ export class OrdersDetailPageComponent extends ComponentCanDeactivate {
 			{ 'id': GebrauchskopieStatus.Fehlgeschlagen, 'name': this._txt.get('enums.gebrauchskopieStatus.fehlgeschlagen', 'Fehlgeschlagen') },
 			{ 'id': GebrauchskopieStatus.Versendet, 'name': this._txt.get('enums.gebrauchskopieStatus.versendet', 'Versendet') }
 		];
+
+		flatpickr.localize(German);
 	}
 
 	private _init(): void {
@@ -154,6 +157,11 @@ export class OrdersDetailPageComponent extends ComponentCanDeactivate {
 
 	public getFormattedDate(dt: Date | string) {
 		return dt ? moment.utc(dt).format('DD.MM.YYYY, HH:mm:ss') : '';
+	}
+
+
+	public getFormattedDateWithoutTime(dt: Date | string) {
+		return dt ? moment.utc(dt).format('DD.MM.YYYY') : '';
 	}
 
 	public getFormattedStatusHistoryToStatus(h: StatusHistory): string {
@@ -305,7 +313,7 @@ export class OrdersDetailPageComponent extends ComponentCanDeactivate {
 		if (!this._err.verifyApplicationFeatureOrShowError(ApplicationFeatureEnum.AuftragsuebersichtAuftraegeKannEntscheidFreigabeHinterlegen)) {
 			return;
 		}
-		let strings: string[] = [];
+		const strings: string[] = [];
 		strings[0] = this.detailRecord.userId;
 		this._userService.getUsers(strings).then((users) => {
 			if (users) {
@@ -433,6 +441,7 @@ export class OrdersDetailPageComponent extends ComponentCanDeactivate {
 	public ausleihdauerChange(): void {
 		if (this.canFieldAusleihdauerChange()) {
 			const ausgabe = moment(this?.detailRecord?.ausgabedatum);
+
 			this.detailRecord.erwartetesRueckgabeDatum = ausgabe.add(this.detailRecord.ausleihdauer, 'days').toDate();
 			this.isValidRueckgabeNumber = this?.detailRecord?.ausleihdauer > 0;
 		}
@@ -440,13 +449,9 @@ export class OrdersDetailPageComponent extends ComponentCanDeactivate {
 
 	public erwartetesRueckgabeDatumChange(): void {
 		if (this.canFieldAusleihdauerChange()) {
-			let rueckgabe = moment(this?.detailRecord?.erwartetesRueckgabeDatum);
+			const rueckgabe = moment(this?.detailRecord?.erwartetesRueckgabeDatum);
 			const ausgabe = moment(this?.detailRecord?.ausgabedatum);
-			// it has already deducted one day more
-			// if the order was after 0 o'clock
-			rueckgabe.add(ausgabe.hours(), 'hours');
-			rueckgabe.add(ausgabe.minute() + 1, 'minutes');
-			let ausgabeDays = rueckgabe.diff(ausgabe, 'days');
+			const ausgabeDays = rueckgabe.diff( ausgabe, 'days');
 
 			this.detailRecord.ausleihdauer = ausgabeDays;
 			if (ausgabeDays > 0) {
@@ -457,11 +462,24 @@ export class OrdersDetailPageComponent extends ComponentCanDeactivate {
 		}
 	}
 
-	public rueckgabeDatumValidChanged(isValid: boolean) {
-		this.isValidRueckgabeDatum = isValid;
+	public dataPickerValueUpdate($event: FlatPickrOutputOptions) {
+		if ($event.dateString === ''){
+			this.detailRecord.erwartetesRueckgabeDatum = null;
+			this.isValidRueckgabeNumber = false;
+		} else {
+			this.isValidRueckgabeNumber = true;
+			this.detailRecord.erwartetesRueckgabeDatum = $event.selectedDates[0];
+			this.detailRecord.erwartetesRueckgabeDatum.setDate(this.detailRecord.erwartetesRueckgabeDatum.getDate() + 1);
+		}
 	}
 
-	public orderingLesesaalDatumValidChanged(isValid: boolean) {
-		this.isValidOrderingLesesaalDatum = isValid;
+	public dataPickerValueUpdateGeplanteAusgabe($event: FlatPickrOutputOptions) {
+		if ($event.dateString === ''){
+			this.detailRecord.orderingLesesaalDate= null;
+		}
+		else {
+			this.detailRecord.orderingLesesaalDate = $event.selectedDates[0];
+			this.detailRecord.orderingLesesaalDate.setDate(this.detailRecord.orderingLesesaalDate.getDate() + 1);
+		}
 	}
 }

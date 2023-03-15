@@ -66,7 +66,7 @@ export class OrdersEinsichtListPageComponent implements OnInit, AfterViewInit {
 
 	public ngAfterViewInit(): void {
 		setTimeout(() => {
-			let filter = this._storage.getItem('OrderEinsichtList_preFilter') as SelectionPreFilter;
+			const filter = this._storage.getItem('OrderEinsichtList_preFilter') as SelectionPreFilter;
 			if (filter !== null && filter !== undefined) {
 				this._previousPreFilter = filter;
 				this.preFilter = filter;
@@ -83,7 +83,7 @@ export class OrdersEinsichtListPageComponent implements OnInit, AfterViewInit {
 	}
 
 	private _loadColumns(): void {
-		let userSettings = this._cfg.getSetting('user.settings') as ManagementUserSettings;
+		const userSettings = this._cfg.getSetting('user.settings') as ManagementUserSettings;
 		if (userSettings.einsichtsGesuchSettings && userSettings.einsichtsGesuchSettings.columns) {
 			this.columns = userSettings.einsichtsGesuchSettings.columns;
 		} else {
@@ -113,7 +113,7 @@ export class OrdersEinsichtListPageComponent implements OnInit, AfterViewInit {
 	}
 
 	public listMenuItemClicked(menu: WjMenu) {
-		let cmd = menu.selectedIndex;
+		const cmd = menu.selectedIndex;
 		switch (cmd) {
 			case 0:
 				this.saveColumns();
@@ -191,7 +191,7 @@ export class OrdersEinsichtListPageComponent implements OnInit, AfterViewInit {
 	}
 
 	private _saveColumnsAsUserSettings(cols) {
-		let existingSettings = this._cfg.getUserSettings() as ManagementUserSettings;
+		const existingSettings = this._cfg.getUserSettings() as ManagementUserSettings;
 		existingSettings.einsichtsGesuchSettings = <EinsichtsgesuchUserSettings> {
 			columns: cols
 		};
@@ -233,7 +233,7 @@ export class OrdersEinsichtListPageComponent implements OnInit, AfterViewInit {
 			const users = this.detailRecords.map((i: OrderingFlatItem) => i.user);
 			if (users && users.length > 0) {
 				if (users.length > 1) {
-					for (let c of users)	{
+					for (const c of users)	{
 						if (c !== users[0]) {
 							this._toastr.error('Ausgewählte Gesuche sind von unterschiedlichen Benutzern', 'Entscheid Gesuch hinterlegen');
 							return;

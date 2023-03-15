@@ -80,7 +80,7 @@ export class ConverterProgressComponent implements OnInit {
 	}
 
 	private _buildCrumbs(): void {
-		let crumbs: any[] = this.crumbs = [];
+		const crumbs: any[] = this.crumbs = [];
 		crumbs.push({ iconClasses: 'glyphicon glyphicon-home', _url: this._url.getHomeUrl() });
 		crumbs.push({
 			label: this._txt.get('breadcrumb.Reporting', 'Reporting')

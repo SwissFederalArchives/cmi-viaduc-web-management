@@ -18,7 +18,7 @@ export class AblieferndeStelleService {
 	}
 
 	public async deleteAblieferndeStelle(ablieferndeStelleIds: number[]): Promise<any> {
-		let url = `${this._apiUrl}/DeleteAblieferndeStelle`;
+		const url = `${this._apiUrl}/DeleteAblieferndeStelle`;
 		return await this._http.post(url, ablieferndeStelleIds, this._http.noCaching).toPromise();
 	}
 
@@ -28,12 +28,12 @@ export class AblieferndeStelleService {
 	}
 
 	public async createAblieferndeStelle(ablieferndeStelle: AblieferndeStelle): Promise<any> {
-		let url = `${this._apiUrl}/CreateAblieferndeStelle`;
+		const url = `${this._apiUrl}/CreateAblieferndeStelle`;
 		return await this._http.post(url, ablieferndeStelle, this._http.noCaching).toPromise();
 	}
 
 	public async updateAblieferndeStelle(ablieferndeStelle: AblieferndeStelle): Promise<any> {
-		let url = `${this._apiUrl}/UpdateAblieferndeStelle`;
+		const url = `${this._apiUrl}/UpdateAblieferndeStelle`;
 		return await this._http.post(url, ablieferndeStelle, this._http.noCaching).toPromise();
 	}
 }

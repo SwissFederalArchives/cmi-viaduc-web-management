@@ -35,11 +35,11 @@ export class AblieferndeStelleDetailPageComponent extends ComponentCanDeactivate
 	@ViewChild('formStelleDetail', { static: false })
 	public formStelleDetail: NgForm;
 
-	public hasKontrollstelle: boolean = true;
-	public showDeleteModal: boolean = false;
+	public hasKontrollstelle = true;
+	public showDeleteModal = false;
 	public emailToDelete: string;
-	public saveClicked: boolean = false;
-	public showConfirmModal: boolean = false;
+	public saveClicked = false;
+	public showConfirmModal = false;
 	public crumbs: any[] = [];
 	public ablieferndeStelleHeaderName: string;
 	public id: any;
@@ -183,7 +183,7 @@ export class AblieferndeStelleDetailPageComponent extends ComponentCanDeactivate
 	}
 
 	private _buildCrumbs(): void {
-		let crumbs: any[] = this.crumbs = [];
+		const crumbs: any[] = this.crumbs = [];
 		crumbs.push({iconClasses: 'glyphicon glyphicon-home', _url: this._url.getHomeUrl()});
 		crumbs.push({
 			label: this._txt.get('breadcrumb.behoerdenZugriff', 'Behörden-Zugriff')
@@ -257,7 +257,7 @@ export class AblieferndeStelleDetailPageComponent extends ComponentCanDeactivate
 	}
 
 	private _fillDisplayNameAsToken(res: AsToken): void {
-		for (let item of res.tokens) {
+		for (const item of res.tokens) {
 			item.displayName = `${item.token} (${item.bezeichnung})`;
 		}
 
@@ -266,8 +266,8 @@ export class AblieferndeStelleDetailPageComponent extends ComponentCanDeactivate
 	}
 
 	private _sortTokens(tokens: AblieferndeStelleToken[]): AblieferndeStelleToken[] {
-		let sortedTokenNames = tokens.map(t => t.displayName).sort();
-		let resultTokens = [];
+		const sortedTokenNames = tokens.map(t => t.displayName).sort();
+		const resultTokens = [];
 		sortedTokenNames.forEach(tokenDisplayName =>
 			resultTokens.push(tokens.find(token =>
 				token.displayName === tokenDisplayName)
@@ -277,7 +277,7 @@ export class AblieferndeStelleDetailPageComponent extends ComponentCanDeactivate
 	}
 
 	private _fillDisplayNameAblieferndeStelleToken(res: AblieferndeStelleToken[]): void {
-		for (let item of res) {
+		for (const item of res) {
 			item.displayName = `${item.token} (${item.bezeichnung})`;
 		}
 	}
@@ -304,7 +304,7 @@ export class AblieferndeStelleDetailPageComponent extends ComponentCanDeactivate
 	}
 
 	public removeKontrollstelle(email: string) {
-		let index = this.ablieferndeStelle.kontrollstellen.indexOf(email);
+		const index = this.ablieferndeStelle.kontrollstellen.indexOf(email);
 		if (index >= 0) {
 			this.ablieferndeStelle.kontrollstellen.splice(index, 1);
 			this.wjListbox.refresh();

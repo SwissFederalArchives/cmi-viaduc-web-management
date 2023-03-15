@@ -36,7 +36,7 @@ export class InVorlageExportierenModalComponent {
 		this._selectedVorlage = val;
 	}
 
-	public loading: boolean = false;
+	public loading = false;
 	public vorlagen: EinsichtsGesuchEmailVorlage[] = [];
 	public isLoading = false;
 	public sprache: string;

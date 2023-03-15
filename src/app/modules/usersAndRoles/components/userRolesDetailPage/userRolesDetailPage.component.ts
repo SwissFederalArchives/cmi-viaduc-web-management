@@ -10,10 +10,11 @@ import {AblieferndeStelle, DetailResult} from '../../../shared/model';
 import {RoleService} from '../../services';
 import * as fileSaver from 'file-saver';
 import {HttpEventType} from '@angular/common/http';
-import * as moment from 'moment';
-
 import {FormBuilder, FormControl, FormGroup, Validators} from '@angular/forms';
 import {UserRolesDetailPageErrorMessages} from './userRolesDetailPageErrorMessages';
+import flatpickr from 'flatpickr';
+import {German} from 'flatpickr/dist/l10n/de';
+import {FlatPickrOutputOptions} from 'angularx-flatpickr/lib/flatpickr.directive';
 
 @Component({
 	selector: 'cmi-viaduc-user-roles-detail-page',
@@ -23,7 +24,6 @@ import {UserRolesDetailPageErrorMessages} from './userRolesDetailPageErrorMessag
 export class UserRolesDetailPageComponent extends ComponentCanDeactivate implements OnInit, AfterViewChecked {
 	public errors: { [key: string]: string } = {};
 	public loading: boolean;
-
 	public crumbs: any[];
 	public stillSelectedRoles: any;
 	public stillAvailableRoles: any;
@@ -47,7 +47,9 @@ export class UserRolesDetailPageComponent extends ComponentCanDeactivate impleme
 	public ablieferndeStelleAllList: AblieferndeStelle[];
 	private stillSelectedAblieferndeStelleList: any;
 	private initialeAblieferndeStelleList: any;
-	private rolesIsDirty: Boolean;
+	private rolesIsDirty: boolean;
+	public today = new Date();
+	public maxDate = new Date();
 
 	constructor(private _context: ClientContext, public _authorization: AuthorizationService, private _roleService: RoleService, private _txt: TranslationService,
 				private _url: UrlService,
@@ -62,9 +64,13 @@ export class UserRolesDetailPageComponent extends ComponentCanDeactivate impleme
 				private _changeDetectionRef: ChangeDetectorRef,
 				private formbuilder: FormBuilder) {
 		super();
+		flatpickr.localize(German);
 	}
 
 	public ngOnInit(): void {
+		this.today.setHours(0, 0, 0, 0);
+		this.maxDate.setDate( this.today.getDate() + 30 );
+		this.maxDate.setHours(23, 59, 59, 99);
 		this._route.params.subscribe(params => this._load(params['id']));
 		this.loading = true;
 		this._ablieferndeStelleService.getAllAblieferndeStellen().subscribe(
@@ -75,7 +81,7 @@ export class UserRolesDetailPageComponent extends ComponentCanDeactivate impleme
 			},
 			() => this.loading = false);
 
-		let countries = this._countriesService.getCountries(this._context.language);
+		const countries = this._countriesService.getCountries(this._context.language);
 		this.countries = this._countriesService.sortCountriesByName(countries);
 	}
 
@@ -150,7 +156,7 @@ export class UserRolesDetailPageComponent extends ComponentCanDeactivate impleme
 		const ablieferndeStelleIds = this.detail.item.ablieferndeStelleList != null ? this.detail.item.ablieferndeStelleList.map(as => as.ablieferndeStelleId) : [];
 		this._userService.cleanAndAddAblieferndeStelle(this.detail.item.id, ablieferndeStelleIds).subscribe(
 			async res => {
-			let access = this.detail.item.access || {};
+			const access = this.detail.item.access || {};
 				this.detail.item.tokens = access.asTokens || [];
 				this._ui.showSuccess(this._txt.get('userAndRoles.assignedAblieferndeStellenSuccessfullySaved', 'Zuständige Stellen erfolgreich gespeichert'));
 				this.rememberSelectedRoles();
@@ -270,7 +276,7 @@ export class UserRolesDetailPageComponent extends ComponentCanDeactivate impleme
 			return;
 		}
 		const formData = new FormData();
-		for (let file of event.target.files) {
+		for (const file of event.target.files) {
 			formData.append(file.name, file);
 		}
 		this.selectedIdentifizierungsmittel = formData;
@@ -278,13 +284,13 @@ export class UserRolesDetailPageComponent extends ComponentCanDeactivate impleme
 
 	public downloadIdentifierungsmittel() {
 		this.loading = true;
-		let url = this._userService.getIdentifizierungsmittelPdfUrl(this.detail.item.id);
+		const url = this._userService.getIdentifizierungsmittelPdfUrl(this.detail.item.id);
 		this._http.download(url).subscribe(
 			event => {
 				if (event.type === HttpEventType.Response) {
 					try {
 						this.loading = false;
-						let blob = event.body;
+						const blob = event.body;
 						fileSaver.saveAs(blob, this.detail.item.id + '.pdf', { autoBom: false });
 					} catch (ex) {
 						console.error(ex);
@@ -388,36 +394,6 @@ export class UserRolesDetailPageComponent extends ComponentCanDeactivate impleme
 		}
 	}
 
-	public dateValidator(control: FormControl): any | null {
-		if (control.value === null || control.value === '' || moment(control.value, 'DD.MM.YYYY', true).isValid()) {
-			if (control.invalid) {
-				control.setErrors(null);
-				this.updateErrorMessages();
-			}
-			return null;
-		}
-		// return error object
-		return {'invalidDate': {'value': control.value}};
-	}
-
-	public dateRangeValidator(control: FormControl): any | null {
-		let dateString = control.value;
-		if (!dateString || dateString === '' )  {
-			if (control.invalid) {
-				control.setErrors(null);
-				this.updateErrorMessages();
-			}
-			return null;
-		}
-
-		if (this.getNextThirtyDays.findIndex(e => e === dateString) >= 0) {
-			return null;
-		}
-
-		// return error object
-		return {'invalidDateRange': {'value': control.value}};
-	}
-
 	public GetModalMessage(): string {
 		switch (this.myForm.controls['rolePublicClient'].value) {
 			case this._authorization.roles.Oe2:
@@ -493,6 +469,7 @@ export class UserRolesDetailPageComponent extends ComponentCanDeactivate impleme
 	}
 
 	public getFormIsDirty():boolean {
+
 		if (this.rolesIsDirty) {
 			return true;
 		}
@@ -500,11 +477,6 @@ export class UserRolesDetailPageComponent extends ComponentCanDeactivate impleme
 			return true;
 		}
 		if (this.myForm) {
-			// Form reagiert auf Datum Änderungen nicht mit dirty, wenn der Wert davor "null" war
-			if (this.myForm.controls['digitalisierungsbeschraenkungAufgehobenBis'].value !== this.detail.item.digitalisierungsbeschraenkungAufgehobenBis ||
-				this.myForm.controls['downloadLimitDisabledUntil'].value !== this.detail.item.downloadLimitDisabledUntil ) {
-				return true;
-			}
 			return this.myForm.dirty;
 		} else {
 			return false;
@@ -547,7 +519,7 @@ export class UserRolesDetailPageComponent extends ComponentCanDeactivate impleme
 			this.allRoles  = this.detail['roles'];
 			this.distributeAssignedRoles(this.detail.item.roles, this.initialeRoles);
 		}
-		let access = result.item.access || {};
+		const access = result.item.access || {};
 		result.item.tokens = access.asTokens || [];
 		if (this.stillSelectedAblieferndeStelleList) {
 			this.detail.item.ablieferndeStelleList = [];
@@ -560,24 +532,13 @@ export class UserRolesDetailPageComponent extends ComponentCanDeactivate impleme
 				this.initialeAblieferndeStelleList.push(ablieferndeStelleList);
 			});
 		}
-		this.detail.item.birthday = result.item.birthday ? moment(new Date(result.item.birthday)).format('DD.MM.YYYY') : null;
-		let dateTime = moment(new Date()).add(-1, 'days').toDate();
-		if (result.item.downloadLimitDisabledUntil) {
-			let compareDownloadLimitDisabledUntil = moment(new Date(result.item.downloadLimitDisabledUntil));
-			if (compareDownloadLimitDisabledUntil.diff(dateTime) > 0) {
-				this.detail.item.downloadLimitDisabledUntil = moment(new Date(this.detail.item.downloadLimitDisabledUntil)).format('DD.MM.YYYY');
-			} else {
-				this.detail.item.downloadLimitDisabledUntil = null;
-			}
-		}
-		if (result.item.digitalisierungsbeschraenkungAufgehobenBis) {
-			let compareDigitalisierungsbeschraenkungAufgehobenBis = moment(new Date(result.item.digitalisierungsbeschraenkungAufgehobenBis));
-			if (compareDigitalisierungsbeschraenkungAufgehobenBis.diff(dateTime) > 0) {
-				this.detail.item.digitalisierungsbeschraenkungAufgehobenBis = moment(new Date(this.detail.item.digitalisierungsbeschraenkungAufgehobenBis)).format('DD.MM.YYYY');
-			} else {
-				this.detail.item.digitalisierungsbeschraenkungAufgehobenBis = null;
-			}
-		}
+		this.detail.item.birthday = result.item.birthday ? new Date(result.item.birthday) : null;
+		this.detail.item.downloadLimitDisabledUntil = result.item.downloadLimitDisabledUntil && this.isInDateRange(new Date(this.detail.item.downloadLimitDisabledUntil))
+			? new Date(this.detail.item.downloadLimitDisabledUntil)	: null;
+		this.detail.item.digitalisierungsbeschraenkungAufgehobenBis  = result.item.digitalisierungsbeschraenkungAufgehobenBis  &&
+		this.isInDateRange(new Date(this.detail.item.digitalisierungsbeschraenkungAufgehobenBis))
+			? new Date(this.detail.item.digitalisierungsbeschraenkungAufgehobenBis) : null;
+
 		this.initForm();
 		this._buildCrumbs();
 	}
@@ -644,13 +605,12 @@ export class UserRolesDetailPageComponent extends ComponentCanDeactivate impleme
 			fabasoftDossier:  new FormControl({value: this.detail.item.fabasoftDossier, disabled: !this.allowBereichBenutzerdatenBearbeiten}),
 			id: [this.detail.item.id],
 			userExtId: [this.detail.item.userExtId],
-			downloadLimitDisabledUntil: [this.detail.item.downloadLimitDisabledUntil, [this.dateRangeValidator.bind(this), this.dateValidator.bind(this)]],
-			digitalisierungsbeschraenkungAufgehobenBis: [this.detail.item.digitalisierungsbeschraenkungAufgehobenBis, [this.dateRangeValidator.bind(this), this.dateValidator.bind(this)]],
+			downloadLimitDisabledUntil: new FormControl(this.detail.item.downloadLimitDisabledUntil ? new Date(this.detail.item.downloadLimitDisabledUntil) : null, [this.dateRangeValidator.bind(this)]),
+			digitalisierungsbeschraenkungAufgehobenBis: new FormControl(this.detail.item.digitalisierungsbeschraenkungAufgehobenBis ? new Date(this.detail.item.digitalisierungsbeschraenkungAufgehobenBis) : null, [this.dateRangeValidator.bind(this)]),
 			language: [{value: this.detail.item.language, disabled: !this.allowBereichBenutzerdatenBearbeiten}],
 			createModifiyData: [this.detail.item.createModifiyData],
 			rolePublicClient: [{value: this.detail.item.rolePublicClient, disabled: !this.allowBereichBenutzerdatenBearbeiten}],
-			birthday:[{value: this.detail.item.birthday,  disabled: (!this.allowBereichBenutzerdatenBearbeiten || this.detail.item.rolePublicClient === this._authorization.roles.Oe3 ) },
-				[this.dateValidator.bind(this)]],
+			birthday:[{value: this.detail.item.birthday,  disabled: (!this.allowBereichBenutzerdatenBearbeiten || this.detail.item.rolePublicClient === this._authorization.roles.Oe3 )}],
 			researcherGroup: new FormControl({value: this.detail.item.researcherGroup,
 					disabled: (this.detail.item.rolePublicClient !== this._authorization.roles.Oe3 || !this.detail.item.emailAddress.endsWith('@dodis.ch') || !this.allowForschungsgruppeDdsBearbeiten) }),
 			barInternalConsultation: new FormControl({value: this.detail.item.barInternalConsultation,
@@ -663,8 +623,7 @@ export class UserRolesDetailPageComponent extends ComponentCanDeactivate impleme
 	}
 
 	private reassembleDatatype() {
-		let detailItem = this.myForm.getRawValue();
-
+		const detailItem = this.myForm.getRawValue();
 		this.detail.item.familyName = detailItem.familyName;
 		this.detail.item.firstName = detailItem.firstName;
 		this.detail.item.organization = detailItem.organization;
@@ -680,8 +639,9 @@ export class UserRolesDetailPageComponent extends ComponentCanDeactivate impleme
 		this.detail.item.fabasoftDossier = detailItem.fabasoftDossier;
 		this.detail.item.id = detailItem.id;
 		this.detail.item.userExtId = detailItem.userExtId;
-		this.detail.item.downloadLimitDisabledUntil = detailItem.downloadLimitDisabledUntil;
-		this.detail.item.digitalisierungsbeschraenkungAufgehobenBis = detailItem.digitalisierungsbeschraenkungAufgehobenBis;
+		this.detail.item.downloadLimitDisabledUntil = this.isInDateRange(detailItem.downloadLimitDisabledUntil) ? detailItem.downloadLimitDisabledUntil : null;
+		this.detail.item.digitalisierungsbeschraenkungAufgehobenBis = this.isInDateRange(detailItem.digitalisierungsbeschraenkungAufgehobenBis) ?
+			detailItem.digitalisierungsbeschraenkungAufgehobenBis : null;
 		this.detail.item.language = detailItem.language;
 		this.detail.item.rolePublicClient = detailItem.rolePublicClient;
 		this.detail.item.researcherGroup = detailItem.researcherGroup;
@@ -690,6 +650,17 @@ export class UserRolesDetailPageComponent extends ComponentCanDeactivate impleme
 		this.rememberSelectedAblieferndeStelle();
 		this.detail.item.roles = this.initialeRoles;
 		this.detail.item.ablieferndeStelleList = this.initialeAblieferndeStelleList;
+	}
+
+	private isInDateRange(checkDate: Date) {
+		if (!checkDate) {
+			return false;
+		}
+		if (checkDate >= this.today && checkDate <= this.maxDate) {
+			return true;
+		}
+
+		return false;
 	}
 
 	private rememberSelectedRoles() {
@@ -709,7 +680,7 @@ export class UserRolesDetailPageComponent extends ComponentCanDeactivate impleme
 	private async _load(id: string): Promise<void> {
 		this.loading = true;
 		try {
-			let res = await this._roleService.getUserInfo(id);
+			const res = await this._roleService.getUserInfo(id);
 			this._prepareResult(res);
 		} catch (err) {
 			this._ui.showError(err);
@@ -727,12 +698,21 @@ export class UserRolesDetailPageComponent extends ComponentCanDeactivate impleme
 		}
 	}
 
-	public get getNextThirtyDays(): string[] {
-		let days = [];
-		for (let i = 0; i <= moment().daysInMonth(); i++) {
-			days.push(moment().add(i, 'days').format('DD.MM.YYYY'));
+	public dateRangeValidator(control: FormControl): any | null {
+		if (!control.value || control.value === '' )  {
+			if (control.invalid) {
+				control.setErrors(null);
+				this.updateErrorMessages();
+			}
+			return null;
 		}
-		return days;
+
+		if (control.value <= this.maxDate && control.value >= this.today) {
+			return null;
+		}
+
+		// return error object
+		return {'invalidDateRange': {'value': control.value}};
 	}
 
 	public get allowBarInterneKonsultationBearbeiten(): boolean {
@@ -779,7 +759,7 @@ export class UserRolesDetailPageComponent extends ComponentCanDeactivate impleme
 
 		const ablieferndeStelleIds = this.detail.item.ablieferndeStelleList != null ? this.detail.item.ablieferndeStelleList.map(as => as.ablieferndeStelleId) : [];
 		if (this.initialeAblieferndeStelleList.length === this.detail.item.ablieferndeStelleList.length) {
-			let length = this.initialeAblieferndeStelleList.length;
+			const length = this.initialeAblieferndeStelleList.length;
 			for (let i = 0; i < length; i++) {
 				if (ablieferndeStelleIds.indexOf(this.initialeAblieferndeStelleList[i].ablieferndeStelleId) < 0) {
 					return true;
@@ -800,6 +780,12 @@ export class UserRolesDetailPageComponent extends ComponentCanDeactivate impleme
 			this.myForm.controls['researcherGroup'].enable();
 		} else {
 			this.myForm.controls['researcherGroup'].disable();
+		}
+	}
+
+	public dataPickerValueUpdate($event: FlatPickrOutputOptions, controlName: string) {
+		if ($event.dateString === '') {
+			this.myForm.controls[controlName].setValue(null);
 		}
 	}
 }

@@ -35,9 +35,9 @@ export class StatisticsReportsComponent implements OnInit {
 			event => {
 				if (event.type === HttpEventType.Response) {
 					try {
-						let contentDisposition: string = event.headers.get('content-disposition');
-						let filename = contentDisposition.substring(contentDisposition.indexOf('filename=') + 10, contentDisposition.length - 1);
-						let blob = event.body;
+						const contentDisposition: string = event.headers.get('content-disposition');
+						const filename = contentDisposition.substring(contentDisposition.indexOf('filename=') + 10, contentDisposition.length - 1);
+						const blob = event.body;
 						this.loading = false;
 						fileSaver.saveAs(blob, filename, { autoBom: false });
 						this._ui.showSuccess(this._txt.get('StatisticsReport.downloadSuccess', 'Die Statistikreport werden gespeichert.'));
@@ -69,7 +69,7 @@ export class StatisticsReportsComponent implements OnInit {
 	}
 
 	private _buildCrumbs(): void {
-		let crumbs: any[] = this.crumbs = [];
+		const crumbs: any[] = this.crumbs = [];
 		crumbs.push({ iconClasses: 'glyphicon glyphicon-home', _url: this._url.getHomeUrl() });
 		crumbs.push({
 			label: this._txt.get('breadcrumb.Reporting', 'Reporting')

@@ -7,9 +7,6 @@ import {CollectionView} from '@grapecity/wijmo';
 export class DetailPagingService {
 	private _collectionView: CollectionView;
 
-	constructor() {
-	}
-
 	public setCurrent(view: CollectionView, currentPosition: number) {
 		this._collectionView = view;
 		this._collectionView.currentPosition = Math.max(currentPosition, 0);

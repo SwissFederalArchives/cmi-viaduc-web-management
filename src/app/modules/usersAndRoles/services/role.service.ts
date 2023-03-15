@@ -25,7 +25,7 @@ export class RoleService {
 	}
 
 	public getRoleInfo(roleId: string): Promise<DetailResult<any>> {
-		let queryString = `?roleId=${roleId}&language=${this._context.language}`;
+		const queryString = `?roleId=${roleId}&language=${this._context.language}`;
 
 		const url = `${this._apiUrl}/GetRoleInfo${queryString}`;
 		return this._http.get<DetailResult<any>>(url, this._http.noCaching).toPromise();
@@ -37,7 +37,7 @@ export class RoleService {
 	}
 
 	public setRoleFeatures(roleId: any, featureIds: any[]): Promise<void> {
-		let queryString = `?roleId=${roleId}`;
+		const queryString = `?roleId=${roleId}`;
 		const url = `${this._apiUrl}/SetRoleFeatures${queryString}`;
 		return this._http.post<void>(url, {featureIds: featureIds}, this._http.noCaching).toPromise();
 	}
@@ -46,13 +46,13 @@ export class RoleService {
 
 	// region Users
 	public getUserInfo(userId: string): Promise<DetailResult<any>> {
-		let queryString = `?userId=${userId}&language=${this._context.language}`;
+		const queryString = `?userId=${userId}&language=${this._context.language}`;
 		const url = `${this._apiUrl}/GetUserInfo${queryString}`;
 		return this._http.get<DetailResult<any>>(url, this._http.noCaching).toPromise();
 	}
 
 	public setUserRoles(userId: string, roleIds: any[]): Promise<void> {
-		let queryString = `?userId=${userId}`;
+		const queryString = `?userId=${userId}`;
 		const url = `${this._apiUrl}/SetUserRoles${queryString}`;
 		return this._http.post<void>(url, {roleIds: roleIds}, this._http.noCaching).toPromise();
 	}

@@ -12,7 +12,7 @@ export class CollectionService {
 	}
 
 	public getAll(): Observable<CollectionListItemDto[] | null> {
-		let url = this._createBaseUrl + 'GetAll';
+		const url = this._createBaseUrl + 'GetAll';
 
 		return this.http.get<CollectionListItemDto[]>(url, this.http.noCaching).pipe(map(arr =>  arr.map(item => CollectionListItemDto.fromJS(item))));
 	}
@@ -33,7 +33,7 @@ export class CollectionService {
 	}
 
 	public create(value: CollectionDto | null): Observable<any> {
-		let url = this._createBaseUrl + 'Create';
+		const url = this._createBaseUrl + 'Create';
 
 		const content = value.toJSON();
 		return this.http.post(url, content, this.http.noCaching);
@@ -59,7 +59,7 @@ export class CollectionService {
 	}
 
 	public batchDelete(ids: number[]): Observable<any> {
-		let url = this._createBaseUrl + 'BatchDelete';
+		const url = this._createBaseUrl + 'BatchDelete';
 		if (ids === undefined || ids.length === 0) {
 			throw new Error('The parameter ' + ids + ' must be defined and contain values.');
 		}

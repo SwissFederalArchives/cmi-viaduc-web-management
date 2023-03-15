@@ -19,7 +19,7 @@ export class DefaultRedirectGuard extends DefaultContextGuard {
 	public canActivate(route: ActivatedRouteSnapshot): Observable<boolean> {
 		const can = super.canActivate(route);
 
-		let url = route.url.reduce((l, s) => {
+		const url = route.url.reduce((l, s) => {
 			l += '/' + s.path;
 			return l;
 		}, '');

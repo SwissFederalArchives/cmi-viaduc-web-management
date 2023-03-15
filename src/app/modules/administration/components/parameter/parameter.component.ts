@@ -80,7 +80,7 @@ export class ParameterComponent implements OnInit {
 			return false;
 		}
 		if (this.parameter && this.parameter.regexValidation && value && typeof(value) === 'string') {
-			let matches = value.match(this.parameter.regexValidation);
+			const matches = value.match(this.parameter.regexValidation);
 			return matches && matches[0] !== null;
 		} else {
 			return true;

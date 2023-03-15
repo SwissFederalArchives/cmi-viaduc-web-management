@@ -11,17 +11,15 @@ export class VerifyModalComponent {
 	public onSubmitted: EventEmitter<boolean> = new EventEmitter<boolean>();
 	@Output()
 	public openChange: EventEmitter<boolean> = new EventEmitter<boolean>();
-
-	@Input()
-	public set open(val: boolean) {
-		this._open = val;
-		this.openChange.emit(val);
-	}
-
 	private _open: boolean;
 
 	public get open(): boolean {
 		return this._open;
+	}
+	@Input()
+	public set open(val: boolean) {
+		this._open = val;
+		this.openChange.emit(val);
 	}
 
 	public constructor(private _txt: TranslationService) {

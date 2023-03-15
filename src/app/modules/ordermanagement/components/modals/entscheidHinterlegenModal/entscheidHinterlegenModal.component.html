@@ -27,14 +27,17 @@
 						<label for="datumBewilligung" class="col-sm-4 control-label">Datum des Entscheids *
 						</label>
 						<div class="col-sm-8">
-							<input type="text"
+							<input type="date"
+								   autocomplete="off"
+								   mwlFlatpickr
 								   class="form-control"
-								   datePicker
 								   name="datumBewilligung"
 								   [(ngModel)]="datumEntscheid"
 								   [minDateToday]="false"
+								   [allowInput]="true"
 								   (isValidChanged)="checkDate($event)"
 								   [required]="true"
+								   dateFormat="d.m.Y"
 								   #datumBewilligungField="ngModel"
 								   [placeholder]="'Bewilligungsdatum (tt.mm.jjjj)' | translate: 'entscheidHinterlegenModal.datumPlaceholder'"
 								   id="datumBewilligung"/>

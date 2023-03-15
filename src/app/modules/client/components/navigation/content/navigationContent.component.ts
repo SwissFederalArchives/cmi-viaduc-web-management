@@ -82,7 +82,7 @@ export class NavigationContentComponent implements AfterViewInit {
 	}
 
 	public get drillDownCointainerHeight(): string {
-		let dropdownHeight = (window.screen.height) - 91;
+		const dropdownHeight = (window.screen.height) - 91;
 		return (this.mobileUserNavOpen || this.mobileMainNavOpen) ? dropdownHeight + 'px' : 'auto';
 	}
 
@@ -99,7 +99,7 @@ export class NavigationContentComponent implements AfterViewInit {
 	}
 
 	public nullifyClick(event: any): void {
-		let senderElementName = event.target.tagName.toLowerCase();
+		const senderElementName = event.target.tagName.toLowerCase();
 		if (senderElementName !== 'a') {
 			event.stopPropagation();
 		}

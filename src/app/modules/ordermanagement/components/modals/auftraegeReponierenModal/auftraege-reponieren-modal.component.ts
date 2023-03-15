@@ -1,4 +1,4 @@
-import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
+import {Component, EventEmitter, Input, Output} from '@angular/core';
 import {OrderService} from '../../../services';
 import {ToastrService} from 'ngx-toastr';
 import {ErrorService} from '../../../../shared/services';
@@ -8,7 +8,7 @@ import {ErrorService} from '../../../../shared/services';
 	templateUrl: 'auftraege-reponieren-modal.component.html',
 	styleUrls: ['./auftraege-reponieren-modal.component.less']
 })
-export class AuftraegeReponierenModalComponent implements OnInit {
+export class AuftraegeReponierenModalComponent {
 
 	@Input()
 	public ids: number[] = [];
@@ -33,9 +33,6 @@ export class AuftraegeReponierenModalComponent implements OnInit {
 	constructor(private _ord: OrderService,
 				private _err: ErrorService,
 				private _toastr: ToastrService) {
-	}
-
-	public ngOnInit(): void {
 	}
 
 	public cancel() {

@@ -14,7 +14,7 @@ export class AblieferndeStelle {
 	public createdBy: string;
 	public modifiedOn: Date;
 	public modifiedBy: string;
-	public createModifyData: string = '';
+	public createModifyData = '';
 
 	// Helpers
 	public deleteMe: boolean;

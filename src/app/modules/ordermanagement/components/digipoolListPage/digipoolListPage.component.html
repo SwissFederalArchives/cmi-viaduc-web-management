@@ -72,7 +72,7 @@
 									<ng-template wjFlexGridCellTemplate [cellType]="'Cell'" let-item="item" *ngIf="col.key === 'orderItemId'">
 										<a [routerLink]="_url.getNormalizedUrl('/auftragsuebersicht/auftraege') + '/' + item.orderItemId">
 											{{item.orderItemId}}</a>
-									</ng-template>										
+									</ng-template>
 									<ng-template wjFlexGridCellTemplate [cellType]="'Cell'" let-item="item" *ngIf="col.key === 'signatur'">
 												<a  href="{{_url.getPublicClientBaseURL() + _url.getNormalizedUrl('/archiv/einheit/') + item.veId}}" target="_blank" *ngIf="item.veId && item.veId !==0;else emptyVeId" >
 												{{item.signatur}}</a>
@@ -116,9 +116,8 @@
 							<div class="col-sm-3">
 								<input	class="form-control"
 										id="termin"
-										type="text"
+										type="date"
 										[(ngModel)]="selectedTerminDate"
-										datePicker
 										name="termin"
 										aria-labelledby="Date DD.MM.YYYY">
 										<span class="help-block">{{'dd.MM.yyyy' | translate: 'digipoolList.helptime'}}</span>

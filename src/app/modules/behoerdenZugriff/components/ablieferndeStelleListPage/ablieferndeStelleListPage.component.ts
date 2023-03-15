@@ -73,13 +73,13 @@ export class AblieferndeStellePageComponent implements OnInit {
 			return;
 		}
 
-		let toDelete: number[] = this.flexGrid.checkedItems.map(s => s.ablieferndeStelleId);
+		const toDelete: number[] = this.flexGrid.checkedItems.map(s => s.ablieferndeStelleId);
 
 		if (toDelete.length === 0) {
 			return;
 		}
 
-		let promise: Promise<any> = this._ablieferndeStelleService.deleteAblieferndeStelle(toDelete);
+		const promise: Promise<any> = this._ablieferndeStelleService.deleteAblieferndeStelle(toDelete);
 		promise.then(() => {
 				this.loadAblieferndeStelleList();
 				this.showDeleteModal = false;
@@ -115,7 +115,7 @@ export class AblieferndeStellePageComponent implements OnInit {
 	}
 
 	public getQuantityOfCheckedItmesToDelete(): number {
-		let counter: number = 0;
+		const counter = 0;
 		if (!this.flexGrid) {
 			return counter;
 		}
@@ -132,7 +132,7 @@ export class AblieferndeStellePageComponent implements OnInit {
 			return;
 		}
 
-		let fileName = this._txt.get('behoerdenZugriff.ablieferndeStellenExportFileName', 'abliefernde.stellen.bar.ch.xlsx');
+		const fileName = this._txt.get('behoerdenZugriff.ablieferndeStellenExportFileName', 'abliefernde.stellen.bar.ch.xlsx');
 		this.flexGrid.exportToExcel(fileName).subscribe(() => {
 			// nothing
 		}, (err) => {
@@ -145,7 +145,7 @@ export class AblieferndeStellePageComponent implements OnInit {
 	}
 
 	private buildCrumbs(): void {
-		let crumbs: any[] = this.crumbs = [];
+		const crumbs: any[] = this.crumbs = [];
 		crumbs.push({iconClasses: 'glyphicon glyphicon-home', url: this._url.getHomeUrl()});
 		crumbs.push({label: this._txt.get('breadcrumb.behoerdenZugriff', 'Behörden-Zugriff')});
 		crumbs.push({label: this._txt.get('breadcrumb.zusteandigestellen', 'Zuständige Stellen')});
@@ -163,7 +163,7 @@ export class AblieferndeStellePageComponent implements OnInit {
 
 	private prepareResult(result: AblieferndeStelle[]) {
 		if (!_util.isEmpty(result)) {
-			for (let arrayItem of result) {
+			for (const arrayItem of result) {
 				arrayItem.applicationUserAsString = this.getUserAsString(arrayItem);
 				arrayItem.ablieferndeStelleTokenAsString = this.getTokenAsString(arrayItem);
 				arrayItem.kontrollstellenAsString = (arrayItem.kontrollstellen || []).join('; ');
@@ -185,7 +185,7 @@ export class AblieferndeStellePageComponent implements OnInit {
 	}
 
 	private _loadColumns(): void {
-		let userSettings = this._cfg.getSetting('user.settings') as ManagementUserSettings;
+		const userSettings = this._cfg.getSetting('user.settings') as ManagementUserSettings;
 		if (userSettings.ablieferndeStelleSettings && userSettings.ablieferndeStelleSettings.columns) {
 			this.columns = userSettings.ablieferndeStelleSettings.columns;
 		} else {
@@ -195,7 +195,7 @@ export class AblieferndeStellePageComponent implements OnInit {
 	}
 
 	private _saveColumnsAsUserSettings(cols) {
-		let existingSettings = this._cfg.getUserSettings() as ManagementUserSettings;
+		const existingSettings = this._cfg.getUserSettings() as ManagementUserSettings;
 		existingSettings.ablieferndeStelleSettings = <AblieferndeStelleSettings> {
 			columns: cols
 		};
@@ -211,10 +211,10 @@ export class AblieferndeStellePageComponent implements OnInit {
 	}
 
 	public saveColumns() {
-		let cols = [...this.columns];
+		const cols = [...this.columns];
 
-		for (let c of cols) {
-			let existing: Column = this.flexGrid.columns.filter(col => col.header === c.defaultLabel)[0];
+		for (const c of cols) {
+			const existing: Column = this.flexGrid.columns.filter(col => col.header === c.defaultLabel)[0];
 			if (existing) {
 				c.width = existing.renderWidth;
 				c.format = existing.format;
@@ -226,7 +226,7 @@ export class AblieferndeStellePageComponent implements OnInit {
 			}
 		}
 
-		let sortedArray = cols.sort((a, b) => {
+		const sortedArray = cols.sort((a, b) => {
 			if (a.index > b.index) {
 				return 1;
 			}

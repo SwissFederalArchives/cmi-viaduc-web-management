@@ -14,7 +14,7 @@ export class ConverterProgressService implements OnDestroy {
 
 	constructor(private _options: CoreOptions, private _http: HttpService) {
 		this.apiUrl = this._options.serverUrl + this._options.privatePort + '/api/ConverterProgress';
-		let url = this.apiUrl +  '/GetCurrentConverterProgress';
+		const url = this.apiUrl +  '/GetCurrentConverterProgress';
 
 		this.progressDetails$ = timer(1, 5000).pipe(
 			switchMap(() => this._http.get<ProgressDetail[]>(url)),
@@ -30,7 +30,7 @@ export class ConverterProgressService implements OnDestroy {
 	}
 
 	public ngOnDestroy(): void {
-		this.stopPolling.next();
+		this.stopPolling.next(true);
 	}
 
 	public pause() {
@@ -45,12 +45,12 @@ export class ConverterProgressService implements OnDestroy {
 		const postBody = {
 			detailId: detailId
 		};
-		let url = this.apiUrl +  '/RemoveItemFromResults';
+		const url = this.apiUrl +  '/RemoveItemFromResults';
 		return this._http.post(url, postBody);
 	}
 
 	public clearProgressInfo(): Observable<any> {
-		let url = this.apiUrl +  '/ClearProgressInfo';
+		const url = this.apiUrl +  '/ClearProgressInfo';
 		return this._http.post(url, null);
 	}
 }

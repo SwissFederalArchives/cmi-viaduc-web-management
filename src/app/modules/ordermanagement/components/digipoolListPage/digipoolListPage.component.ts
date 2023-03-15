@@ -76,10 +76,10 @@ export class DigipoolListPageComponent implements OnInit {
 	}
 
 	public saveColumns() {
-		let cols = [...this.columns];
+		const cols = [...this.columns];
 
-		for (let c of cols) {
-			let existing: Column = this.flexGrid.columns.filter(col => col.header === c.defaultLabel)[0];
+		for (const c of cols) {
+			const existing: Column = this.flexGrid.columns.filter(col => col.header === c.defaultLabel)[0];
 			if (existing) {
 				c.width = existing.renderWidth;
 				c.format = existing.format;
@@ -91,7 +91,7 @@ export class DigipoolListPageComponent implements OnInit {
 			}
 		}
 
-		let sortedArray = cols.sort((a, b) => {
+		const sortedArray = cols.sort((a, b) => {
 			if (a.index > b.index) {
 				return 1;
 			}
@@ -134,7 +134,7 @@ export class DigipoolListPageComponent implements OnInit {
 	}
 
 	public onSavePriorisierungOverviewClick(event): void {
-		let selectedDigipoolItemsIds = this.flexGrid.checkedItems.map(i => i.orderItemId);
+		const selectedDigipoolItemsIds = this.flexGrid.checkedItems.map(i => i.orderItemId);
 
 		let digitalisierungskategorie = null;
 		if (this.setStatusSpezial) {
@@ -170,7 +170,7 @@ export class DigipoolListPageComponent implements OnInit {
 	}
 
 	public onYesAufbereitungsfehlerZuruecksetzenClick(event): void {
-		let selectedDigipoolItemsIds = this.flexGrid.checkedItems.map(i => i.orderItemId);
+		const selectedDigipoolItemsIds = this.flexGrid.checkedItems.map(i => i.orderItemId);
 
 		this._orderService.resetAufbereitungsfehler(selectedDigipoolItemsIds).subscribe(
 			() => {
@@ -183,7 +183,7 @@ export class DigipoolListPageComponent implements OnInit {
 	}
 
 	public validateTime(): boolean {
-		let regexp = new RegExp(/^([0-1][0-9]:[0-5][0-9])|([2][0-3]:[0-5][0-9])$/);
+		const regexp = new RegExp(/^([0-1][0-9]:[0-5][0-9])|([2][0-3]:[0-5][0-9])$/);
 		return regexp.test(this.selectedTerminTime);
 	}
 
@@ -213,9 +213,9 @@ export class DigipoolListPageComponent implements OnInit {
 	}
 
 	private _loadDataMaps() {
-		let maps: { [id: string]: DataMap; } = {};
+		const maps: { [id: string]: DataMap; } = {};
 		maps['digitalisierunskategorie'] = this._wjs.getDataMap(DigitalisierungsKategorie, this._dec.translateDigitalisierungsKategorie.bind(this)) as any;
-		let prioFilter = [];
+		const prioFilter = [];
 		for (let i = 1; i <= 9; i++) {
 			prioFilter.push({key: i.toString(),  name: i.toString()});
 		}
@@ -242,7 +242,7 @@ export class DigipoolListPageComponent implements OnInit {
 	}
 
 	private _prepareResult(result: DigipoolEntry[]) {
-		for (let item of result) {
+		for (const item of result) {
 			if (item.terminDigitalisierung) {
 				item.terminDigitalisierung = new Date(item.terminDigitalisierung);
 			}
@@ -264,7 +264,7 @@ export class DigipoolListPageComponent implements OnInit {
 	private selectRowFromParameter() {
 		if (this.selectedListItem) {
 
-			let currItem = this.digipoolList.sourceCollection.find(i => Number(i.orderItemId) === Number(this.selectedListItem));
+			const currItem = this.digipoolList.sourceCollection.find(i => Number(i.orderItemId) === Number(this.selectedListItem));
 
 			if (this.selectPageOfItem(currItem)) {
 				this.digipoolList.currentItem = currItem;
@@ -279,7 +279,7 @@ export class DigipoolListPageComponent implements OnInit {
 		this.digipoolList.beginUpdate();
 		this.digipoolList.moveToFirstPage();
 
-		let found:boolean = true;
+		let found = true;
 
 		while (!this.digipoolList.contains(item)) {
 			if (!this.digipoolList.moveToNextPage()) {
@@ -293,7 +293,7 @@ export class DigipoolListPageComponent implements OnInit {
 	}
 
 	private _loadColumns(): void {
-		let userSettings = this._cfg.getSetting('user.settings') as ManagementUserSettings;
+		const userSettings = this._cfg.getSetting('user.settings') as ManagementUserSettings;
 		if (userSettings.digipoolSettings && userSettings.digipoolSettings.columns) {
 			this.columns = userSettings.digipoolSettings.columns;
 		} else {
@@ -306,7 +306,7 @@ export class DigipoolListPageComponent implements OnInit {
 	}
 
 	private _saveColumnsAsUserSettings(cols) {
-		let existingSettings = this._cfg.getUserSettings() as ManagementUserSettings;
+		const existingSettings = this._cfg.getUserSettings() as ManagementUserSettings;
 		existingSettings.digipoolSettings = <DigipoolUserSettings> {
 			columns: cols
 		};
@@ -314,13 +314,13 @@ export class DigipoolListPageComponent implements OnInit {
 	}
 
 	private hasOnlyCheckedItemsOfSpecificPriority(priority: number): boolean {
-		let checkedItems = this.flexGrid.checkedItems.map(i => i.priority);
-		let checkedOfPriority = checkedItems.filter( value => value === priority);
+		const checkedItems = this.flexGrid.checkedItems.map(i => i.priority);
+		const checkedOfPriority = checkedItems.filter( value => value === priority);
 		return checkedItems.length === checkedOfPriority.length;
 	}
 
 	private hasCheckedItemsOfSpecificPriority(priority: number): boolean {
-		let checkedOfPriority =  this.flexGrid.checkedItems.map(i => i.priority).filter( value => value === priority);
+		const checkedOfPriority =  this.flexGrid.checkedItems.map(i => i.priority).filter( value => value === priority);
 		return checkedOfPriority.length > 0;
 	}
 

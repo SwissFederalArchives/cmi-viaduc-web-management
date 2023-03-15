@@ -23,7 +23,7 @@ export class FileDownloadService {
 	}
 
 	private _downloadFileWithToken(token:any, id: number): void {
-		let form = [];
+		const form = [];
 		form.push(
 			'<form action="',
 			this._options.serverUrl + this._options.privatePort + '/api/File/DownloadFile',

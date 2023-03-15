@@ -9,7 +9,7 @@ import {
 	CmiGridComponent
 } from '@cmi/viaduc-web-core';
 import {FormBuilder, FormGroup, Validators} from '@angular/forms';
-import {combineLatest, Observable} from 'rxjs';
+import {combineLatest} from 'rxjs';
 import {DetailPagingService, ErrorService, UrlService} from '../../../../shared';
 import {ActivatedRoute, ParamMap} from '@angular/router';
 import {ToastrService} from 'ngx-toastr';
@@ -58,7 +58,7 @@ export class ManuelleKorrekturDetailPageComponent extends ComponentCanDeactivate
 	public ngOnInit(): void {
 		this.loading = true;
 		const ManuelleKorrekturDetailItem$ = this._route.paramMap.pipe(switchMap((params: ParamMap) => {
-			let id = Number(params.get('id'));
+			const id = Number(params.get('id'));
 			this.detailPagingEnabled = this._dps.getCurrentIndex() > -1;
 			return this._service.getManuelleKorrektur(id);
 		}));
@@ -77,7 +77,7 @@ export class ManuelleKorrekturDetailPageComponent extends ComponentCanDeactivate
 	private sortFelder() {
 		this.sortedList = [];
 		let titel, darin, bemerkungZurVe, verwandteVe, zusatzkomponenteZac1: ManuelleKorrekturFeldDto;
-		for (let feld of this.detailItem.manuelleKorrektur.manuelleKorrekturFelder) {
+		for (const feld of this.detailItem.manuelleKorrektur.manuelleKorrekturFelder) {
 			if (feld.feldname === 'Titel') {
 				titel = feld;
 			} else if (feld.feldname === 'Darin') {
@@ -128,10 +128,9 @@ export class ManuelleKorrekturDetailPageComponent extends ComponentCanDeactivate
 	}
 
 	public save(statusChanged: boolean) {
-		let result: Observable<any>;
 		const rawValue = this.myForm.getRawValue();
 		const manuelleKorrektur = ManuelleKorrekturDto.fromJS(rawValue);
-		result = this._service.update(manuelleKorrektur);
+		const result = this._service.update(manuelleKorrektur);
 		result.subscribe((r) => {
 				this.reloadData(r);
 				if (statusChanged) {
@@ -183,7 +182,7 @@ export class ManuelleKorrekturDetailPageComponent extends ComponentCanDeactivate
 			anonymisierungsstatusText: this.getAnonymisierungsStatus(this.detailItem.manuelleKorrektur.anonymisierungsstatus)
 		});
 		this.editMode = this.detailItem.manuelleKorrektur.anonymisierungsstatus === 0;
-		let sorrtedArray:Array<ManuelleKorrekturStatusHistoryDto> =
+		const sorrtedArray:Array<ManuelleKorrekturStatusHistoryDto> =
 			this.detailItem.manuelleKorrektur.manuelleKorrekturStatusHistories.sort((mksh1, mksh2) => {
 				if (mksh1.erzeugtAm > mksh2.erzeugtAm) {
 					return -1;
@@ -202,7 +201,7 @@ export class ManuelleKorrekturDetailPageComponent extends ComponentCanDeactivate
 		this.verweise = new CollectionView(this.detailItem.verweiseVEs);
 		this.verweise.pageSize = 10;
 		this.verweise.sortDescriptions.push(new SortDescription('referenceCode', true));
-		let maps: { [id: string]: DataMap; } = {};
+		const maps: { [id: string]: DataMap; } = {};
 		maps['history.anonymisierungsstatus'] = new DataMap([
 			{ key: 2, name: 'Prüfung notwendig'},
 			{ key: 0, name: 'In Bearbeitung'},
@@ -212,10 +211,10 @@ export class ManuelleKorrekturDetailPageComponent extends ComponentCanDeactivate
 	}
 
 	private buildCrumbs(): void {
-		let crumbs: any[] = this.crumbs = [];
-		let menu = 'anonymization';
-		let manuelleKorrekturen = 'manuelleKorrekturen';
-		let id = this.detailItem.manuelleKorrektur.manuelleKorrekturId;
+		const crumbs: any[] = this.crumbs = [];
+		const menu = 'anonymization';
+		const manuelleKorrekturen = 'manuelleKorrekturen';
+		const id = this.detailItem.manuelleKorrektur.manuelleKorrekturId;
 
 		crumbs.push({iconClasses: 'glyphicon glyphicon-home', url: this._url.getHomeUrl()});
 		crumbs.push({
@@ -242,7 +241,7 @@ export class ManuelleKorrekturDetailPageComponent extends ComponentCanDeactivate
 	}
 
 	public publizieren() {
-		let result = this._service.publizieren(this.detailItem.manuelleKorrektur.manuelleKorrekturId);
+		const result = this._service.publizieren(this.detailItem.manuelleKorrektur.manuelleKorrekturId);
 		result.subscribe((r) => {
 				this.detailItem.manuelleKorrektur = r;
 				this.initForm();

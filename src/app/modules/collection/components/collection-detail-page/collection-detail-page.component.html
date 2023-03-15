@@ -54,6 +54,15 @@
 						<div class="form-group col-md-3" [ngClass]="{'has-warning': (errors.validFrom)}">
 							<label for="validFrom" tooltip="Gültig von">Gültig von:</label>
 							<input type="datetime-local" id="validFrom" formControlName="validFrom"
+								   autocomplete="off"
+								   mwlFlatpickr
+								   required
+								   [enableTime]="true"
+								   [maxDate]="this.detailItem.validTo"
+								   [convertModelValue]="true"
+								   [allowInput]="true"
+								   (flatpickrValueUpdate)="dataPickerValueUpdateVon($event)"
+								   dateFormat="d.m.Y"
 								   class="form-control"/>
 							<div *ngIf="errors.validFrom" class="help-block">
 								{{ errors.validFrom }}
@@ -62,6 +71,15 @@
 						<div class="form-group col-md-3" [ngClass]="{'has-warning': (errors.validTo)}">
 	            <label for="validTo" tooltip="Gültig bis">Gültig bis:</label>
 							<input type="datetime-local" id="validTo" formControlName="validTo"
+								   autocomplete="off"
+								   mwlFlatpickr
+								   required
+								   (flatpickrValueUpdate)="dataPickerValueUpdateBis($event)"
+								   [enableTime]="true"
+								   [minDate]="this.detailItem.validFrom"
+								   [convertModelValue]="true"
+								   [allowInput]="true"
+								   dateFormat="d.m.Y"
 								   class="form-control"/>
 							<div *ngIf="errors.validTo" class="help-block">
 								{{ errors.validTo }}

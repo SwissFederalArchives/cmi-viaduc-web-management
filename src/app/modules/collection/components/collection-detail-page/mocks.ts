@@ -14,6 +14,4 @@ export class MockUserSettingsParamMap implements ParamMap {
 	public has(name: string): boolean {
 		return false;
 	}
-	constructor() {
-	}
 }

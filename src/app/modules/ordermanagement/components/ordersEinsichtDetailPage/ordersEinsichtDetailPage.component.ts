@@ -62,6 +62,8 @@ export class OrdersEinsichtDetailPageComponent  extends ComponentCanDeactivate {
 		this._stm.getArtDerArbeiten().subscribe((arbeiten) => {
 			this.artDerArbeiten = arbeiten;
 		});
+
+
 	}
 
 	@HostListener('window:scroll', ['$event'])
@@ -93,6 +95,7 @@ export class OrdersEinsichtDetailPageComponent  extends ComponentCanDeactivate {
 				this.fieldInfos = fields;
 			});
 		});
+
 	}
 
 	private _buildCrumbs(): void {
@@ -148,6 +151,10 @@ export class OrdersEinsichtDetailPageComponent  extends ComponentCanDeactivate {
 		return dt ? moment.utc(dt).format('DD.MM.YYYY, HH:mm:ss') : '';
 	}
 
+	public getFormattedDateWithoutTime(dt: Date | string) {
+		return dt ? moment.utc(dt).format('DD.MM.YYYY') : '';
+	}
+
 	public getFormattedStatusHistoryToStatus(h: StatusHistory): string {
 		return this._dec.translateInternalStatus(h.toStatus);
 	}
@@ -180,32 +187,6 @@ export class OrdersEinsichtDetailPageComponent  extends ComponentCanDeactivate {
 		if (field) {
 			const val = moment.utc(field).format('DD.MM.YYYY');
 			return (val === '01.01.0001') ? null : val;
-		}
-		return null;
-	}
-
-	public setStringAsDate(str: string, field: any): void {
-		field = (str && str.length > 0) ? moment(str, 'DD.MM.YYYY').toDate() : null;
-	}
-
-	public setStringAsDateTime(str: string, key: string): void {
-		// Required for adding a date by hand
-		if (!moment(str, 'DD.MM.YYYY', true).isValid()) {
-			return;
-		}
-
-		const oldValue = moment(this.detailRecord[key]).format('DD.MM.YYYY, HH:mm:ss');
-		this.detailRecord[key] = (str && str.length > 0) ? moment.utc(str, 'DD.MM.YYYY, HH:mm:ss').toDate() : null;
-		// Required to check old/new values as loading the form also calls this method
-		if (str !== oldValue) {
-			this.formEinsichtDetail.form.markAsDirty();
-		}
-	}
-
-	public getDateTimeAsString(field: any): string {
-		if (field) {
-			const val = moment.utc(field).format('DD.MM.YYYY, HH:mm:ss');
-			return (val === '01.01.0001, 00:00:00') ? null : val;
 		}
 		return null;
 	}

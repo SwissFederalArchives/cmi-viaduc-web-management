@@ -23,6 +23,7 @@
 					</div>
 				</div>
 			</div>
+
 			<form class="row" [formGroup]="myForm" *ngIf="myForm">
 				<div class="col-md-12">
 					<div class="with-border">
@@ -145,13 +146,16 @@
 									<label tooltip="{{'Geburtsdatum' | translate:'user.birthday'}}" class="col-md-4 control-label">{{'Geburtsdatum' | translate:'user.birthday'}}</label>
 									<div class="col-md-8">
 										<input class="form-control"
-											   type="text"
-											   datePicker
-											   [minDateToday]="false"
+											   type="date"
+											   autocomplete="off"
+											   mwlFlatpickr
 											   formControlName="birthday"
-											   aria-labelledby="Date DD.MM.YYYY"
+											   [maxDate]="today"
+											   (flatpickrValueUpdate)="dataPickerValueUpdate($event, 'birthday')"
+											   [convertModelValue]="true"
+											   [allowInput]="true"
+											   dateFormat="d.m.Y"
 											   placeholder="{{'Geburtsdatum (dd.mm.jjjj)' | translate: 'user.placeholder.birthday'}}"
-											   [disabled]="!allowBereichBenutzerdatenBearbeiten || !editUserHasOe3Role"
 											   name="birthday">
 										<div *ngIf="errors.birthday" class="help-block">
 											{{ errors.birthday }}
@@ -305,16 +309,18 @@
 										   class="col-md-4 control-label">{{'Downloadbeschränkung aufheben bis' | translate:'user.downloadLimit'}}</label>
 									<div class="col-md-8">
 										<input class="form-control"
-											   type="text"
-											   id="downloadLimitDisabledUntil"
-											   datePicker
-											   name="downloadLimitDisabledUntil"
-											   [minDateToday]="true"
-											   [openingDays]="getNextThirtyDays"
-											   formControlName="downloadLimitDisabledUntil"
-											   aria-labelledby="Date DD.MM.YYYY"
+											   type="date"
+											   autocomplete="off"
+											   mwlFlatpickr
+											   [minDate]="today"
+											   [maxDate]="maxDate"
+											   (flatpickrValueUpdate)="dataPickerValueUpdate($event, 'downloadLimitDisabledUntil')"
+											   [convertModelValue]="true"
+											   [allowInput]="true"
+											   dateFormat="d.m.Y"
 											   placeholder="{{'Downloadbeschränkung aufheben bis (dd.mm.jjjj)' | translate: 'user.placeholder.downloadLimitDisabledUntil'}}"
-											   [disabled]="!allowDownloadbeschraenkungBearbeiten">
+											   name="downloadLimitDisabledUntil"
+											   formControlName="downloadLimitDisabledUntil">
 										<div *ngIf="errors.downloadLimitDisabledUntil" class="help-block">
 											{{ errors.downloadLimitDisabledUntil }}
 										</div>
@@ -325,16 +331,19 @@
 										   class="col-md-4 control-label">{{'Digitalisierungsbeschränkung aufheben bis' | translate:'user.digitalisierungsLimit'}}</label>
 									<div class="col-md-8">
 										<input class="form-control"
-											   type="text"
-											   id="digitalisierungsbeschraenkungAufgehobenBis"
-											   datePicker
-											   name="digitalisierungsbeschraenkungAufgehobenBis"
-											   [minDateToday]="true"
-											   [openingDays]="getNextThirtyDays"
-											   formControlName="digitalisierungsbeschraenkungAufgehobenBis"
-											   aria-labelledby="Date DD.MM.YYYY"
+											   type="date"
+											   autocomplete="off"
+											   mwlFlatpickr
+											   [minDate]="today"
+											   [maxDate]="maxDate"
+											   (flatpickrValueUpdate)="dataPickerValueUpdate($event, 'digitalisierungsbeschraenkungAufgehobenBis')"
+											   [convertModelValue]="true"
+											   [allowInput]="true"
+											   dateFormat="d.m.Y"
 											   placeholder="{{'Digitalisierungsbeschränkung aufheben bis (dd.mm.jjjj)' | translate: 'user.placeholder.digitalisierungsbeschraenkungAufgehobenBis'}}"
-											   [disabled]="!allowDigitalisierungsbeschraenkungBearbeiten">
+											   name="digitalisierungsbeschraenkungAufgehobenBis"
+											   formControlName="digitalisierungsbeschraenkungAufgehobenBis"
+											   >
 										<div *ngIf="errors.digitalisierungsbeschraenkungAufgehobenBis" class="help-block">
 											{{ errors.digitalisierungsbeschraenkungAufgehobenBis }}
 										</div>
@@ -425,7 +434,7 @@
 								<button id="buttonSaveUser" *ngIf="allowBereichBenutzerdatenBearbeiten || allowDownloadbeschraenkungBearbeiten || allowBenutzerrollePublicClientBearbeiten ||
 									(detail.item.isInternalUser && allowBarInterneKonsultationBearbeiten) || (!detail.item.isInternalUser && allowForschungsgruppeDdsBearbeiten)"
 										type="button" class="btn btn-primary"
-										(click)="saveUser()" name="buttonSaveUser" [disabled]="allowBereichBenutzerdatenBearbeiten && (!myForm.valid)">
+										(click)="saveUser()" name="buttonSaveUser" [disabled]="allowBereichBenutzerdatenBearbeiten && (!myForm.valid || myForm.pristine)">
 									{{'Speichern' |translate:'save' }}
 								</button>
 								<button *ngIf="allowBereichBenutzerdatenBearbeiten || allowDownloadbeschraenkungBearbeiten || allowBenutzerrollePublicClientBearbeiten ||

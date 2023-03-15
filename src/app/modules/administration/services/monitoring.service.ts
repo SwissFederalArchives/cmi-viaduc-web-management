@@ -12,12 +12,12 @@ export class MonitoringService {
 	}
 
 	public getServicesStatus(): Promise<MonitoringResult[]> {
-		let url = this._apiUrl + '/GetServicesStatus';
+		const url = this._apiUrl + '/GetServicesStatus';
 		return this._http.get<MonitoringResult[]>(url, this._http.noCaching).toPromise();
 	}
 
 	public getTestStatus(): Promise<MonitoringResult[]> {
-		let url = this._apiUrl + '/GetTestStatus';
+		const url = this._apiUrl + '/GetTestStatus';
 		return this._http.get<MonitoringResult[]>(url, this._http.noCaching).toPromise();
 	}
 }

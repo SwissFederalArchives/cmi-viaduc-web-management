@@ -45,9 +45,8 @@ export class OrdersListPageComponent implements OnInit {
 	public showAuftraegeErinnerungVersenden = false;
 	public showBarCode = false;
 	public hasRight = false;
+	public barcodeSet: boolean;
 
-	// @ts-ignore
-	private barcodeSet: boolean;
 	private _previousPreFilter: SelectionPreFilter = null;
 	private _isInitializing = true;
 
@@ -76,7 +75,7 @@ export class OrdersListPageComponent implements OnInit {
 	}
 
 	private _loadColumns(): void {
-		let userSettings = this._cfg.getSetting('user.settings') as ManagementUserSettings;
+		const userSettings = this._cfg.getSetting('user.settings') as ManagementUserSettings;
 		if (userSettings.orderSettings && userSettings.orderSettings.columns) {
 			this.columns = userSettings.orderSettings.columns;
 		} else {
@@ -91,7 +90,7 @@ export class OrdersListPageComponent implements OnInit {
 
 	private _restorePreFilterButtonState() {
 		setTimeout(() => {
-			let filter = this._storage.getItem('AL_PreFilterButton') as SelectionPreFilter;
+			const filter = this._storage.getItem('AL_PreFilterButton') as SelectionPreFilter;
 			if (filter !== null && filter !== undefined) {
 				if (filter === SelectionPreFilter.Barcode) {
 					this.barcodeSet = true;
@@ -128,7 +127,7 @@ export class OrdersListPageComponent implements OnInit {
 	}
 
 	public listMenuItemClicked(menu: WjMenu) {
-		let cmd = menu.selectedIndex;
+		const cmd = menu.selectedIndex;
 		switch (cmd) {
 			case 0:
 				this.saveColumns();
@@ -213,7 +212,7 @@ export class OrdersListPageComponent implements OnInit {
 	}
 
 	private _saveColumnsAsUserSettings(cols) {
-		let existingSettings = this._cfg.getUserSettings() as ManagementUserSettings;
+		const existingSettings = this._cfg.getUserSettings() as ManagementUserSettings;
 		existingSettings.orderSettings = <OrderUserSettings> {
 			columns: cols
 		};
@@ -285,7 +284,7 @@ export class OrdersListPageComponent implements OnInit {
 			if (bewilligungDates && bewilligungDates.length > 0) {
 
 				if (bewilligungDates.length > 1) {
-					for (let d of bewilligungDates) {
+					for (const d of bewilligungDates) {
 						if (!bewilligungDates[0] && d) {
 							this._ui.showError('Ausgewählte Aufträge haben unterschiedliche Bewilligungsdaten', 'Freigabekontrolle');
 							return;
@@ -308,7 +307,7 @@ export class OrdersListPageComponent implements OnInit {
 			const internalComments = checkedItems.map((i: OrderingFlatItem) => i.internalComment);
 			if (internalComments && internalComments.length > 0) {
 				if (internalComments.length > 1) {
-					for (let c of internalComments) {
+					for (const c of internalComments) {
 						if (c !== internalComments[0]) {
 							this._ui.showError('Ausgewählte Aufträge haben unterschiedliche interne Bemerkungen', 'Freigabekontrolle');
 							return;

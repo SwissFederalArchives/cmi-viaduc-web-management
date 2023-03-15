@@ -12,12 +12,12 @@ export class ManuelleKorrekturenService {
 	}
 
 	public async BatchAddManuelleKorrektur(veIds: string[]): Promise<Map<string, string>> {
-		let url = this._createBaseUrl + 'BatchAddManuelleKorrektur';
+		const url = this._createBaseUrl + 'BatchAddManuelleKorrektur';
 		return this.http.post<Map<string, string>>(url, veIds, this.http.noCaching).toPromise();
 	}
 
 	public batchDelete(itemsToDelete: number[]): Observable<any> {
-		let url = this._createBaseUrl + 'BatchDeleteManuelleKorrektur';
+		const url = this._createBaseUrl + 'BatchDeleteManuelleKorrektur';
 		if (itemsToDelete === undefined || itemsToDelete.length === 0) {
 			throw new Error('The parameter ' + itemsToDelete + ' must be defined and contain values.');
 		}
@@ -34,7 +34,7 @@ export class ManuelleKorrekturenService {
 	}
 
 	public update(value: ManuelleKorrekturDto | null): Observable<ManuelleKorrekturDto> {
-		let url = this._createBaseUrl + 'InsertOrUpdateManuelleKorrektur';
+		const url = this._createBaseUrl + 'InsertOrUpdateManuelleKorrektur';
 		return this.http.post<ManuelleKorrekturDto>(url, value, this.http.noCaching);
 	}
 

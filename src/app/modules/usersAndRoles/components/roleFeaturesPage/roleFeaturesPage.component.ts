@@ -41,7 +41,7 @@ export class RoleFeaturesPageComponent extends ComponentCanDeactivate implements
 	}
 
 	private _buildCrumbs(): void {
-		let crumbs: any[] = this.crumbs = [];
+		const crumbs: any[] = this.crumbs = [];
 		crumbs.push({iconClasses: 'glyphicon glyphicon-home', url: this._url.getHomeUrl()});
 		crumbs.push({
 			url: this._url.getNormalizedUrl('/benutzerundrollen'),
@@ -53,9 +53,9 @@ export class RoleFeaturesPageComponent extends ComponentCanDeactivate implements
 	private _prepareResult(result: PagedResult<any>) {
 		const columns = [];
 		// Alle selektierten Features ermitteln
-		for (let item of result.items) {
-			let featureList = [];
-			for (let feature of item.features) {
+		for (const item of result.items) {
+			const featureList = [];
+			for (const feature of item.features) {
 				featureList.push(feature.id);
 			}
 			this.roleFeaturesList.set(item.id.toString(), featureList);
@@ -107,8 +107,8 @@ export class RoleFeaturesPageComponent extends ComponentCanDeactivate implements
 	}
 	public onCheckboxClick(featureId: string, roleId: string): void {
 		if (this.roleFeaturesForSaveList.has(roleId)) {
-			let a = this.roleFeaturesForSaveList.get(roleId);
-			let index = a.indexOf(featureId);
+			const a = this.roleFeaturesForSaveList.get(roleId);
+			const index = a.indexOf(featureId);
 			if (index >= 0) {
 				a.splice(index, 1);
 			} else {
@@ -145,7 +145,7 @@ export class RoleFeaturesPageComponent extends ComponentCanDeactivate implements
 	}
 
 	public exportGrid(): void {
-		let fileName = this.txt.get('role.benutzer.exportfilename', 'rollen-funktiononen.bar.ch.xlsx');
+		const fileName = this.txt.get('role.benutzer.exportfilename', 'rollen-funktiononen.bar.ch.xlsx');
 
 		this.flexGrid.exportToExcel(fileName).subscribe(() => {
 			// nothing

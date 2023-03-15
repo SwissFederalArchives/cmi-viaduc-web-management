@@ -3,6 +3,7 @@ import {ApproveStatus, EntityDecoratorService} from '@cmi/viaduc-web-core';
 import {OrderService} from '../../../services';
 import {ToastrService} from 'ngx-toastr';
 import {ErrorService} from '../../../../shared/services';
+import {FlatPickrOutputOptions} from 'angularx-flatpickr/lib/flatpickr.directive';
 import * as moment from 'moment';
 
 @Component({
@@ -10,12 +11,13 @@ import * as moment from 'moment';
 	templateUrl: 'freigabeKontrolleModal.component.html',
 	styleUrls: ['./freigabeKontrolleModal.component.less']
 })
-export class FreigabeKontrolleModalComponent implements OnInit {
+export class FreigabeKontrolleModalComponent implements  OnInit{
 
 	@Input()
 	public ids: number[] = [];
 	@Input()
-	public datumBewilligung: string | Date;
+	public datumBewilligung:  Date;
+
 	@Input()
 	public interneBemerkung: string;
 	@Input()
@@ -42,8 +44,7 @@ export class FreigabeKontrolleModalComponent implements OnInit {
 		this._selectedEntscheid = val;
 		this.haveToEnterBewilligungsDatum = (val && val === ApproveStatus.FreigegebenInSchutzfrist);
 	}
-
-	public isValidDate = true;
+	public isValidDate = false;
 	public isLoading = false;
 	public entscheide = [];
 	public haveToEnterBewilligungsDatum = false;
@@ -63,12 +64,7 @@ export class FreigabeKontrolleModalComponent implements OnInit {
 	}
 
 	public ngOnInit(): void {
-		if (this.datumBewilligung) {
-			const m = moment(this.datumBewilligung);
-			this.datumBewilligung = m.isUTC()
-				? moment.utc(this.datumBewilligung).format('DD.MM.YYYY')
-				: moment(this.datumBewilligung).format('DD.MM.YYYY');
-		}
+		this.convertDatumBewilligungFromStringToDate();
 	}
 
 	public translateStatus(a: ApproveStatus) {
@@ -79,21 +75,30 @@ export class FreigabeKontrolleModalComponent implements OnInit {
 		this.open = false;
 	}
 
-	public checkDate(isValid) {
-		this.isValidDate = isValid;
+	public checkDate($event: FlatPickrOutputOptions) {
+		const isValid = $event.dateString !== '' && $event.dateString;
+		if (isValid) {
+			this.datumBewilligung = $event.selectedDates[0];
+			this.isValidDate = true;
+		} else {
+			this.isValidDate = false;
+		}
 	}
 
 	public ok() {
-		if (!this.selectedEntscheid) {
+		if (!this.selectedEntscheid && !this.isValidDate) {
 			return;
 		}
 
-		const bewilligungsDatum = this.haveToEnterBewilligungsDatum ? moment.utc(this.datumBewilligung, 'DD.MM.YYYY').toDate() : null;
+		// Wir wandeln nach UTC um, behalten aber den Zeitteil. So wird aus 20.12.2022 00:00:00 GMT+1 nicht 19.12.2022 23:00:00Z sondern
+		// wird zu 20.12.2022 00:00:00Z
+		const bewilligungsDatum = this.haveToEnterBewilligungsDatum ? moment(this.datumBewilligung).utc(true).toDate() : null;
 		if (!bewilligungsDatum && this.haveToEnterBewilligungsDatum) {
 			return;
 		}
+
 		this.isLoading = true;
-		this._ord.auftraegeEntscheidFreigabeHinterlegen(this.ids, this.selectedEntscheid, bewilligungsDatum, this.interneBemerkung).subscribe(r => {
+		this._ord.auftraegeEntscheidFreigabeHinterlegen(this.ids, this.selectedEntscheid, bewilligungsDatum , this.interneBemerkung).subscribe(r => {
 			this._toastr.success('Statusänderung erfolgreich durchgeführt', 'Erfolgreich');
 			this.open = false;
 			this.onSubmitted.emit(true);
@@ -102,5 +107,15 @@ export class FreigabeKontrolleModalComponent implements OnInit {
 			this._err.showError(e);
 			this.isLoading = false;
 		});
+	}
+
+	public convertDatumBewilligungFromStringToDate() {
+		this.isValidDate = false;
+		if (this.datumBewilligung) {
+			// Das im @Input übergebene Datum ist in Wahrheit ein string, obwohl der Datentyp ein Date ist. (2022-12-22T00:00:00)
+			// Javascript akzeptiert dies. Mit der Umwandlung über moment, erhalten wir ein gültiges Datum
+			this.datumBewilligung = moment(this.datumBewilligung).toDate();
+			this.isValidDate = true;
+		}
 	}
 }

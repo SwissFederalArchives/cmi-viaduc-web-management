@@ -1,4 +1,4 @@
-import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
+import {Component, EventEmitter, Input, Output} from '@angular/core';
 import {OrderService} from '../../../services';
 import {ToastrService} from 'ngx-toastr';
 import {ErrorService} from '../../../../shared/services';
@@ -8,7 +8,7 @@ import {ErrorService} from '../../../../shared/services';
 	templateUrl: 'auftraegeAbschliessenModal.component.html',
 	styleUrls: ['./auftraegeAbschliessenModal.component.less']
 })
-export class AuftraegeAbschliessenModalComponent implements OnInit {
+export class AuftraegeAbschliessenModalComponent {
 
 	@Input()
 	public ids: number[] = [];
@@ -33,9 +33,6 @@ export class AuftraegeAbschliessenModalComponent implements OnInit {
 	constructor(private _ord: OrderService,
 				private _err: ErrorService,
 				private _toastr: ToastrService) {
-	}
-
-	public ngOnInit(): void {
 	}
 
 	public cancel() {

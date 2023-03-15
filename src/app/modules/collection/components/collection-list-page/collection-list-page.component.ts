@@ -51,7 +51,7 @@ export class CollectionListPageComponent implements OnInit {
 		this.buildCrumbs();
 		this.loadColumns();
 		this.loadCollectionList();
-		let maps: { [id: string]: DataMap; } = {};
+		const maps: { [id: string]: DataMap; } = {};
 		maps['collectionTypeId'] = new DataMap(this.collectionTypes, 'collectionTypeId', 'name');
 
 		this.valueFilters = maps;
@@ -99,7 +99,7 @@ export class CollectionListPageComponent implements OnInit {
 			return;
 		}
 
-		let itemsToDelete: number[] = this.flexGrid.checkedItems.map(s => s.collectionId);
+		const itemsToDelete: number[] = this.flexGrid.checkedItems.map(s => s.collectionId);
 
 		let result: Observable<any>;
 		if (itemsToDelete.length === 1) {
@@ -118,7 +118,7 @@ export class CollectionListPageComponent implements OnInit {
 	}
 
 	public getQuantityOfCheckedItmesToDelete(): number {
-		let counter: number = 0;
+		const counter = 0;
 		if (!this.flexGrid) {
 			return counter;
 		}
@@ -171,10 +171,10 @@ export class CollectionListPageComponent implements OnInit {
 	}
 
 	public saveColumns() {
-		let cols = [...this.columns];
+		const cols = [...this.columns];
 
-		for (let c of cols) {
-			let existing: Column = this.flexGrid.columns.filter(col => col.header === c.defaultLabel)[0];
+		for (const c of cols) {
+			const existing: Column = this.flexGrid.columns.filter(col => col.header === c.defaultLabel)[0];
 			if (existing) {
 				c.width = existing.renderWidth;
 				c.format = existing.format;
@@ -186,7 +186,7 @@ export class CollectionListPageComponent implements OnInit {
 			}
 		}
 
-		let sortedArray = cols.sort((a, b) => {
+		const sortedArray = cols.sort((a, b) => {
 			if (a.index > b.index) {
 				return 1;
 			}
@@ -206,14 +206,14 @@ export class CollectionListPageComponent implements OnInit {
 	}
 
 	private buildCrumbs(): void {
-		let crumbs: any[] = this.crumbs = [];
+		const crumbs: any[] = this.crumbs = [];
 		crumbs.push({iconClasses: 'glyphicon glyphicon-home', url: this._url.getHomeUrl()});
 		crumbs.push({label: this._txt.get('breadcrumb.collection', 'Sammlungen')});
 		crumbs.push({label: this._txt.get('breadcrumb.collection', 'Virtuelle Sammlungen')});
 	}
 
 	private loadColumns(): void {
-		let userSettings = this._cfg.getSetting('user.settings') as ManagementUserSettings;
+		const userSettings = this._cfg.getSetting('user.settings') as ManagementUserSettings;
 		if (userSettings.collectionSettings && userSettings.collectionSettings.columns) {
 			this.columns = userSettings.collectionSettings.columns;
 		} else {
@@ -236,7 +236,7 @@ export class CollectionListPageComponent implements OnInit {
 	}
 
 	private saveColumnsAsUserSettings(cols) {
-		let existingSettings = this._cfg.getUserSettings() as ManagementUserSettings;
+		const existingSettings = this._cfg.getUserSettings() as ManagementUserSettings;
 		existingSettings.collectionSettings = <CollectionSettings>{
 			columns: cols
 		};
