@@ -17,4 +17,10 @@ export class StatisticReportService {
 		url = url + `?startDate=${moment(startDate).toISOString()}&endDate=${moment(endDate).toISOString()}`;
 		return this._http.download(url);
 	}
+
+	public getStatisticReportDownloadData(startDate: Date, endDate: Date): any {
+		let url = this._apiUrl +  '/GetDownloadRecords';
+		url = url + `?startDate=${moment(startDate).toISOString()}&endDate=${moment(endDate).toISOString()}`;
+		return this._http.download(url);
+	}
 }
