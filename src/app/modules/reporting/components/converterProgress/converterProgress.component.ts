@@ -28,7 +28,7 @@ export class ConverterProgressComponent implements OnInit {
 
 		_router.events.pipe(
 			filter(event => event instanceof NavigationStart))
-			.subscribe((event:NavigationStart) => {
+			.subscribe(() => {
 				progressService.pause();
 			});
 	}
@@ -45,17 +45,17 @@ export class ConverterProgressComponent implements OnInit {
 	}
 
 	public removeItem(detailId: string) {
-		this.progressService.removeItem(detailId).subscribe(r => {
+		this.progressService.removeItem(detailId).subscribe(() => {
 			this._toastr.success(this._txt.get('converterProgress.removeItemSuccess', 'Eintrag gelöscht'));
-		}, err => {
+		}, () => {
 			this._toastr.error(this._txt.get('converterProgress.removeItemFailure', 'Eintrag konnte nicht gelöscht werden'));
 		});
 	}
 
 	public removeAll() {
-		this.progressService.clearProgressInfo().subscribe(r => {
+		this.progressService.clearProgressInfo().subscribe(() => {
 			this._toastr.success(this._txt.get('converterProgress.removeAllSuccess', 'Einträge gelöscht'));
-		}, err => {
+		}, () => {
 			this._toastr.error(this._txt.get('converterProgress.removeAllFailure', 'Einträge konnten nicht gelöscht werden'));
 		});
 	}

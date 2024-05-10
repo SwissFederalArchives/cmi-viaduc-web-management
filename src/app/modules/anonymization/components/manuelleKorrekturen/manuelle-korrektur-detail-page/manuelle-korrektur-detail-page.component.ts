@@ -94,6 +94,7 @@ export class ManuelleKorrekturDetailPageComponent extends ComponentCanDeactivate
 		this.sortedList.push(titel, darin, bemerkungZurVe, verwandteVe, zusatzkomponenteZac1);
 	}
 
+	/* eslint-disable */
 	@HostListener('window:scroll', ['$event'])
 	public onScroll(event) {
 		const verticalOffset = window.pageYOffset

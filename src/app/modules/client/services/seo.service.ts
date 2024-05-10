@@ -58,6 +58,7 @@ export class SeoService {
 		}
 	}
 
+	// eslint-disable-next-line
 	public updatePageInfo(url: string): void {
 		const title = this._txt.get('header.title', 'Management-Client des Online-Zugangs');
 		const description = this._txt.get('page.description', 'recherche.admin.ch');

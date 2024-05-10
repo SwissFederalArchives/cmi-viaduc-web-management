@@ -5,6 +5,7 @@ import {OrderService} from '../../../services';
 import {ErrorService, SharedModule} from '../../../../shared';
 import {ToastrService} from 'ngx-toastr';
 import {By} from '@angular/platform-browser';
+import {NO_ERRORS_SCHEMA} from '@angular/core';
 
 describe('FreigabeKontrolleModalPage', () => {
 	let fixture: ComponentFixture<FreigabeKontrolleModalComponent>;
@@ -45,6 +46,7 @@ describe('FreigabeKontrolleModalPage', () => {
 		TestBed.configureTestingModule({
 			imports:[CoreModule, SharedModule],
 			declarations: [FreigabeKontrolleModalComponent],
+			schemas: [NO_ERRORS_SCHEMA],
 			providers: [
 				{provide: EntityDecoratorService, useValue: entityDecoratorService},
 				{provide: OrderService, useValue: orderService},

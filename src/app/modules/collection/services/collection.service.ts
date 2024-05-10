@@ -13,7 +13,6 @@ export class CollectionService {
 
 	public getAll(): Observable<CollectionListItemDto[] | null> {
 		const url = this._createBaseUrl + 'GetAll';
-
 		return this.http.get<CollectionListItemDto[]>(url, this.http.noCaching).pipe(map(arr =>  arr.map(item => CollectionListItemDto.fromJS(item))));
 	}
 

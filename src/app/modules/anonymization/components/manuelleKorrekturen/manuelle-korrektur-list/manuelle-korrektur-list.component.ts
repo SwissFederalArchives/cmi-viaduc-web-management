@@ -70,22 +70,24 @@ export class ManuelleKorrekturListComponent implements OnInit {
 		this._initTableView();
 		const maps: { [id: string]: DataMap; } = {};
 		maps['anonymisierungsstatus'] = new DataMap([
-		{ key: 2, name: 'Prüfung notwendig'},
-		{ key: 0, name: 'In Bearbeitung'},
-		{ key: 1, name: 'Publiziert'}
+			{key: 2, name: 'Prüfung notwendig'},
+			{key: 0, name: 'In Bearbeitung'},
+			{key: 1, name: 'Publiziert'}
 		], 'key', 'name');
 		this.valueFilters = maps;
 		this.buildForm();
 	}
 
 	private _loadColumns(): void {
-		this._usr.initUserSettings();
-		const userSettings = this._cfg.getSetting('user.settings') as ManagementUserSettings;
-		if (userSettings.manuelleKorrekturSettings && userSettings.manuelleKorrekturSettings.columns) {
-			this.columns = userSettings.manuelleKorrekturSettings.columns;
-		} else {
-			this._resetColumnsToDefault();
-		}
+		this._usr.getUserSettings().then((settings) => {
+			const userSettings = settings as ManagementUserSettings;
+			if (userSettings.manuelleKorrekturSettings && userSettings.manuelleKorrekturSettings.columns) {
+				this.columns = userSettings.manuelleKorrekturSettings.columns;
+			} else {
+				this._resetColumnsToDefault();
+			}
+			this.refreshHiddenVisibleColumns();
+		});
 	}
 
 	public getVisibleColumns(): any[] {
@@ -149,7 +151,6 @@ export class ManuelleKorrekturListComponent implements OnInit {
 
 	private _initTableView() {
 		this._loadColumns();
-		this.refreshHiddenVisibleColumns();
 		this.restorePreFilterButtonState();
 		this.getDefaultView();
 	}
@@ -299,6 +300,7 @@ export class ManuelleKorrekturListComponent implements OnInit {
 		}
 	}
 
+	// eslint-disable-next-line
 	public onFilterApplied(ev) {
 		if (!_util.isEmpty(this.baseFilterString)) {
 			const filterBefore = this.manuelleKorrekturItems.filterDefinition.toString();

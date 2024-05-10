@@ -7,6 +7,7 @@ import {Router} from '@angular/router';
 import {MockUserSettings, ToastrTestingModule} from './mocks';
 import {Observable} from 'rxjs';
 import * as moment from 'moment';
+import {NO_ERRORS_SCHEMA} from '@angular/core';
 
 describe('CollectionListPageComponent', () => {
 	let sut: CollectionListPageComponent;
@@ -105,12 +106,14 @@ describe('CollectionListPageComponent', () => {
 				return 'www.google.de';
 			}
 		};
-		let userService = <UserService> {
+		let userService = <UserService>{
 			getUser(): Promise<User> {
-				return Promise.resolve(<User> { id: '123', emailAddress: 'darth.vader@cmiag.ch' });
+				return Promise.resolve(<User>{id: '123', emailAddress: 'darth.vader@cmiag.ch'});
 			},
 			updateUserSettings(settings: any) {
-
+			},
+			getUserSettings(): Promise<any> {
+				return Promise.resolve( new MockUserSettings());
 			}
 		};
 		let router = <Router>{};
@@ -118,6 +121,7 @@ describe('CollectionListPageComponent', () => {
 		await TestBed.configureTestingModule({
 			imports:[SharedModule.forRoot(), CoreModule.forRoot(), ToastrTestingModule],
 			declarations: [CollectionListPageComponent],
+			schemas: [NO_ERRORS_SCHEMA],
 			providers: [
 				{provide: CollectionService, useValue: collectionService },
 				{provide: TranslationService, useValue: txt },

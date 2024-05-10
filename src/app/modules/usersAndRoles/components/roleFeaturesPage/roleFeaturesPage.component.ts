@@ -128,7 +128,7 @@ export class RoleFeaturesPageComponent extends ComponentCanDeactivate implements
 		this.isDirty = false;
 		this.roleFeaturesForSaveList.forEach((value: string[], key: string) => {
 				this._roleService.setRoleFeatures(key, value).then(
-					res => {
+					() => {
 						this.loading = false;
 						this._loadList();
 						this._ui.showSuccess(this._txt.get('roleFeature.successfullySaved', 'Rollen-Funktionen-Matrix erfolgreich gespeichert'));
@@ -156,7 +156,7 @@ export class RoleFeaturesPageComponent extends ComponentCanDeactivate implements
 
 	public ngOnInit(): void {
 		this._buildCrumbs();
-		this._route.params.subscribe(params => this._loadList());
+		this._route.params.subscribe(() => this._loadList());
 		this.allowEdit = false;
 		this.isDirty = false;
 	}

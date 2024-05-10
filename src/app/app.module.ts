@@ -35,7 +35,7 @@ export function tryActivateExistingSession(authentication: AuthenticationService
 		CoreModule.forRoot(),
 		SharedModule.forRoot(),
 		ClientModule.forRoot(),
-		RouterModule.forRoot(ROUTES, { useHash: true, relativeLinkResolution: 'legacy' }),
+		RouterModule.forRoot(ROUTES, { useHash: true }),
 		ToastrModule.forRoot(toastrOptions),
 		MarkdownModule.forRoot(),
 		/* eslint-disable */

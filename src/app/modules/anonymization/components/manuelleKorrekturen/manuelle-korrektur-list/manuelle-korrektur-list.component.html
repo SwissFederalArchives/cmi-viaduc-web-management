@@ -167,7 +167,7 @@
 			</div>
 		</div>
 	</cmi-viaduc-modal-body>
-	<cmi-viaduc-modal-footer>
+	<cmi-viaduc-modal-footer *ngIf="myForm">
 		<div class="row">
 			<div class="col-xs-12">
 				<button type="button" class="btn btn-primary"  [disabled]="!myForm.dirty || myForm.controls['veIds'].value

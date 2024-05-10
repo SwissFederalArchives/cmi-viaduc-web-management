@@ -18,6 +18,7 @@ import {ToastrService} from 'ngx-toastr';
 import {Observable, of} from 'rxjs';
 import {MockUserSettingsParamMap} from '../../../../collection/components/collection-detail-page/mocks';
 import * as moment from 'moment';
+import {NO_ERRORS_SCHEMA} from '@angular/core';
 
 describe('ManuelleKorrekturDetailPageComponent', () => {
 	let sut: ManuelleKorrekturDetailPageComponent;
@@ -165,6 +166,7 @@ describe('ManuelleKorrekturDetailPageComponent', () => {
 		await TestBed.configureTestingModule({
 			imports: [SharedModule.forRoot(), CoreModule.forRoot(), ToastrTestingModule],
 			declarations: [ManuelleKorrekturDetailPageComponent],
+			schemas: [NO_ERRORS_SCHEMA],
 			providers: [
 				{provide: ManuelleKorrekturenService, useValue: manuelleKorrekturenService},
 				{provide: FormBuilder, useValue: new FormBuilder()},

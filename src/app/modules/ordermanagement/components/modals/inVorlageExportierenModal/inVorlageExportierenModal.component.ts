@@ -86,7 +86,7 @@ export class InVorlageExportierenModalComponent {
 		}
 
 		this.isLoading = true;
-		this._ord.inVorlageExportieren(this.ids, this.selectedVorlage, this.sprache).subscribe(r => {
+		this._ord.inVorlageExportieren(this.ids, this.selectedVorlage, this.sprache).subscribe(() => {
 			const msg = this.ids.length === 1 ? 'Der Auftrag wurde erfolgreich exportiert' : 'Die Aufträge wurden erfolgreich exportiert';
 			this._toastr.success(msg, 'Erfolgreich');
 			this.open = false;

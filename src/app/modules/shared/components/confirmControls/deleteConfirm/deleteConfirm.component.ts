@@ -34,11 +34,13 @@ export class DeleteConfirmComponent {
 	@Output()
 	public cancelClicked: EventEmitter<void> = new EventEmitter<void>();
 
+	// eslint-disable-next-line
 	public onDeleteClick(event): void {
 		this.deleteClicked.emit();
 		this.showDeleteModal = false;
 	}
 
+	// eslint-disable-next-line
 	public onCancelClick(event): void {
 		this.cancelClicked.emit();
 		this.showDeleteModal = false;

@@ -185,13 +185,15 @@ export class AblieferndeStellePageComponent implements OnInit {
 	}
 
 	private _loadColumns(): void {
-		const userSettings = this._cfg.getSetting('user.settings') as ManagementUserSettings;
-		if (userSettings.ablieferndeStelleSettings && userSettings.ablieferndeStelleSettings.columns) {
-			this.columns = userSettings.ablieferndeStelleSettings.columns;
-		} else {
-			this.resetColumnsToDefault();
-		}
-		this.refreshHiddenVisibleColumns();
+		this._usr.getUserSettings().then((settings) => {
+			const userSettings = settings as ManagementUserSettings;
+			if (userSettings.ablieferndeStelleSettings && userSettings.ablieferndeStelleSettings.columns) {
+				this.columns = userSettings.ablieferndeStelleSettings.columns;
+			} else {
+				this.resetColumnsToDefault();
+			}
+			this.refreshHiddenVisibleColumns();
+		});
 	}
 
 	private _saveColumnsAsUserSettings(cols) {

@@ -1,6 +1,5 @@
 import {Component, OnInit} from '@angular/core';
 import {AuthenticationService} from '../../modules/client/services/authentication.service';
-import {Utilities as _util} from '@cmi/viaduc-web-core';
 
 @Component({
 	selector: 'cmi-viaduc-auth-page',

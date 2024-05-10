@@ -1,13 +1,13 @@
 import {of as observableOf, Observable, of} from 'rxjs';
 import {Injectable} from '@angular/core';
-import {ActivatedRouteSnapshot, CanActivateChild} from '@angular/router';
+import { ActivatedRouteSnapshot } from '@angular/router';
 import {DefaultContextGuard} from './defaultContextGuard';
 import {ContextService, AuthenticationService} from '../services';
 import {ClientContext, PreloadService} from '@cmi/viaduc-web-core';
 import {mergeMap, skip} from 'rxjs/operators';
 
 @Injectable()
-export class AuthGuard extends DefaultContextGuard implements CanActivateChild {
+export class AuthGuard extends DefaultContextGuard  {
 	constructor(private _context: ClientContext,
 				private _preload: PreloadService,
 				private _auth: AuthenticationService,

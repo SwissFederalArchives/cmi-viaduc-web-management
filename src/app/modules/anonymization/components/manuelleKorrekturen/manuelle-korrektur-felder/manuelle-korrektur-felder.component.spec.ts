@@ -2,6 +2,7 @@ import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
 import {ManuelleKorrekturFelderComponent} from './manuelle-korrektur-felder.component';
 import {FormBuilder} from '@angular/forms';
 import {ManuelleKorrekturFeldDto} from '@cmi/viaduc-web-core';
+import {NO_ERRORS_SCHEMA} from '@angular/core';
 
 describe('ManuelleKorrekturFelderComponent', () => {
 	let sut: ManuelleKorrekturFelderComponent;
@@ -10,6 +11,7 @@ describe('ManuelleKorrekturFelderComponent', () => {
 	beforeEach(async () => {
 		await TestBed.configureTestingModule({
 			declarations: [ ManuelleKorrekturFelderComponent ],
+			schemas: [NO_ERRORS_SCHEMA],
 			providers: [
 				{provide: FormBuilder, useValue: new FormBuilder()}
 			]

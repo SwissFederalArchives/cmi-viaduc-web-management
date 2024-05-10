@@ -20,7 +20,7 @@ export class ConverterProgressService implements OnDestroy {
 			switchMap(() => this._http.get<ProgressDetail[]>(url)),
 			retry(),
 			share(),
-			takeWhile(v => !this.isPaused),
+			takeWhile(() => !this.isPaused),
 			takeUntil(this.stopPolling)
 		);
 	}

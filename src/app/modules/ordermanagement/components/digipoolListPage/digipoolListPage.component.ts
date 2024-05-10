@@ -129,6 +129,7 @@ export class DigipoolListPageComponent implements OnInit {
 		this.showPriorisierungOverview = true;
 	}
 
+	/* eslint-disable */
 	public onCancelPriorisierungOverviewClick(event): void {
 		this.showPriorisierungOverview = false;
 	}

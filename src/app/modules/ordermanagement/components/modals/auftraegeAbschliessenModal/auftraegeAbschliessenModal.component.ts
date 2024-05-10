@@ -41,7 +41,7 @@ export class AuftraegeAbschliessenModalComponent {
 
 	public ok() {
 		this.isLoading = true;
-		this._ord.auftraegeAbschliessen(this.ids).subscribe(r => {
+		this._ord.auftraegeAbschliessen(this.ids).subscribe(() => {
 			this._toastr.success('Statusänderung erfolgreich durchgeführt', 'Erfolgreich');
 			this.open = false;
 			this.onSubmitted.emit(true);

@@ -74,7 +74,7 @@ export class NewsManagementPageComponent implements OnInit {
 			return;
 		}
 
-		this._newsService.deleteNews(toDelete).then((data) => {
+		this._newsService.deleteNews(toDelete).then(() => {
 			this._getAndStoreNews();
 			this._toastr.success('Erfolgreich gelöscht');
 		},

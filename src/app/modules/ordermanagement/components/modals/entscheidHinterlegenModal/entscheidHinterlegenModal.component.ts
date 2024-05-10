@@ -120,7 +120,7 @@ export class EntscheidHinterlegenModalComponent implements OnInit {
 		}
 		this.hint = 'Statusänderung wird durchgeführt...';
 		this.isLoading = true;
-		this._ord.einsichtsgesucheEntscheidFuerGesucheHinterlegen(this.items.map(i => i.itemId), this.selectedEntscheid, bewilligungsDatum, this.interneBemerkung).subscribe(r => {
+		this._ord.einsichtsgesucheEntscheidFuerGesucheHinterlegen(this.items.map(i => i.itemId), this.selectedEntscheid, bewilligungsDatum, this.interneBemerkung).subscribe(() => {
 			this._toastr.success('Statusänderung erfolgreich durchgeführt', 'Erfolgreich');
 			this.open = false;
 			this.onSubmitted.emit(true);

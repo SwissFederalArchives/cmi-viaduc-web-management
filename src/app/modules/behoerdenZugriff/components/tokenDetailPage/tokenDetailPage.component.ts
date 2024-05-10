@@ -69,7 +69,7 @@ export class TokenDetailPageComponent extends ComponentCanDeactivate implements 
 
 		if (this._mode === Mode.Add) {
 			const promise: Promise<any> = this.tokenService.createToken(this.ablieferndeStelleToken);
-			promise.then((data) => {
+			promise.then(() => {
 					this.goToTokenList();
 				},
 				(error: HttpErrorResponse) => {
@@ -81,7 +81,7 @@ export class TokenDetailPageComponent extends ComponentCanDeactivate implements 
 				});
 		} else if (this._mode === Mode.Edit) {
 			const promise: Promise<any> = this.tokenService.updateToken(this.ablieferndeStelleToken);
-			promise.then((data) => {
+			promise.then(() => {
 					this.goToTokenList();
 				},
 				(error: HttpErrorResponse) => {

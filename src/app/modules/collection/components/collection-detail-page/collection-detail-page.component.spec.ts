@@ -11,6 +11,7 @@ import {Observable, of} from 'rxjs';
 import {MockUserSettingsParamMap} from './mocks';
 import * as moment from 'moment';
 import {By} from '@angular/platform-browser';
+import {NO_ERRORS_SCHEMA} from '@angular/core';
 
 describe('CollectionDetail', () => {
 	// const mockFileReader =  new MockFileReader();
@@ -108,6 +109,7 @@ describe('CollectionDetail', () => {
 		await TestBed.configureTestingModule({
 			imports: [CoreModule.forRoot(), SharedModule.forRoot()],
 			declarations: [CollectionDetailPageComponent],
+			schemas: [NO_ERRORS_SCHEMA],
 			providers: [
 				{provide: CollectionService, useValue: collectionService},
 				{provide: UrlService, useValue: urlService},

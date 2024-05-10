@@ -50,7 +50,7 @@
 						<cmi-viaduc-odata-pagination [(collectionView)]="userList"></cmi-viaduc-odata-pagination>
 					</div>
 				</div>
-				<cmi-viaduc-grid  #flexGrid [itemsSource]="userList" [name]="'userRolesPage'" [dataMaps]="valueFilters" [enableMultiSort]="true" [defaultSortColumnKey]="'id'">
+				<cmi-viaduc-grid  #flexGrid  [itemsSource]="userList" [name]="'userRolesPage'" [dataMaps]="valueFilters" [enableMultiSort]="true" [defaultSortColumnKey]="'id'">
 
 					<ng-template wjFlexGridCellTemplate [cellType]="'RowHeader'" let-cell="cell">
 						<a (click)="show(cell.item)">

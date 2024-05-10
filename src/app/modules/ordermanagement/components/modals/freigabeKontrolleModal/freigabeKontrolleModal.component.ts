@@ -98,7 +98,7 @@ export class FreigabeKontrolleModalComponent implements  OnInit{
 		}
 
 		this.isLoading = true;
-		this._ord.auftraegeEntscheidFreigabeHinterlegen(this.ids, this.selectedEntscheid, bewilligungsDatum , this.interneBemerkung).subscribe(r => {
+		this._ord.auftraegeEntscheidFreigabeHinterlegen(this.ids, this.selectedEntscheid, bewilligungsDatum , this.interneBemerkung).subscribe(() => {
 			this._toastr.success('Statusänderung erfolgreich durchgeführt', 'Erfolgreich');
 			this.open = false;
 			this.onSubmitted.emit(true);

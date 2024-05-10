@@ -13,11 +13,14 @@
           "options": {
             "outputPath": "dist",
             "index": "src/index.html",
-            "main": "src/main.ts",
+						"main": "src/main.ts",
             "deployUrl": "client/",
             "tsConfig": "src/tsconfig.app.json",
             "preserveSymlinks": true,
-            "polyfills": "src/polyfills.ts",
+						"polyfills": [
+							"zone.js",
+							"zone.js/testing"
+						],
             "stylePreprocessorOptions": {
               "includePaths": [
                 "node_modules/@cmi/viaduc-web-core/styles"
@@ -119,16 +122,18 @@
         "test": {
           "builder": "@angular-devkit/build-angular:karma",
           "options": {
-            "main": "src/test.ts",
             "karmaConfig": "./karma.conf.js",
-            "polyfills": "src/polyfills.ts",
+            "polyfills": [
+              "zone.js",
+              "zone.js/testing"
+            ],
             "tsConfig": "src/tsconfig.spec.json",
             "scripts": [
               "src/assets/js/vendors.min.js",
               "src/assets/js/polyfills.min.js",
               "src/assets/js/main.js",
               "node_modules/jszip/dist/jszip.min.js",
-							"node_modules/marked/marked.min.js",
+              "node_modules/marked/marked.min.js",
               {
                 "inject": false,
                 "input": "node_modules/@grapecity/wijmo.cultures/wijmo.culture.de-CH.js",
@@ -182,7 +187,6 @@
       }
     }
   },
-  "defaultProject": "cmi-viaduc-web-management",
   "schematics": {
     "@schematics/angular:component": {
       "prefix": "cmi",

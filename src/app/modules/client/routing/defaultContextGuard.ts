@@ -1,11 +1,11 @@
 import {of as observableOf, Observable} from 'rxjs';
 import {Injectable} from '@angular/core';
-import {ActivatedRouteSnapshot, CanActivate} from '@angular/router';
+import { ActivatedRouteSnapshot } from '@angular/router';
 import {ContextService} from '../services/context.service';
 import {ClientContext, Utilities as _util} from '@cmi/viaduc-web-core';
 
 @Injectable()
-export class DefaultContextGuard implements CanActivate {
+export class DefaultContextGuard  {
 
 	private _languageTester = /^(de|fr|it|en)$/;
 

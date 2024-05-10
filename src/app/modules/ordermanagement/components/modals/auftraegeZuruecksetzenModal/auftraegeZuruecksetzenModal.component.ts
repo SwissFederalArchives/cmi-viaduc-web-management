@@ -41,7 +41,7 @@ export class AuftraegeZuruecksetzenModalComponent {
 
 	public ok() {
 		this.isLoading = true;
-		this._ord.zuruecksetzen(this.ids).subscribe(r => {
+		this._ord.zuruecksetzen(this.ids).subscribe(() => {
 			this._toastr.success('Statusänderung erfolgreich durchgeführt', 'Erfolgreich');
 			this.open = false;
 			this.onSubmitted.emit(true);

@@ -2,6 +2,7 @@ import {Injectable} from '@angular/core';
 import {User} from '../model/user';
 import {Subject, Observable} from 'rxjs';
 import {ConfigService, CoreOptions, HttpService} from '@cmi/viaduc-web-core';
+import * as moment from 'moment/moment';
 
 @Injectable()
 export class UserService {
@@ -94,9 +95,14 @@ export class UserService {
 	}
 
 	private _mapUserPostParameter(userItem: any): any {
-		userItem.birthdayString = userItem.birthday;
-		userItem.downloadLimitDisabledUntilString = userItem.downloadLimitDisabledUntil;
-		userItem.digitalisierungsbeschraenkungString = userItem.digitalisierungsbeschraenkungAufgehobenBis;
+		userItem.birthdayString = this.getFormattedDateWithoutTime(userItem.birthday);
+		userItem.downloadLimitDisabledUntilString = this.getFormattedDateWithoutTime(userItem.downloadLimitDisabledUntil);
+		userItem.digitalisierungsbeschraenkungString = this.getFormattedDateWithoutTime(userItem.digitalisierungsbeschraenkungAufgehobenBis);
 		return userItem;
 	}
+
+	private getFormattedDateWithoutTime(dt: Date | string) {
+		return dt ? moment(dt).format('DD.MM.YYYY') : '';
+	}
+
 }

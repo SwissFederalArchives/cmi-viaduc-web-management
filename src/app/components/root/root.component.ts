@@ -25,7 +25,7 @@ export class RootComponent implements OnInit, AfterViewInit {
 		// eslint-disable-next-line
 		this._preloadService.preloaded.subscribe((state) => {});
 
-		this._preloadService.preload(this._context.language, false).then(res => {
+		this._preloadService.preload(this._context.language, false).then(() => {
 			const version = this._config.getSetting('service.version');
 			this._context.client.setVersion(version);
 			this.preloading = false;

@@ -1,4 +1,5 @@
 import { ParamMap} from '@angular/router';
+/* eslint-disable */
 
 export class MockUserSettingsParamMap implements ParamMap {
 	public readonly keys: string[];

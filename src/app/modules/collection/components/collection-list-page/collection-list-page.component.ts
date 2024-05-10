@@ -213,13 +213,16 @@ export class CollectionListPageComponent implements OnInit {
 	}
 
 	private loadColumns(): void {
-		const userSettings = this._cfg.getSetting('user.settings') as ManagementUserSettings;
-		if (userSettings.collectionSettings && userSettings.collectionSettings.columns) {
-			this.columns = userSettings.collectionSettings.columns;
-		} else {
-			this.resetColumnsToDefault();
-		}
-		this.refreshHiddenVisibleColumns();
+		this._usr.getUserSettings().then((settings) => {
+			const userSettings =  settings as ManagementUserSettings;
+			if (userSettings.collectionSettings && userSettings.collectionSettings.columns) {
+				this.columns = userSettings.collectionSettings.columns;
+			} else {
+				console.log('hätte hier nicht rein sollen!!!');
+				this.resetColumnsToDefault();
+			}
+			this.refreshHiddenVisibleColumns();
+		});
 	}
 
 	private prepareResult(result: CollectionListItemDto[]) {

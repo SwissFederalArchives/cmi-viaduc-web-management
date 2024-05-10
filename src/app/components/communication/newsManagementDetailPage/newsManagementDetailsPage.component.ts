@@ -51,7 +51,7 @@ export class NewsManagementDetailsPageComponent extends ComponentCanDeactivate i
 		this.errors = [];
 		const promise: Promise<any> = this._newsService.insertOrUpdateNews(this.news);
 
-		promise.then((data) => {
+		promise.then(() => {
 				this._goToNews();
 			},
 			(error: HttpErrorResponse) => {
