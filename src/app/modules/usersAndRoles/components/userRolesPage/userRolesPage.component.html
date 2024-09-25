@@ -63,7 +63,13 @@
 										 [format]="col.format"
 										 [dataType]="col.dataType ? col.dataType : 1"
 										 [header]="col.defaultLabel | translate:'usersAndRoles.columns.' + col.key"
+										 [align]= "col.align ? col.align : ''"
 										 [allowResizing]="true" >
+
+						<ng-template wjFlexGridCellTemplate [cellType]="'Cell'" let-cell="cell">
+							<span *ngIf="cell.col.dataType === 4">{{ formatDate(cell.item[cell.col.binding], cell.col.format) }}</span>
+							<span *ngIf="cell.col.dataType !== 4">{{ cell.item[cell.col.binding] }}</span>
+						</ng-template>
 					</wj-flex-grid-column>
 				</cmi-viaduc-grid>
 				<div class="row bottom-pagination">

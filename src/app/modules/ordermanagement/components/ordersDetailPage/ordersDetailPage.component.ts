@@ -59,6 +59,7 @@ export class OrdersDetailPageComponent extends ComponentCanDeactivate {
 	public formOrderDetail: NgForm;
 	public currentUserRole: string;
 	public isValidRueckgabeNumber = true;
+	public isBusy = false;
 
 	constructor(private _aut: AuthorizationService,
 				private _dec: EntityDecoratorService,
@@ -278,10 +279,14 @@ export class OrdersDetailPageComponent extends ComponentCanDeactivate {
 		if (!this._err.verifyApplicationFeatureOrShowError(ApplicationFeatureEnum.AuftragsuebersichtAuftraegeKannAushebungsauftraegeDrucken)) {
 			return;
 		}
-
+		this.isBusy = true;
 		const selectedItemids = [this._recordId];
 		this._ord.getAushebungsAuftragHtml(selectedItemids).subscribe(html => {
+			this.isBusy = false;
 			this._ui.showHtmlInNewTab(html, this._txt.get('aushebungsauftrag', 'Aushebungsauftrag'));
+		}, (error) => {
+			this.isBusy = false;
+			this._err.showError(error);
 		});
 	}
 
@@ -289,10 +294,14 @@ export class OrdersDetailPageComponent extends ComponentCanDeactivate {
 		if (!this._err.verifyApplicationFeatureOrShowError(ApplicationFeatureEnum.AuftragsuebersichtAuftraegeVersandkontrolleAusfuehren)) {
 			return;
 		}
-
+		this.isBusy = true;
 		const selectedItemids = [this._recordId];
 		this._ord.getVersandkontrolleHtml(selectedItemids).subscribe(html => {
+			this.isBusy = false;
 			this._ui.showHtmlInNewTab(html, this._txt.get('versandkontrolle', 'Versandkontrolle'));
+		}, error => {
+			this.isBusy = false;
+			this._err.showError(error);
 		});
 	}
 

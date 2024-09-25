@@ -10,6 +10,7 @@ import {ManagementUserSettings} from '../../../shared/model/managementUserSettin
 import {Column, DataMap} from '@grapecity/wijmo.grid';
 import {ODataCollectionView} from '@grapecity//wijmo.odata';
 import {DetailPagingService} from '../../../shared/services';
+import {DateUtilityService} from '../../../shared/services/date-utility.service'; 
 
 @Component({
 	selector: 'cmi-viaduc-user-roles-page',
@@ -43,7 +44,8 @@ export class UserRolesPageComponent implements OnInit {
 				private _cfg: ConfigService,
 				private _opt: CoreOptions,
 				private _dps: DetailPagingService,
-				private _countriesService: CountriesService) {
+				private _countriesService: CountriesService,
+				private _dateUtilityService: DateUtilityService) {
 	}
 
 	public get txt(): TranslationService {
@@ -220,6 +222,7 @@ export class UserRolesPageComponent implements OnInit {
 				modifiedOn: DataType.Date,
 				birthday: DataType.Date,
 				downloadLimitDisabledUntil: DataType.Date,
+				digitalisierungsbeschraenkungAufgehobenBis: DataType.Date
 			},
 			canFilter: true,
 			canSort: true,
@@ -287,5 +290,13 @@ export class UserRolesPageComponent implements OnInit {
 
 	private _getListRoleManagementClient(): any {
 		return [{ name: 'APPO'}, { name: 'ALLOW'}];
+	}
+
+	public formatDate(date: Date, format: string): string {
+		if(format=='dd.MM.yyyy HH:mm:ss') {
+			return this._dateUtilityService.formatDate(date, 'DD.MM.YYYY HH:mm:ss');
+		}
+
+		return this._dateUtilityService.formatDate(date);
 	}
 }

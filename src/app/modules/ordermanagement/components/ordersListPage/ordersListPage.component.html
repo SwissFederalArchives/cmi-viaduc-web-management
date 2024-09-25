@@ -14,6 +14,7 @@
 					</h2>
 				</div>
 				<div *ngIf="hasRight; else noRights">
+					<cmi-loader *ngIf="isBusy" class="cmi-visible"></cmi-loader>
 					<div class="action-container">
 						<div class="row action-buttons">
 							<div class="col-xs-12">

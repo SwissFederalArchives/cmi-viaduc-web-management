@@ -18,16 +18,20 @@ export class User {
 	public tokens: string[];
 	public ablieferndeStelleList: AblieferndeStelle[];
 	public rolePublicClient: string;
-	public birthday: string;
+	public birthday: Date;
 	public displayName: string;
 	public userExtId: string;
 	public language: string;
-	public legalAgreementConset: boolean;
+	public legalAgreementConsent: boolean;
 	public fabasoftDossier: string;
 	public createdOn: Date;
 	public createdBy: string;
 	public modifiedOn: Date;
 	public modifiedBy: string;
 	public downloadLimitDisabledUntil: Date;
-	public digitalisierungsbeschraenkung: Date;
+	public digitalisierungsbeschraenkungAufgehobenBis: Date;
+	public qoAValue: number;
+	public homeName: string;
+	public isIdentifiedUser: boolean;
+	public lastLoginDate: Date;
 }

@@ -171,13 +171,16 @@
 				"key":"researcherGroup",
 				"width":"*",
 				"visible": false,
-				"dataType": 3
+				"dataType": 3,
+				"align": "center"
 			},
 			{
 				"defaultLabel":"BAR-interne Konsultation",
 				"key": "barInternalConsultation",
 				"width":"*",
-				"visible": false
+				"visible": false,
+				"dataType": 3,
+				"align": "center"
 			},
 			{
 				"defaultLabel":"Zugewiesene zuständige Stellen",
@@ -218,6 +221,28 @@
 				"visible": false,
 				"format":"dd.MM.yyyy",
 				"dataType": 4
+			},
+			{
+				"defaultLabel":"Letztes Login",
+				"key": "lastLoginDate",
+				"width":"*",
+				"visible": false,
+				"format": "dd.MM.yyyy HH:mm:ss",
+				"dataType": 4
+			},
+			{
+				"defaultLabel":"HomeName",
+				"key": "homeName",
+				"width":"*",
+				"visible": false
+			},
+			{
+				"defaultLabel":"Qualität der Authentifizierung (QoA) bei der letzten Anmeldung",
+				"key": "qoaValue",
+				"width":"*",
+				"visible": false,
+				"dataType": 2,
+				"align": "left"
 			}
 		]
 	},

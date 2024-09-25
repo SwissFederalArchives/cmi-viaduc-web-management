@@ -30,7 +30,6 @@ export class UserRolesDetailPageComponent extends ComponentCanDeactivate impleme
 	private allRoles: any;
 	private initialeRoles: any;
 	public detail: DetailResult<any>;
-	public preSelectedRolepublic: string;
 	public selectedIdentifizierungsmittel: any;
 
 	public language: any = [{name:'Deutsch', code:'de'}, {name:'Französisch', code:'fr'}, {name:'Italienisch', code:'it'}, {name:'Englisch', code:'en'}];
@@ -50,6 +49,8 @@ export class UserRolesDetailPageComponent extends ComponentCanDeactivate impleme
 	private rolesIsDirty: boolean;
 	public today = new Date();
 	public maxDate = new Date();
+
+	public clientRoles = ['Ö2','Ö3','BVW','AS','BAR'];
 
 	constructor(private _context: ClientContext, public _authorization: AuthorizationService, private _roleService: RoleService, private _txt: TranslationService,
 				private _url: UrlService,
@@ -196,9 +197,14 @@ export class UserRolesDetailPageComponent extends ComponentCanDeactivate impleme
 			createModifiyData: this.detail.item.createModifiyData,
 			rolePublicClient: this.detail.item.rolePublicClient,
 			researcherGroup: this.detail.item.researcherGroup,
+			homeName: this.detail.item.homeName,
+			qoAValue: this.detail.item.qoAValue,
+			isIdentifiedUser: this.detail.item.isOe3OrHigher,
+			lastLoginDate: this.detail.item.lastLoginDate,
 			barInternalConsultation: this.detail.item.barInternalConsultation,
 		});
 		this.recalculateResearcherGroup();
+		this.updateValidators();
 	}
 
 	public resetRoleManagement (): void {
@@ -239,30 +245,59 @@ export class UserRolesDetailPageComponent extends ComponentCanDeactivate impleme
 	}
 
 	public oeDreiDisabled(): boolean {
-		return !this.allowBenutzerrollePublicClientBearbeiten || !this.detail.item.hasIdentifizierungsmittel;
+		return !this.allowBenutzerrollePublicClientBearbeiten ||
+			this._authorization.roles.Oe2 === this.myForm?.controls.rolePublicClient.value ||
+			this._authorization.roles.BAR === this.myForm?.controls.rolePublicClient.value||
+			this.isFEDLogin();
+	}
+	public oeZweiDisabled(): boolean {
+		return !this.allowBenutzerrollePublicClientBearbeiten || this.isFEDLogin() ||
+			this._authorization.roles.BAR === this.myForm?.controls.rolePublicClient.value;
 	}
 
 	public asTokenManageDisabled(): boolean {
 		return !this.detail.item.rolePublicClient || this.detail.item.rolePublicClient.indexOf(this._authorization.roles.AS) === -1;
 	}
 
+	public isRoleOptionDisabled(role: string): boolean | null {
+		switch (role) {
+			case this._authorization.roles.Oe2:
+				if (this.oeZweiDisabled()) {
+					return true;
+				}
+				return null;
+			case this._authorization.roles.Oe3:
+				if (this.oeDreiDisabled()) {
+					return true;
+				}
+				return null;
+			case this._authorization.roles.BVW:
+				if (this.allowBenutzerrollePublicClientBearbeiten && this.qoaValue() > 39) {
+					return null;
+				} else {
+					return true;
+				}
+			case this._authorization.roles.AS:
+				if (this.allowBenutzerrollePublicClientBearbeiten && (this.qoaValue() > 49 || (this.detail.item.rolePublicClient == this._authorization.roles.BVW && this.qoaValue() > 39))) {
+					return null;
+				} else {
+					return true;
+				}
+			case this._authorization.roles.BAR:
+				if (this.allowBenutzerrollePublicClientBearbeiten && this.isFEDLogin() && ((this.qoaValue() > 59 ) || (this.detail.item.rolePublicClient == this._authorization.roles.BVW && this.qoaValue() > 39))) {
+					return null;
+				} else {
+					return true;
+				}
+			default:
+				return true;
+		}
+	}
+
 	public getCheckedStatusForRolePublic(value: string): boolean {
 		return value && value.indexOf(this.myForm.controls['rolePublicClient'].value ) === 0;
 	}
 
-	public setCheckedStatusForRolePublic(value: string) {
-		if (!value) {
-			return;
-		}
-
-		// Forschungsgruppe DDS darf nicht für Ö2 gewählt werden
-		if (value.indexOf(this._authorization.roles.Oe2) === 0) {
-			this.myForm.controls['researcherGroup'].setValue(false);
-		}
-
-		this.myForm.controls['rolePublicClient'].setValue(value);
-		this.myForm.controls['rolePublicClient'].markAsDirty();
-	}
 
 	public toggelSelectedResearcherGroup(e: MouseEvent): void {
 		if (this.myForm.controls['researcherGroup'].value === false) {
@@ -322,7 +357,8 @@ export class UserRolesDetailPageComponent extends ComponentCanDeactivate impleme
 			},
 			() => {
 				this.detail.item.hasIdentifizierungsmittel = true;
-				this.setCheckedStatusForRolePublic(this._authorization.roles.Oe3);
+				this.myForm.controls.rolePublicClient.setValue(this._authorization.roles.Oe3);
+				this.updateValidators();
 				this.recalculateResearcherGroup();
 				this.selectedIdentifizierungsmittel = null;
 				this.loading = false;
@@ -330,7 +366,7 @@ export class UserRolesDetailPageComponent extends ComponentCanDeactivate impleme
 		);
 	}
 
-	public downgradToOe2() {
+	public removeIdentifizierungsmittel() {
 		this.loading = true;
 		this._userService.setIdentifizierungsmittelPdf(this.detail.item.id, this._authorization.roles.Oe2, null).subscribe(
 			() => {
@@ -342,111 +378,119 @@ export class UserRolesDetailPageComponent extends ComponentCanDeactivate impleme
 				this._ui.showError(this._txt.get('userAndRoles.downgradfail', 'Identifizierungsmittel konnte nicht gelöscht werden'), err.message);
 			},
 			() => {
-				this.detail.item.hasIdentifizierungsmittel = false;
-				this.setCheckedStatusForRolePublic(this._authorization.roles.Oe2);
-				this.selectedIdentifizierungsmittel = null;
-				this.recalculateResearcherGroup();
 				this.loading = false;
 			}
 		);
 	}
 
-	// eslint-disable-next-line
-	public onCancelClick(event): void {
-		this.showModal = false;
+	private downgradeToOe2() {
+		this.detail.item.hasIdentifizierungsmittel = false;
+		this.selectedIdentifizierungsmittel = null;
+		this.recalculateResearcherGroup();
 	}
 
-	public onOpenModalClick(event, rolePublicClient: string, allowOpenModal: boolean): void {
-		// Auswahl muss zurückgesetzt werden, denn der effektive Wechsel muss im Dialog bestätigt werden
-		this.setCheckedStatusForRolePublic(this.myForm.controls['rolePublicClient'].value);
-		// Es kann nicht von Oe2 zu Oe3 gewechselt werden. Dies muss ueber ein PDF upload gemacht werden.
-		if (rolePublicClient === this.myForm.controls['rolePublicClient'].value || !allowOpenModal) {
-			return;
-		}
-
-		event.stopPropagation();
-		event.preventDefault();
-
-		this.preSelectedRolepublic = rolePublicClient;
-		this.showModal = true;
+	public onCancelClick(): void {
+		this.myForm.controls.rolePublicClient.reset();
+		this.myForm.controls.rolePublicClient.setValue(this.detail.item.rolePublicClient);
+		this.showModal = false;
 	}
 
 	// eslint-disable-next-line
 	public onOkClick(event): void {
 		this.showModal = false;
 
-		switch (this.preSelectedRolepublic) {
+		// Forschungsgruppe DDS darf nicht für Ö2 gewählt werden
+		if (this.myForm.controls.rolePublicClient.value  === this._authorization.roles.Oe2) {
+			this.myForm.controls['researcherGroup'].setValue(false);
+		}
+
+		switch (this.myForm.controls.rolePublicClient.value) {
 			case this._authorization.roles.Oe2:
-				this.downgradToOe2();
+				if (this.detail.item.hasIdentifizierungsmittel) {
+					this.removeIdentifizierungsmittel();
+					this.downgradeToOe2();
+				} else {
+					this.downgradeToOe2();
+				}
 				break;
 			case this._authorization.roles.Oe3:
-				this.uploadIdentifierungsmittel();
+				if (this.detail.item.rolePublicClient === this._authorization.roles.Oe2){
+					// Es kann nicht von Oe2 zu Oe3 gewechselt werden. Dies muss ueber ein PDF upload gemacht werden.
+					this.uploadIdentifierungsmittel();
+				}
 				break;
-			case this._authorization.roles.BVW:
-				this.setCheckedStatusForRolePublic(this._authorization.roles.BVW);
-				break;
-			case this._authorization.roles.AS:
-				this.setCheckedStatusForRolePublic(this._authorization.roles.AS);
-				break;
-			case this._authorization.roles.BAR:
-				this.setCheckedStatusForRolePublic(this._authorization.roles.BAR);
-				break;
-			default:
-				throw new Error();
 		}
+
+		this.updateValidators();
+		this.updateErrorMessages();
 	}
 
 	public GetModalMessage(): string {
-		switch (this.myForm.controls['rolePublicClient'].value) {
-			case this._authorization.roles.Oe2:
-				return this._txt.get('user.upload.oe2ToOe3Message', 'Nach erfolgtem Upload des Identifizierungsnachweises als PDF-Datei ' +
-					'erfolgt ein automatischer Rollenwechsel durch das System. Der Benutzer erhält durch den Rollenwechsel erweiterte Rechte. Möchten Sie fortfahren?');
-			case this._authorization.roles.Oe3:
-				return this._txt.get('user.upload.oe3ToOe2Message', 'Die Identifizierungsausweise werden dauerhaft gelöscht. Möchten Sie fortfahren?');
-			case this._authorization.roles.BVW:
-				return this._txt.get('user.upload.bvwToAsOrBarMessage', 'Der Benutzer erhält durch den Rollenwechsel erweiterte Rechte. Möchten Sie fortfahren?');
+		switch (this.detail.item.rolePublicClient) {
+			case this._authorization.roles.BAR:
+				return this._txt.get('user.upload.lessRightMessage', 'Der Benutzer verliert dadurch seine erweiterten Rechte. Möchten Sie fortfahren?');
 			case this._authorization.roles.AS:
-				if (this.preSelectedRolepublic === this._authorization.roles.BVW) {
-					return this._txt.get('user.upload.asToBvwMessage', 'Die dem Benutzer zugewiesenen Verlinkungen auf die zuständigen Stellen werden dauerhaft gelöscht. ' +
-						'Der Benutzer verliert dadurch seine erweiterten Rechte. Wollen Sie fortfahren?');
-				} else if (this.preSelectedRolepublic === this._authorization.roles.BAR) {
+				if (this.myForm.controls.rolePublicClient.value === this._authorization.roles.BAR) {
 					return this._txt.get('user.upload.asToBarMessage', 'Die dem Benutzer zugewiesenen Verlinkungen auf die zuständigen Stellen werden dauerhaft gelöscht. ' +
 						'Der Benutzer erhält durch den Rollenwechsel erweiterte Rechte. Möchten Sie fortfahren?');
+				} else  {
+					return this._txt.get('user.upload.asToBvwMessage', 'Die dem Benutzer zugewiesenen Verlinkungen auf die zuständigen Stellen werden dauerhaft gelöscht. ' +
+						'Der Benutzer verliert dadurch seine erweiterten Rechte. Wollen Sie fortfahren?');
 				}
 				break;
-			case this._authorization.roles.BAR:
-				return this._txt.get('user.upload.barToBvwMessage', 'Der Benutzer verliert dadurch seine erweiterten Rechte. Möchten Sie fortfahren?');
+			case this._authorization.roles.BVW:
+				if (this.myForm.controls.rolePublicClient.value === this._authorization.roles.BAR ||this.myForm.controls.rolePublicClient.value === this._authorization.roles.AS) {
+					return this._txt.get('user.upload.moreRightMessage', 'Der Benutzer erhält durch den Rollenwechsel erweiterte Rechte. Möchten Sie fortfahren?');
+				} else  {
+					return this._txt.get('user.upload.lessRightMessage', 'Der Benutzer verliert dadurch seine erweiterten Rechte. Möchten Sie fortfahren?');
+				}
+			case this._authorization.roles.Oe3:
+				if (this.myForm.controls.rolePublicClient.value === this._authorization.roles.BAR ||this.myForm.controls.rolePublicClient.value === this._authorization.roles.AS || this.myForm.controls.rolePublicClient.value === this._authorization.roles.BVW) {
+					return this._txt.get('user.upload.moreRightMessage', 'Der Benutzer erhält durch den Rollenwechsel erweiterte Rechte. Möchten Sie fortfahren?');
+				} else  {
+					return this._txt.get('user.upload.oe3ToOe2Message', 'Die Identifizierungsausweise werden dauerhaft gelöscht. Möchten Sie fortfahren?');
+				}
+			case this._authorization.roles.Oe2:
+				if (this._authorization.roles.Oe3 === this.myForm.controls.rolePublicClient.value) {
+					return this._txt.get('user.upload.oe2ToOe3Message', 'Nach erfolgtem Upload des Identifizierungsnachweises als PDF-Datei ' +
+						'erfolgt ein automatischer Rollenwechsel durch das System. Der Benutzer erhält durch den Rollenwechsel erweiterte Rechte. Möchten Sie fortfahren?');
+				} else
+					return this._txt.get('user.upload.moreRightMessage', 'Der Benutzer erhält durch den Rollenwechsel erweiterte Rechte. Möchten Sie fortfahren?');
 			default:
-				return 'Keine Text';
+
+				return 'Kein Text';
 		}
 	}
 
 	public GetModalTitel(): string {
-		switch (this.myForm.controls['rolePublicClient'].value) {
-			case this._authorization.roles.Oe2:
-				return this._txt.get('user.upload.toOe3Title', 'Upload Identifizierungsmittel');
-			case this._authorization.roles.Oe3:
-				return this._txt.get('user.upload.toOe2Title', 'Rolle zu Ö2 zurückstufen');
-			case this._authorization.roles.BVW:
-				return this._txt.get('user.upload.toAsOrBarTitle', 'Rollenwechsel erweiterte Rechte');
-			case this._authorization.roles.AS:
-				if (this.preSelectedRolepublic === this._authorization.roles.BVW) {
-					return this._txt.get('user.upload.asToBvwTitle', 'Rolle zu BVW zurückstufen');
-				}
-				if (this.preSelectedRolepublic === this._authorization.roles.BAR) {
-					return this._txt.get('user.upload.asToBarTitle', 'Rollenwechsel erweiterte Rechte');
-				}
-				break;
+		switch (this.detail.item.rolePublicClient) {
 			case this._authorization.roles.BAR:
-				if (this.preSelectedRolepublic === this._authorization.roles.BVW) {
-					return this._txt.get('user.upload.barToBvwTitle', 'Rolle zu BVW zurückstufen');
+				return this._txt.get('user.upload.lessRightTitel', 'Rolle zu {0} zurückstufen', this.myForm.controls.rolePublicClient.value);
+			case this._authorization.roles.AS:
+				if (this.myForm.controls.rolePublicClient === this._authorization.roles.BAR) {
+					return this._txt.get('user.upload.moreRightTitel', 'Rollenwechsel erweiterte Rechte');
+				} else  {
+					return this._txt.get('user.upload.lessRightTitel', 'Rolle zu {0} zurückstufen', this.myForm.controls.rolePublicClient.value);
 				}
-				if (this.preSelectedRolepublic === this._authorization.roles.AS) {
-					return this._txt.get('user.upload.barToAsTitle', 'Rolle zu AS zurückstufen');
+			case this._authorization.roles.BVW:
+				if (this.myForm.controls.rolePublicClient === this._authorization.roles.BAR ||this.myForm.controls.rolePublicClient.value === this._authorization.roles.AS) {
+					return this._txt.get('user.upload.moreRightTitle', 'Rollenwechsel erweiterte Rechte');
+				} else  {
+					return this._txt.get('user.upload.lessRightTitle', 'Rolle zu {0} zurückstufen', this.myForm.controls.rolePublicClient.value);
 				}
-				break;
+			case this._authorization.roles.Oe3:
+				if (this.myForm.controls.rolePublicClient === this._authorization.roles.BAR ||this.myForm.controls.rolePublicClient.value === this._authorization.roles.AS || this.myForm.controls.rolePublicClient.value === this._authorization.roles.BVW) {
+					return this._txt.get('user.upload.moreRightTitle', 'Rollenwechsel erweiterte Rechte');
+				} else  {
+					return this._txt.get('user.upload.lessRightTitle', 'Rolle zu {0} zurückstufen', this.myForm.controls.rolePublicClient.value);
+				}
+			case this._authorization.roles.Oe2:
+				if (this._authorization.roles.Oe3 === this.myForm.controls.rolePublicClient) {
+					return this._txt.get('user.upload.toOe3Title', 'Upload Identifizierungsmittel');
+				} else
+					return this._txt.get('user.upload.moreRightTitle', 'Rollenwechsel erweiterte Rechte');
 			default:
-				return 'Titel';
+				return 'Kein Titel';
 		}
 	}
 
@@ -580,47 +624,62 @@ export class UserRolesDetailPageComponent extends ComponentCanDeactivate impleme
 	}
 
 	private initForm(): void {
+		// is required to reset disabled controls when switching through the entries
+		this.myForm?.controls.familyName.enable();
+		this.myForm?.controls.firstName.enable();
+		this.myForm?.controls.emailAddress.enable();
+		this.myForm?.controls.birthday.enable();
 		this.myForm = this.formbuilder.group({
-			familyName: new FormControl({value: this.detail.item.familyName,
-					disabled: (!this.allowBereichBenutzerdatenBearbeiten || this.detail.item.rolePublicClient === this._authorization.roles.Oe3 || this.detail.item.isInternalUser) },
+			familyName: new FormControl({
+					value: this.detail.item.familyName,
+					disabled: (!this.allowBereichBenutzerdatenBearbeiten || this.detail.item.rolePublicClient !== this._authorization.roles.Oe2)
+				},
 				[Validators.required, Validators.maxLength(200)]),
-			firstName: new FormControl({value: this.detail.item.firstName,
-					disabled: (!this.allowBereichBenutzerdatenBearbeiten || this.detail.item.rolePublicClient === this._authorization.roles.Oe3) || this.detail.item.isInternalUser },
+			firstName: new FormControl({
+					value: this.detail.item.firstName,
+					disabled: (!this.allowBereichBenutzerdatenBearbeiten || this.detail.item.rolePublicClient !== this._authorization.roles.Oe2)
+				},
 				[Validators.required, Validators.maxLength(200)]),
-			organization: new FormControl({value: this.detail.item.organization, disabled: (!this.allowBereichBenutzerdatenBearbeiten || this.detail.item.isInternalUser) },
+			organization: new FormControl({value: this.detail.item.organization, disabled: (!this.allowBereichBenutzerdatenBearbeiten)},
+				this.isInternalUser ? [Validators.required, Validators.maxLength(200)] : [Validators.maxLength(200)]),
+			street: new FormControl({value: this.detail.item.street, disabled: !this.allowBereichBenutzerdatenBearbeiten},
+				[Validators.required, Validators.maxLength(200)]),
+			streetAttachment: new FormControl({value: this.detail.item.streetAttachment, disabled: !this.allowBereichBenutzerdatenBearbeiten},
 				[Validators.maxLength(200)]),
-			street: new FormControl({value: this.detail.item.street, disabled: !this.allowBereichBenutzerdatenBearbeiten },
+			zipCode: new FormControl({value: this.detail.item.zipCode, disabled: !this.allowBereichBenutzerdatenBearbeiten},
 				[Validators.required, Validators.maxLength(200)]),
-			streetAttachment: new FormControl({value: this.detail.item.streetAttachment, disabled: !this.allowBereichBenutzerdatenBearbeiten },
-				[Validators.maxLength(200)]),
-			zipCode:  new FormControl({ value: this.detail.item.zipCode, disabled: !this.allowBereichBenutzerdatenBearbeiten },
+			town: new FormControl({value: this.detail.item.town, disabled: !this.allowBereichBenutzerdatenBearbeiten},
 				[Validators.required, Validators.maxLength(200)]),
-			town: new FormControl({ value: this.detail.item.town, disabled: !this.allowBereichBenutzerdatenBearbeiten},
-				[Validators.required, Validators.maxLength(200)]),
-			countryCode: new FormControl({ value: this.detail.item.countryCode, disabled: !this.allowBereichBenutzerdatenBearbeiten}),
-			phoneNumber: new FormControl({ value: this.detail.item.phoneNumber,  disabled: !this.allowBereichBenutzerdatenBearbeiten},
+			countryCode: new FormControl({value: this.detail.item.countryCode, disabled: !this.allowBereichBenutzerdatenBearbeiten}),
+			phoneNumber: new FormControl({value: this.detail.item.phoneNumber, disabled: !this.allowBereichBenutzerdatenBearbeiten},
 				[Validators.pattern('^[()+]?([0-9][\\s()-]*){6,20}$')]),
-			mobileNumber: new FormControl({ value: this.detail.item.mobileNumber,  disabled: !this.allowBereichBenutzerdatenBearbeiten},
+			mobileNumber: new FormControl({value: this.detail.item.mobileNumber, disabled: !this.allowBereichBenutzerdatenBearbeiten},
 				[Validators.pattern('^[()+]?([0-9][\\s()-]*){6,20}$')]),
-			emailAddress:  new FormControl({value: this.detail.item.emailAddress, disabled: (!this.allowBereichBenutzerdatenBearbeiten || this.detail.item.isInternalUser)},
+			emailAddress: new FormControl({value: this.detail.item.emailAddress, disabled: (!this.allowBereichBenutzerdatenBearbeiten || this.isInternalUser)},
 				[Validators.required, Validators.email, Validators.maxLength(200)]),
-			fabasoftDossier:  new FormControl({value: this.detail.item.fabasoftDossier, disabled: !this.allowBereichBenutzerdatenBearbeiten}),
+			fabasoftDossier: new FormControl({value: this.detail.item.fabasoftDossier, disabled: !this.allowBereichBenutzerdatenBearbeiten}),
 			id: [this.detail.item.id],
 			userExtId: [this.detail.item.userExtId],
+			qoAValue: new FormControl({value: this.detail.item.qoAValue, disabled: true}),
+			homeName: new FormControl({value: this.detail.item.homeName, disabled: true}),
+			isIdentifiedUser: new FormControl({value: this.detail.item.isOe3OrHigher, disabled: true}),
+			lastLoginDate: new FormControl({value: this.detail.item.lastLoginDate, disabled: true}),
 			downloadLimitDisabledUntil: new FormControl(this.detail.item.downloadLimitDisabledUntil ? new Date(this.detail.item.downloadLimitDisabledUntil) : null, [this.dateRangeValidator.bind(this)]),
 			digitalisierungsbeschraenkungAufgehobenBis: new FormControl(this.detail.item.digitalisierungsbeschraenkungAufgehobenBis ? new Date(this.detail.item.digitalisierungsbeschraenkungAufgehobenBis) : null, [this.dateRangeValidator.bind(this)]),
 			language: [{value: this.detail.item.language, disabled: !this.allowBereichBenutzerdatenBearbeiten}],
 			createModifiyData: [this.detail.item.createModifiyData],
-			rolePublicClient: [{value: this.detail.item.rolePublicClient, disabled: !this.allowBereichBenutzerdatenBearbeiten}],
-			birthday:[{value: this.detail.item.birthday,  disabled: (!this.allowBereichBenutzerdatenBearbeiten || this.detail.item.rolePublicClient === this._authorization.roles.Oe3 )}],
-			researcherGroup: new FormControl({value: this.detail.item.researcherGroup,
-					disabled: (this.detail.item.rolePublicClient !== this._authorization.roles.Oe3 || !this.detail.item.emailAddress.endsWith('@dodis.ch') || !this.allowForschungsgruppeDdsBearbeiten) }),
-			barInternalConsultation: new FormControl({value: this.detail.item.barInternalConsultation,
-				disabled: !this.allowBarInterneKonsultationBearbeiten})
+			rolePublicClient: new FormControl({value: this.detail.item.rolePublicClient, disabled: !this.allowBereichBenutzerdatenBearbeiten}),
+			birthday: [{value: this.detail.item.birthday, disabled: (!this.allowBereichBenutzerdatenBearbeiten || this.detail.item.rolePublicClient === this._authorization.roles.Oe3)}],
+			researcherGroup: new FormControl({
+				value: this.detail.item.researcherGroup,
+				disabled: (this.detail.item.rolePublicClient !== this._authorization.roles.Oe3 || !this.detail.item.emailAddress.endsWith('@dodis.ch') || !this.allowForschungsgruppeDdsBearbeiten)
+			}),
+			barInternalConsultation: new FormControl({
+				value: this.detail.item.barInternalConsultation,
+				disabled: !this.allowBarInterneKonsultationBearbeiten || this.detail.item.qoAValue < 60
+			})
 		});
-		if (this.detail.item.isInternalUser) {
-			this.myForm.controls['organization'].setValidators([Validators.required, Validators.maxLength(200)]);
-		}
+
 		this.myForm.statusChanges.subscribe(() => this.updateErrorMessages());
 	}
 
@@ -648,6 +707,10 @@ export class UserRolesDetailPageComponent extends ComponentCanDeactivate impleme
 		this.detail.item.rolePublicClient = detailItem.rolePublicClient;
 		this.detail.item.researcherGroup = detailItem.researcherGroup;
 		this.detail.item.barInternalConsultation = detailItem.barInternalConsultation;
+		this.detail.item.qoAValue = detailItem.qoAValue;
+		this.detail.item.isOe3OrHigher = detailItem.isOe3OrHigher;
+		this.detail.item.homeName = detailItem.homeName;
+		this.detail.item.lastLoginDate = detailItem.lastLoginDate;
 		this.rememberSelectedRoles();
 		this.rememberSelectedAblieferndeStelle();
 		this.detail.item.roles = this.initialeRoles;
@@ -682,8 +745,9 @@ export class UserRolesDetailPageComponent extends ComponentCanDeactivate impleme
 	private async _load(id: string): Promise<void> {
 		this.loading = true;
 		try {
-			const res = await this._roleService.getUserInfo(id);
-			this._prepareResult(res);
+			await this._roleService.getUserInfo(id).then((res) => {
+					this._prepareResult(res);
+				});
 		} catch (err) {
 			this._ui.showError(err);
 		}
@@ -754,7 +818,15 @@ export class UserRolesDetailPageComponent extends ComponentCanDeactivate impleme
 	}
 
 	public get editUserHasOe3Role(): boolean {
-		return this.myForm.controls['rolePublicClient'].value === this._authorization.roles.Oe3;
+		return this.myForm.controls.rolePublicClient.value === this._authorization.roles.Oe3;
+	}
+
+	public qoaValue(): number {
+		return this.detail.item.qoAValue
+	}
+
+	public isFEDLogin(): boolean {
+		return 'E-ID FED-LOGIN' === this.myForm?.controls.homeName.value
 	}
 
 	private hasAblieferndeStelleListChanged(): boolean {
@@ -789,5 +861,55 @@ export class UserRolesDetailPageComponent extends ComponentCanDeactivate impleme
 		if ($event.dateString === '') {
 			this.myForm.controls[controlName].setValue(null);
 		}
+	}
+
+	public get isInternalUser() {
+		if (this._authorization.roles.Oe3 ===  this.detail.item.rolePublicClient  || this._authorization.roles.Oe2 === this.detail.item.rolePublicClient )  {
+			return false;
+		}
+
+		return true;
+	}
+
+	public rolePublicClientChange() {
+		this.showModal = true;
+	}
+
+	public rolePublicClientChangeOe3() {
+		this.myForm.controls.rolePublicClient.setValue(this._authorization.roles.Oe3);
+		this.myForm.controls.rolePublicClient.markAsDirty();
+		this.showModal = true;
+	}
+
+	private updateValidators() {
+		if (this.myForm.controls.rolePublicClient.value === this._authorization.roles.Oe3 || this.myForm.controls.rolePublicClient.value === this._authorization.roles.Oe2) {
+			this.myForm.controls.organization.removeValidators(Validators.required);
+			this.myForm.controls.emailAddress.enable();
+		} else {
+			this.myForm.controls.organization.addValidators(Validators.required);
+			if (!this.myForm.controls.organization.value || this.myForm.controls.organization.value === ''){
+				// Damit der Bearbeiter weiss warum nicht gespeichert werden kann
+				this.myForm.controls.organization.markAsDirty();
+			}
+			this.myForm.controls.emailAddress.disable();
+		}
+		if (this.allowBereichBenutzerdatenBearbeiten && this.myForm.controls.rolePublicClient.value !== this._authorization.roles.Oe3){
+			this.myForm.controls.birthday.enable();
+		} else {
+			this.myForm.controls.birthday.disable();
+		}
+
+		if (this.allowBereichBenutzerdatenBearbeiten && this.myForm.controls.rolePublicClient.value === this._authorization.roles.Oe2){
+			this.myForm.controls.familyName.enable();
+			this.myForm.controls.firstName.enable();
+		} else {
+			this.myForm.controls.familyName.disable();
+			this.myForm.controls.firstName.disable();
+		}
+
+		this.myForm.controls.birthday.updateValueAndValidity();
+		this.myForm.controls.organization.updateValueAndValidity();
+		this.myForm.controls.familyName.updateValueAndValidity();
+		this.myForm.controls.firstName.updateValueAndValidity();
 	}
 }

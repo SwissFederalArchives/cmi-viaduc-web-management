@@ -38,13 +38,18 @@ export class AuthenticationService {
 				private _urlService: UrlService) {
 	}
 
-	public login(): void {
+	public login(idp: string = null): void {
 
 		const callbackUrl = `${window.location.pathname}Auth/ExternalSignIn`; // relative url
 
 		const returnUrl = window.location.hash.replace('#', '');
+		let idpQueryParam = '';
+		if (idp)
+		{
+			idpQueryParam = `&idp=${idp}`
+		}
 
-		const loginUrl = _util.addToString(this._options.serverUrl + this._options.publicPort, '/', 'AuthServices/SignIn?ReturnUrl=' + encodeURIComponent(callbackUrl));
+		const loginUrl = _util.addToString(this._options.serverUrl + this._options.publicPort, '/', 'AuthServices/SignIn?ReturnUrl=' + encodeURIComponent(callbackUrl) + idpQueryParam);
 		this._sessionStorage.setUrl(authReturnUrlKey, returnUrl);
 		window.location.assign(loginUrl);
 	}
@@ -190,6 +195,9 @@ export class AuthenticationService {
 			case AuthStatus.neuerBenutzer:
 				this._sessionStorage.setItem('pcurl', response.redirectUrl);
 				router.navigate([this._urlService.getErrorNewUser()]);
+				return true;
+			case AuthStatus.requiresElevatedCheck:
+				this.login('level-60');
 				return true;
 			default:
 				console.error('Keine definierter AuthStatus!');

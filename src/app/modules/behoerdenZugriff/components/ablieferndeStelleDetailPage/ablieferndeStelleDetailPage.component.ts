@@ -69,18 +69,7 @@ export class AblieferndeStelleDetailPageComponent extends ComponentCanDeactivate
 
 	private _reload() {
 		this.saveClicked = false;
-		if (this.formStelleDetail) {
-			this.formStelleDetail.form.markAsPristine();
-		}
-		if (this.modelKuerzel) {
-			this.modelKuerzel.control.markAsPristine();
-		}
-		if (this.modelBezeichnung) {
-			this.modelBezeichnung.control.markAsPristine();
-		}
-		if (this.modelTokens) {
-			this.modelTokens.control.markAsPristine();
-		}
+		this.markAsPristine();
 		this._tokenService.getAllTokens().subscribe(
 			res => this._fillDisplayNameAsToken(res),
 			err => this._ui.showError(err));
@@ -107,6 +96,7 @@ export class AblieferndeStelleDetailPageComponent extends ComponentCanDeactivate
 				this.formStelleDetail.reset();
 				this.modelTokens.reset();
 				this._ui.showSuccess('Erfolgreich gespeichert.');
+				this.markAsPristine();
 				this.goToAblieferndeStelleList();
 				return;
 			} else {
@@ -279,6 +269,21 @@ export class AblieferndeStelleDetailPageComponent extends ComponentCanDeactivate
 	private _fillDisplayNameAblieferndeStelleToken(res: AblieferndeStelleToken[]): void {
 		for (const item of res) {
 			item.displayName = `${item.token} (${item.bezeichnung})`;
+		}
+	}
+
+	private markAsPristine() : void {
+		if (this.formStelleDetail) {
+			this.formStelleDetail.form.markAsPristine();
+		}
+		if (this.modelKuerzel) {
+			this.modelKuerzel.control.markAsPristine();
+		}
+		if (this.modelBezeichnung) {
+			this.modelBezeichnung.control.markAsPristine();
+		}
+		if (this.modelTokens) {
+			this.modelTokens.control.markAsPristine();
 		}
 	}
 

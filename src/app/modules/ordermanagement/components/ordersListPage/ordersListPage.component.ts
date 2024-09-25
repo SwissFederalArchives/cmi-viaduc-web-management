@@ -49,6 +49,7 @@ export class OrdersListPageComponent implements OnInit {
 
 	private _previousPreFilter: SelectionPreFilter = null;
 	private _isInitializing = true;
+	public isBusy = false;
 
 	constructor(private _txt: TranslationService,
 				private _url: UrlService,
@@ -247,9 +248,14 @@ export class OrdersListPageComponent implements OnInit {
 		if (!this._err.verifyApplicationFeatureOrShowError(ApplicationFeatureEnum.AuftragsuebersichtAuftraegeKannAushebungsauftraegeDrucken)) {
 			return;
 		}
+		this.isBusy = true;
 		const checkedItemids = this.ordersList.checkedRowsIds;
 		this._ord.getAushebungsAuftragHtml(checkedItemids).subscribe(html => {
+			this.isBusy = false;
 			this._ui.showHtmlInNewTab(html, this._txt.get('aushebungsauftrag', 'Aushebungsauftrag'));
+		}, (error) => {
+			this.isBusy = false;
+			this._err.showError(error);
 		});
 	}
 
@@ -257,9 +263,14 @@ export class OrdersListPageComponent implements OnInit {
 		if (!this._err.verifyApplicationFeatureOrShowError(ApplicationFeatureEnum.AuftragsuebersichtAuftraegeVersandkontrolleAusfuehren)) {
 			return;
 		}
+		this.isBusy = true;
 		const checkedItemids = this.ordersList.checkedRowsIds;
 		this._ord.getVersandkontrolleHtml(checkedItemids).subscribe(html => {
+			this.isBusy = false;
 			this._ui.showHtmlInNewTab(html, this._txt.get('versandkontrolle', 'Versandkontrolle'));
+		}, (error) => {
+			this.isBusy = false;
+			this._err.showError(error);
 		});
 	}
 

@@ -16,6 +16,7 @@ import {Router} from '@angular/router';
 import {forkJoin} from 'rxjs';
 import {map} from 'rxjs/operators';
 import {SessionStorageService} from '../../../client/services';
+import {DateUtilityService} from '../../../shared/services/date-utility.service';
 
 @Component({
 	selector: 'cmi-viaduc-orders-list',
@@ -70,7 +71,7 @@ export class OrdersListComponent implements OnInit {
 	private _reasonList: DataMap = undefined;
 	private _artDerArbeitList: DataMap = undefined;
 
-	constructor(private _url: UrlService,
+	constructor(public _url: UrlService,
 				private _dec: EntityDecoratorService,
 				private _wjs: WijmoService,
 				private _dps: DetailPagingService,
@@ -79,8 +80,8 @@ export class OrdersListComponent implements OnInit {
 				private _rtr: Router,
 				private _storage: SessionStorageService,
 				private _txt: TranslationService,
-				// private _ctx: ClientContext,
-				private _stamm: StammdatenService) {
+				private _stamm: StammdatenService,
+				private _dateUtilityService: DateUtilityService) {
 		this.loading = true;
 	}
 
@@ -331,5 +332,12 @@ export class OrdersListComponent implements OnInit {
 		} else {
 			this._rtr.navigate([this._url.getAuftragsuebersichtUrl() + '/' + id]);
 		}
+	}
+
+	public formatDate(date: Date, format: string): string {
+		if(format=='dd.MM.yyyy HH:mm:ss') {
+			return this._dateUtilityService.formatDate(date, 'DD.MM.YYYY HH:mm:ss');
+		}
+		return this._dateUtilityService.formatDate(date);
 	}
 }

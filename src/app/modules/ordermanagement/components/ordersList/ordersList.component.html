@@ -45,8 +45,13 @@
 					<a [routerLink]="_url.getNormalizedUrl('/auftragsuebersicht/digitalisierungsauftraege')" [queryParams]="{ itemId: item.itemId}"  *ngIf="item.orderingType && item.status === 6 && item.orderingType === 2;else nonDigiOrder" >
 					<u>{{item.itemId}}</u></a>
 					<ng-template #nonDigiOrder>
-						{{item.itemId}} 
+						{{item.itemId}}
 					</ng-template>
+				</ng-template>
+				<ng-template wjFlexGridCellTemplate [cellType]="'Cell'" let-cell="cell"  *ngIf="col.dataType === 4">
+					<span>
+						{{ formatDate(cell.item[cell.col.binding], cell.col.format) }}
+					</span>
 				</ng-template>
 			</wj-flex-grid-column>
 		</cmi-viaduc-grid>
